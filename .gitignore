@@ -1,0 +1,39 @@
+# === Visual Studio / C# ASP.NET ===
+*.user
+*.suo
+.vs/
+bin/
+obj/
+App_Data/
+*.log
+*.cache
+*.ide
+TestResults/
+
+# === Entity Framework (EF) ===
+Migrations/
+
+# === PostgreSQL ===
+*.dump
+
+# === Vue.js (JS) ===
+node_modules/
+npm-debug.log*
+yarn-error.log*
+dist/
+.vuepress/dist/
+.npm/
+coverage/
+
+# === JetBrains IDE ===
+.idea/
+*.iml
+
+# === Дополнительные временные файлы ===
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# === VS Code (если используется) ===
+.vscode/
