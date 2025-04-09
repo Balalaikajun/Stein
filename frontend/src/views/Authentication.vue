@@ -1,5 +1,6 @@
 <script>
 import '@fontsource/roboto/700.css'
+import axios from 'axios'
 
 export default {
   name: 'Authentication',
@@ -22,10 +23,16 @@ export default {
 
       try {
 
+        const res = await axios.post('https://localhost:7203/api/Auth', {
+          login: this.login,
+          password: this.password});
+
+
+
         // Отправка запроса на сервер
 
-        if (false) {
-          throw new Error('Authentication failed');
+        if (res.status === 400) {
+          throw new Error(response.value);
         }
 
         this.$router.push('/');
@@ -43,7 +50,7 @@ export default {
 computed: {
   isFormValid() {
     return this.login.trim().length >= 3 &&
-        this.password.length >= 6;
+        this.password.length >= 3;
   }
 }
 }
@@ -78,7 +85,7 @@ computed: {
               id="password"
               v-model="password"
               type="password"
-              minlength="6"
+              minlength="3"
               maxlength="25"
               :disabled="isLoading"
               class="form-input">
