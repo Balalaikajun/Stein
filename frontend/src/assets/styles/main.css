@@ -1,0 +1,58 @@
+*, *:before, *:after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: var(--background-color);
+}
+
+input, button, textarea,select{
+    font-family: Roboto, sans-serif;
+    font-size: 16px;
+    color: var(--text-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+h1{
+    font-size: 32px;
+}
+h2{
+    font-size: 24px;
+}
+h3{
+    font-size: 20px;
+}
+
+p{
+    margin-bottom: 1rem;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+a:hover {
+    color: var(--secondary-color);
+}
+
+:root{
+    --primary-color: #5B00E1;
+    --secondary-color: #7C4DFF;
+    --accent-color: #FFD740;
+    --text-color: #212121;
+    --secondary-text-color: #212121;
+    --background-color: #FFFFFF;
+    --secondary-background-color: #F5F5F5;
+}
+

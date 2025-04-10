@@ -1,58 +1,48 @@
-<script>
-import '@fontsource/roboto/700.css'
+<script setup>
+import {ref, computed} from 'vue'
+import {useRouter} from 'vue-router'
 import axios from 'axios'
+import '@fontsource/roboto/700.css'
 
-export default {
-  name: 'Authentication',
-  data () {
-    return {
-      login: '',
-      password: '',
-      errorsMessage:'',
-      isLoading: false
-    }
-  },
-  methods: {
-    async handleSubmit (e) {
-      e.preventDefault();
+const login = ref('')
+const password = ref('')
+const errorsMessage = ref('')
+const isLoading = ref(false)
 
-      if(!this.isFormValid) return;
+const router = useRouter()
 
-      this.isLoading = true;
-      this.errorsMessage = '';
+const isFormValid = computed(() => {
+  return login.value.trim().length >= 3 && password.value.length >= 3
+})
 
-      try {
+async function handleSubmit(e) {
+  e.preventDefault()
 
-        const res = await axios.post('https://localhost:7203/api/Auth', {
-          login: this.login,
-          password: this.password});
+  if(!isFormValid.value) return
 
+  isLoading.value = true
+  errorsMessage.value = ''
 
+  try {
+    const res = await axios.post('https://localhost:7203/api/Auth',{
+    login: login.value,
+    password: password.value,
+    })
 
-        // Отправка запроса на сервер
+    localStorage.setItem('token', res.data);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
+    console.log(res.data)
 
-        if (res.status === 400) {
-          throw new Error(response.value);
-        }
-
-        this.$router.push('/');
-      }
-      catch(e) {
-        this.errorsMessage = e.message||'Ошибочка';
-      }
-      finally {
-        this.isLoading = false;
-      }
-
-
-    }
-  },
-computed: {
-  isFormValid() {
-    return this.login.trim().length >= 3 &&
-        this.password.length >= 3;
+    router.push('/')
   }
-}
+  catch(err) {
+  if(err.response && err.response.status === 400)
+    errorsMessage.value = err.response.data;
+  else errorsMessage.value = 'Ошибка аутентификации';
+  }
+  finally {
+    isLoading.value = false
+  }
 }
 </script>
 
@@ -60,9 +50,8 @@ computed: {
   <header class="header">
     <img src="@/assets/CollageLogo.png" alt="ККАСиЦТ" class="logo"/>
   </header>
+
   <div class="auth-container">
-
-
     <main class="auth-main">
       <form @submit.prevent="handleSubmit" class="auth-form">
 
@@ -71,12 +60,12 @@ computed: {
         <div class="form-group">
           <label for="login" class="input-label">Login:</label>
           <input
-          id="login"
-          v-model.trim="login"
-          type="text"
-          maxlength="25"
-          :disabled="isLoading"
-          class="form-input">
+              id="login"
+              v-model.trim="login"
+              type="text"
+              maxlength="25"
+              :disabled="isLoading"
+              class="form-input">
         </div>
 
         <div class="form-group">
@@ -96,9 +85,9 @@ computed: {
         </div>
 
         <button
-          type="submit"
-          :disabled="isLoading||!isFormValid"
-          class="submit-button"
+            type="submit"
+            :disabled="isLoading||!isFormValid"
+            class="submit-button"
         >
           <span v-if="!isLoading">Войти</span>
           <span v-else>Проверка...</span>
@@ -126,7 +115,7 @@ computed: {
 }
 
 .auth-form{
-  background: #F5F5F5;
+  background: var(--secondary-background-color);
   padding: 2rem;
   border-radius: 16px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.5);
@@ -134,10 +123,7 @@ computed: {
 
 .form-title{
   text-align: center;
-  margin-bottom: 1.5rem;
-  color: #212121;
-  font-size: 1.5rem;
-  font-family: "Roboto",serif;
+  font-family: Roboto, serif;
 }
 
 .form-group{
@@ -147,35 +133,26 @@ computed: {
 .input-label{
   display: block;
   margin-bottom: 0.5rem;
-  color: #212121;
-  font-size: 1rem;
-  font-family: "Roboto", sans-serif;
-  font-weight: 300;
 }
 
 .form-input{
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #212121;
+  border: 1px solid var(--text-color);
   border-radius: 4px;
   box-sizing: border-box;
-  font-size: 1rem;
-  font-family: "Roboto", sans-serif;
-  font-weight: 300;
   transition: border-color 0.3s ease;
 }
 
 .form-input:focus{
   outline:none;
-  border-color: #7C4DFF;
+  border-color: var(--secondary-color);
   box-shadow: 0 0 0 5px rgba(124, 77, 255, 0.4);
 }
 
 .error-message{
-  color: #212121;
   margin-bottom: 1rem;
   font-size: 1rem;
-  font-family: "Roboto", sans-serif;
   font-weight: 300;
   text-align: center;
 }
@@ -183,18 +160,17 @@ computed: {
 .submit-button{
   width: 100%;
   padding: 0.75rem;
-  background-color: #5B00E1;
-  color: #F5F5F5;
+  background-color: var(--primary-color);
+  color: var(--background-color);
   border: none;
   border-radius: 4px;
   font-size: 1rem;
-  font-family: "Roboto", sans-serif;
   font-weight: 300;
   cursor: pointer;
 }
 
 .submit-button:hover:not(:disabled){
-  background-color: #7C4DFF;
+  background-color: var(--secondary-color);
 }
 
 .submit-button:disabled{
