@@ -1,6 +1,6 @@
 <script setup>
-import {ref, computed} from 'vue'
-import {useRouter} from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import '@fontsource/roboto/700.css'
 
@@ -18,29 +18,28 @@ const isFormValid = computed(() => {
 async function handleSubmit(e) {
   e.preventDefault()
 
-  if(!isFormValid.value) return
+  if (!isFormValid.value) return
 
   isLoading.value = true
   errorsMessage.value = ''
 
   try {
-    const res = await axios.post('https://localhost:7203/api/Auth',{
-    login: login.value,
-    password: password.value,
+    const res = await axios.post('https://localhost:7203/api/Auth', {
+      login: login.value,
+      password: password.value,
     })
 
-    localStorage.setItem('token', res.data);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
-    console.log(res.data)
+    // API возвращает токен в формате plain text, а не объект.
+    localStorage.setItem('token', res.data)
+    axios.defaults.headers.common['Authorization'] = `Bearer ${res.data}`
 
     router.push('/')
-  }
-  catch(err) {
-  if(err.response && err.response.status === 400)
-    errorsMessage.value = err.response.data;
-  else errorsMessage.value = 'Ошибка аутентификации';
-  }
-  finally {
+  } catch (err) {
+    if (err.response && err.response.status === 400)
+      errorsMessage.value = err.response.data
+    else
+      errorsMessage.value = 'Ошибка аутентификации'
+  } finally {
     isLoading.value = false
   }
 }
@@ -48,13 +47,12 @@ async function handleSubmit(e) {
 
 <template>
   <header class="header">
-    <img src="@/assets/CollageLogo.png" alt="ККАСиЦТ" class="logo"/>
+    <img src="@/assets/CollageLogo.png" alt="ККАСиЦТ" class="logo" />
   </header>
 
   <div class="auth-container">
     <main class="auth-main">
       <form @submit.prevent="handleSubmit" class="auth-form">
-
         <h2 class="form-title">Вход в систему</h2>
 
         <div class="form-group">
@@ -65,7 +63,8 @@ async function handleSubmit(e) {
               type="text"
               maxlength="25"
               :disabled="isLoading"
-              class="form-input">
+              class="form-input"
+          />
         </div>
 
         <div class="form-group">
@@ -77,16 +76,17 @@ async function handleSubmit(e) {
               minlength="3"
               maxlength="25"
               :disabled="isLoading"
-              class="form-input">
+              class="form-input"
+          />
         </div>
 
         <div v-if="errorsMessage" class="error-message">
-          {{errorsMessage}}
+          {{ errorsMessage }}
         </div>
 
         <button
             type="submit"
-            :disabled="isLoading||!isFormValid"
+            :disabled="isLoading || !isFormValid"
             class="submit-button"
         >
           <span v-if="!isLoading">Войти</span>
@@ -98,7 +98,7 @@ async function handleSubmit(e) {
 </template>
 
 <style scoped>
-.auth-container{
+.auth-container {
   max-width: 400px;
   margin: 5rem auto;
   padding: 2rem;
@@ -106,36 +106,36 @@ async function handleSubmit(e) {
 
 .header {
   text-align: left;
-  margin: 2rem ;
+  margin: 2rem;
 }
 
-.logo{
+.logo {
   width: 40vw;
   max-width: 150px;
 }
 
-.auth-form{
+.auth-form {
   background: var(--secondary-background-color);
   padding: 2rem;
   border-radius: 16px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
 }
 
-.form-title{
+.form-title {
   text-align: center;
   font-family: Roboto, serif;
 }
 
-.form-group{
+.form-group {
   margin-bottom: 1.5rem;
 }
 
-.input-label{
+.input-label {
   display: block;
   margin-bottom: 0.5rem;
 }
 
-.form-input{
+.form-input {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid var(--text-color);
@@ -144,20 +144,20 @@ async function handleSubmit(e) {
   transition: border-color 0.3s ease;
 }
 
-.form-input:focus{
-  outline:none;
+.form-input:focus {
+  outline: none;
   border-color: var(--secondary-color);
   box-shadow: 0 0 0 5px rgba(124, 77, 255, 0.4);
 }
 
-.error-message{
+.error-message {
   margin-bottom: 1rem;
   font-size: 1rem;
   font-weight: 300;
   text-align: center;
 }
 
-.submit-button{
+.submit-button {
   width: 100%;
   padding: 0.75rem;
   background-color: var(--primary-color);
@@ -169,11 +169,11 @@ async function handleSubmit(e) {
   cursor: pointer;
 }
 
-.submit-button:hover:not(:disabled){
+.submit-button:hover:not(:disabled) {
   background-color: var(--secondary-color);
 }
 
-.submit-button:disabled{
+.submit-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }

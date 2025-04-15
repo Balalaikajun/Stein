@@ -1,58 +1,141 @@
+/* main.css */
+:root {
+    /* Цветовая схема */
+    --primary-color: #5B00E1;
+    --secondary-color: #7C4DFF;
+    --accent-color: #FFD740;
+    --error-color: #FF5252;
+
+    --text-color: #212121;
+    --secondary-text-color: #757575;
+
+    --background-color: #FFFFFF;
+    --secondary-background-color: #F5F5F5;
+
+    /* Состояния */
+    --hover-color: #EEEEEE;
+    --active-bg-color: rgba(91, 0, 225, 0.1);
+    --error-hover-color: rgba(255, 82, 82, 0.1);
+
+    /* Размеры */
+    --sidebar-width: 250px;
+    --border-radius: 4px;
+
+    /* Анимации */
+    --transition-duration: 0.25s;
+    --transition-timing: ease;
+}
+
 *, *:before, *:after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-body{
+html, body {
     font-family: Roboto, "Helvetica Neue", sans-serif;
     font-size: 16px;
     line-height: 1.5;
     color: var(--text-color);
     background-color: var(--background-color);
+    height: 100%;
+    overflow: hidden;
 }
 
-input, button, textarea,select{
-    font-family: Roboto, sans-serif;
-    font-size: 16px;
-    color: var(--text-color);
+input, button, textarea, select {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    background-color: var(--background-color);
 }
 
 h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
     margin-bottom: 0.5rem;
+    color: var(--text-color);
 }
 
-h1{
-    font-size: 32px;
-}
-h2{
-    font-size: 24px;
-}
-h3{
-    font-size: 20px;
-}
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.125rem; }
 
-p{
+p {
     margin-bottom: 1rem;
+    color: var(--secondary-text-color);
 }
 
 a {
     color: var(--primary-color);
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: color var(--transition-duration) var(--transition-timing);
 }
+
 a:hover {
     color: var(--secondary-color);
 }
 
-:root{
-    --primary-color: #5B00E1;
-    --secondary-color: #7C4DFF;
-    --accent-color: #FFD740;
-    --text-color: #212121;
-    --secondary-text-color: #212121;
-    --background-color: #FFFFFF;
-    --secondary-background-color: #F5F5F5;
+button {
+    cursor: pointer;
+    transition: all var(--transition-duration) var(--transition-timing);
 }
 
+/* Глобальные классы для анимаций */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity var(--transition-duration) var(--transition-timing);
+}
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+/* Адаптивные медиа-запросы */
+@media (max-width: 768px) {
+    :root {
+        --sidebar-width: 200px;
+    }
+
+    body {
+        font-size: 14px;
+    }
+}
+
+.main-layout {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    background: #f5f5f5;
+    overflow: hidden;
+}
+
+.table-container {
+    flex: 1;
+    overflow-y: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.data-table {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+}
+
+.data-table thead th {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 2;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+}

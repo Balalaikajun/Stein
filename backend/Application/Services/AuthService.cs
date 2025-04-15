@@ -62,7 +62,7 @@ public class AuthService: IAuthService
             issuer: _issuer,
             audience: _audience,
             claims: claims,
-            expires: DateTime.Now.AddMinutes(_expiryMinutes),
+            expires: DateTime.Now.AddYears(100),
             signingCredentials: creds
         );
 

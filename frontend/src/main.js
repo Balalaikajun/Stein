@@ -7,6 +7,10 @@ import './assets/styles/main.css'
 import axios from 'axios'
 
 const app = createApp(App)
+const token = localStorage.getItem('token')
+if (token) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+}
 
 app.use(router)
 app.mount('#app')

@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Application.Interfaces;
 using Application.Services;
 using Domain.Exceptions;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Application.Interfaces;
 using Domain.Interfaces;
+using Infrastructure.Mapping;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 
@@ -76,7 +78,9 @@ builder.Services.AddAuthorization();
 
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 
+builder.Services.AddAutoMapper(typeof(DepartmentProfile));
 
 builder.Services.AddCors(options =>
 {
