@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Application.DTOs.Department;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -21,7 +22,7 @@ public class DepartmentController: ControllerBase
     [Authorize]
     public async Task<ActionResult> GetDepartments(DepartmentOptionRequestDto request)
     {
-        Console.WriteLine(request.SortBy);
+        Console.WriteLine(JsonSerializer.Serialize(request));
         
         var result = await _departmentService.GetDepartments(request);
         

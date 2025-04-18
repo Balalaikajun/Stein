@@ -3,10 +3,9 @@ using System.ComponentModel.DataAnnotations;
 namespace Application.DTOs.Department;
 
 public record DepartmentOptionRequestDto(
-    string? LastSeenValue,
-    int? LastSeenId,
-    string? SearchText,
-    bool? ActiveFilter,
+    int Skip = 0,
+    int Take = 10,
+    string? SearchText = null,
+    bool? ActiveFilter = null,
     string SortBy = "Title",
-    bool Descending = false,
-    int Limit = 10);
+    bool Descending = false);

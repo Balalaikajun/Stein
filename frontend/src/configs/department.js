@@ -20,7 +20,7 @@ export const filters = [
     id: 'activeFilter',
     title: 'Статус',
     dataType: 'boolean',
-    paramKey: 'activeFilter'
+    paramKey: 'ActiveFilter'
   }
 ]
 
@@ -30,9 +30,8 @@ export const apiConfig = {
     search: 'SearchText',
     sortKey: 'SortBy',
     sortOrder: 'Descending',
-    limit: 'Limit',
-    lastSeenId: 'LastSeenId',
-    lastSeenValue: 'LastSeenValue'
+    take: 'Take',
+    skip: 'Skip',
   }
 }
 

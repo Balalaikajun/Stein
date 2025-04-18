@@ -22,8 +22,7 @@ const currentSort = ref({ ...initialSort })
 const tableItems = ref([])
 const loading = ref(false)
 const hasMore = ref(false)
-const lastSeenId = ref(null)
-const lastSeenValue = ref(null)
+const skip = ref(0)
 const isOpen = ref(false)
 
 // Обработчики событий
@@ -50,27 +49,22 @@ const loadMore = () => {
 // Логика загрузки данных
 const buildRequestParams = (resetPagination = false) => {
   if (resetPagination) {
-    lastSeenId.value = null
-    lastSeenValue.value = null
+    skip.value = 0
   }
 
+  console.log(skip.value)
   // Всегда явно передаем параметры сортировки
   const params = {
     [apiConfig.paramsMapping.search]: searchQuery.value,
     [apiConfig.paramsMapping.sortKey]: currentSort.value.key,
     [apiConfig.paramsMapping.sortOrder]: currentSort.value.descending,
-    [apiConfig.paramsMapping.limit]: 10,
+    [apiConfig.paramsMapping.take]: 10,
+    [apiConfig.paramsMapping.skip]: skip.value,
     ...currentFilters.value
   }
 
-  // Добавляем курсор пагинации только при подгрузке
-  if (!resetPagination && lastSeenId.value !== null && lastSeenValue.value !== null) {
-    return {
-      ...params,
-      [apiConfig.paramsMapping.lastSeenId]: lastSeenId.value,
-      [apiConfig.paramsMapping.lastSeenValue]: lastSeenValue.value
-    }
-  }
+  console.log(params)
+
 
   return params
 }
@@ -93,8 +87,7 @@ const loadData = async (reset = false) => {
     }
 
     hasMore.value = data.hasMore
-    lastSeenId.value = data.lastSeenId
-    lastSeenValue.value = data.lastSeenValue
+    skip.value += data.items.length
 
     console.log(data)
   } catch (error) {

@@ -1,4 +1,3 @@
-using System.Linq.Dynamic.Core;
 using Application.DTOs.Department;
 using Application.Interfaces;
 using AutoMapper;
@@ -6,6 +5,7 @@ using AutoMapper.QueryableExtensions;
 using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Application.Services;
 
@@ -13,6 +13,12 @@ public class DepartmentService : IDepartmentService
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private static readonly Dictionary<string, Expression<Func<Department, object>>> SortSelectors = new()
+    {
+        ["Title"] = d => d.Title,
+        ["IsActive"] = d => d.IsActive,
+        ["Id"] = d => d.Id
+    };
 
     public DepartmentService(IApplicationDbContext context, IMapper mapper)
     {
@@ -21,95 +27,36 @@ public class DepartmentService : IDepartmentService
     }
 
     public async Task<DepartmentOptionResultDto> GetDepartments(DepartmentOptionRequestDto request)
-{
-    var query = _context.Departments.AsQueryable();
-
-    // Применяем фильтры
-    if (request.ActiveFilter.HasValue)
-        query = query.Where(d => d.IsActive == request.ActiveFilter.Value);
-
-    if (!string.IsNullOrWhiteSpace(request.SearchText))
-        query = query.Where(d => EF.Functions.Like(d.Title, $"%{request.SearchText}%"));
-
-    // Определяем направление сортировки
-    var sortProp = GetValidSortProperty(request.SortBy);
-    var sortDirection = request.Descending ? "DESC" : "ASC";
-    query = query.OrderBy($"{sortProp} {sortDirection}, Id {sortDirection}");
-
-    // Обрабатываем курсорную пагинацию
-    if (request.LastSeenId.HasValue && !string.IsNullOrEmpty(request.LastSeenValue))
     {
-        var propType = GetPropertyType(sortProp);
-        var value = ConvertValue(request.LastSeenValue, propType);
+        var query = _context.Departments.AsQueryable();
 
-        string condition;
-        if (propType == typeof(bool))
-        {
-            var boolValue = (bool)value;
-            condition = request.Descending 
-                ? boolValue 
-                    ? $"({sortProp} == true && Id < @1) || {sortProp} == false" 
-                    : "false" // Нет записей после false при сортировке DESC
-                : boolValue 
-                    ? $"({sortProp} == true && Id > @1)" 
-                    : $"({sortProp} == false && Id > @1) || {sortProp} == true";
-        }
-        else
-        {
-            condition = request.Descending 
-                ? $"{sortProp} < @0 || ({sortProp} == @0 && Id < @1)"
-                : $"{sortProp} > @0 || ({sortProp} == @0 && Id > @1)";
-        }
+        // Фильтрация
+        if (request.ActiveFilter.HasValue)
+            query = query.Where(d => d.IsActive == request.ActiveFilter.Value);
 
-        query = query.Where(condition, value, request.LastSeenId.Value);
-    }
+        if (!string.IsNullOrWhiteSpace(request.SearchText))
+            query = query.Where(d => EF.Functions.Like(d.Title, $"%{request.SearchText}%"));
 
-    // Получаем данные
-    var items = await query
-        .Take(request.Limit + 1)
-        .ProjectTo<DepartmentGetDto>(_mapper.ConfigurationProvider)
-        .ToListAsync();
+        // Сортировка
+        var sortBy = SortSelectors.ContainsKey(request.SortBy) ? request.SortBy : "Title";
+        var sortSelector = SortSelectors[sortBy];
 
-    var hasMore = items.Count > request.Limit;
-    var resultItems = hasMore ? items.Take(request.Limit) : items;
+        query = request.Descending
+            ? query.OrderByDescending(sortSelector).ThenByDescending(d => d.Id)
+            : query.OrderBy(sortSelector).ThenBy(d => d.Id);
 
-    return new DepartmentOptionResultDto(
-        resultItems.ToList(),
-        resultItems.LastOrDefault()?.GetValue(sortProp)?.ToString(),
-        resultItems.LastOrDefault()?.Id,
-        hasMore);
-}
+        // Пагинация
+        var items = await query
+            .Skip(request.Skip)
+            .Take(request.Take + 1) // берём на 1 больше, чтобы узнать, есть ли ещё
+            .ProjectTo<DepartmentGetDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
 
-private string GetValidSortProperty(string? sortBy)
-{
-    var validProps = new[] { "Title", "IsActive" };
-    return validProps.Contains(sortBy, StringComparer.OrdinalIgnoreCase) 
-        ? sortBy! 
-        : "Title";
-}
+        var hasMore = items.Count > request.Take;
+        var resultItems = hasMore ? items.Take(request.Take) : items;
 
-private Type GetPropertyType(string propertyName)
-{
-    return typeof(Department).GetProperty(propertyName)?.PropertyType 
-        ?? typeof(string);
-}
-
-private object ConvertValue(string value, Type targetType)
-{
-    if (targetType == typeof(bool)) 
-        return bool.Parse(value.ToLower());
-    
-    if (targetType == typeof(int)) 
-        return int.Parse(value);
-    
-    return value;
-}
-}
-
-public static class ObjectExtensions
-{
-    public static object? GetValue(this object obj, string propertyName)
-    {
-        return obj.GetType().GetProperty(propertyName)?.GetValue(obj);
+        return new DepartmentOptionResultDto(
+            Items: resultItems,
+            HasMore: hasMore);
     }
 }
