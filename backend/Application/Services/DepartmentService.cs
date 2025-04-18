@@ -45,18 +45,27 @@ public class DepartmentService : IDepartmentService
             ? query.OrderByDescending(sortSelector).ThenByDescending(d => d.Id)
             : query.OrderBy(sortSelector).ThenBy(d => d.Id);
 
-        // Пагинация
+        int? total = null;
+        if (request.Skip == 0)
+        {
+            total = await query.CountAsync();
+        }
+        
+        // Пагинацияs
         var items = await query
             .Skip(request.Skip)
             .Take(request.Take + 1) // берём на 1 больше, чтобы узнать, есть ли ещё
             .ProjectTo<DepartmentGetDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
+        
+        
         var hasMore = items.Count > request.Take;
         var resultItems = hasMore ? items.Take(request.Take) : items;
 
         return new DepartmentOptionResultDto(
             Items: resultItems,
-            HasMore: hasMore);
+            HasMore: hasMore,
+            Total: total);
     }
 }

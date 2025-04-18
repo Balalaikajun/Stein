@@ -41,56 +41,35 @@ defineEmits(['sort'])
 </script>
 
 <style scoped>
-/* Гарантируем, что header-строка ведёт себя корректно */
-thead {
-  display: table-header-group;
-}
-
 th {
-  padding: 12px 16px;
-  border-bottom: 1px solid #e0e0e0;
-  text-align: left;
-  background-color: #f8f9fa;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--secondary-background-color);
+  background-color: var(--background-color);
+  color: var(--text-color);
   font-weight: 600;
-  color: #424242;
-  position: sticky;
-  top: 0;
-  z-index: 3;
 }
 
 .sortable {
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background-color var(--transition-duration) var(--transition-timing);
 }
+
 .sortable:hover {
-  background-color: #f0f0f0;
+  background-color: var(--hover-color);
 }
+
 .sorted {
-  background-color: #ececec;
+  background-color: var(--active-bg-color);
 }
+
 .th-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
+  gap: 0.5rem;
 }
-.sort-icon-wrapper {
-  width: 24px;
-  text-align: center;
-}
-.title-text {
-  flex: 1;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
+
 .sort-icon {
-  color: #1976d2;
+  color: var(--primary-color);
 }
-.sort-icon-placeholder {
-  width: 16px;
-  display: inline-block;
-}
+
 .text-center { text-align: center; }
 .text-right { text-align: right; }
 </style>

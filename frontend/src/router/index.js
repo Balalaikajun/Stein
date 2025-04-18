@@ -1,8 +1,8 @@
 import {createRouter, createWebHistory} from "vue-router";
 import TestPage from "@/views/TestPage.vue";
 import Authentication from "@/views/Authentication.vue";
-import Department from '@/configs/department.js'
 import DepartmentPage from '@/views/DepartmentPage.vue'
+import Specialization from '@/views/Specialization.vue'
 
 
 const routes = [
@@ -20,6 +20,11 @@ const routes = [
         path: "/departments",
         name: "departments",
         component: DepartmentPage,
+    },
+    {
+        path: "/specializations",
+        name: "specializations",
+        component: Specialization,
     }
 
 ]

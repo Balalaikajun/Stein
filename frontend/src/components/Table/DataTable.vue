@@ -1,33 +1,44 @@
 <template>
-  <!-- Контейнер с рефом и обработчиком скролла -->
   <div class="table-container" ref="containerRef" @scroll="onScroll">
-    <table class="data-table">
-      <TableHeader
-          :columns="columns"
-          :sort-by="sortBy"
-          :sort-descending="sortDescending"
-          :editable="editable"
-          @sort="handleSort"
-      />
-      <TableBody
-          :columns="columns"
-          :items="items"
-          :loading="loading"
-          :has-more="hasMore"
-          :slots="$slots"
-      />
-    </table>
+    <div class=table-wrapper>
+
+      <table class="data-table">
+        <TableHeader
+            :columns="columns"
+            :sort-by="sortBy"
+            :sort-descending="sortDescending"
+            :editable="editable"
+            @sort="handleSort"
+            class="table-header"
+        />
+        <TableBody
+            :columns="columns"
+            :items="items"
+            :loading="loading"
+            :has-more="hasMore"
+            :slots="$slots"
+        />
+      </table>
+    </div>
+    <tfoot class="table-footer">
+    <tr>
+      <td :colspan="columns.length" class="footer-cell" :data-count="items.length">
+        Элементов: {{ total?.value ?? total }}
+      </td>
+    </tr>
+    </tfoot>
   </div>
 </template>
 
 <script setup>
-import { toRefs, ref, watch, nextTick } from 'vue'
+import { nextTick, ref, toRefs, watch } from 'vue'
 import TableHeader from '@/components/Table/TableHeader.vue'
 import TableBody from '@/components/Table/TableBody.vue'
 
 const props = defineProps({
   columns: Array,
   items: Array,
+  total: Object,
   loading: Boolean,
   hasMore: Boolean,
   sortBy: String,
@@ -73,32 +84,100 @@ const handleSort = (key) => {
 
 <style scoped>
 .table-container {
-  flex: 1 1 0;
-  min-height: 0;
-  width: 100%;
+  background: var(--background-color);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--secondary-background-color);
+  overflow: auto;
+  max-height: 100%;
   height: 100%;
-  overflow: auto;         /* Горизонтальный и вертикальный скролл */
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
 }
 
+
 .data-table {
-  display: block;         /* Для работы sticky внутри контейнера */
   width: 100%;
   min-width: 600px;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
-/* Сохраняем группировку заголовка для sticky */
-.data-table thead {
-  display: table-header-group;
-}
-
-.data-table thead th {
+/* Стили для хедера */
+.table-header :deep(th) {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-color);
+  background: var(--background-color);
+  border-bottom: 2px solid var(--secondary-background-color);
   position: sticky;
   top: 0;
-  background: #f8f9fa;
   z-index: 2;
+}
+
+/* Стили для тела таблицы */
+.data-table :deep(td) {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--secondary-background-color);
+  color: var(--text-color);
+  vertical-align: top;
+  background: var(--background-color);
+}
+
+/* Стили для футера */
+.data-table tfoot td {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  position: sticky;
+  bottom: 0;
+  background: transparent;
+  z-index: 2;
+  border-top: 2px solid var(--secondary-background-color);
+  padding: 12px 16px;
+  font-size: 0.9em;
+  color: var(--secondary-text-color);
+  text-align: right;
+}
+
+/* Состояния при наведении */
+.data-table :deep(tr:hover td) {
+  background-color: var(--hover-color);
+}
+
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .data-table {
+    min-width: 100%;
+  }
+
+  .table-header :deep(th),
+  .data-table :deep(td),
+  .data-table tfoot td {
+    padding: 8px 12px;
+    font-size: 0.85em;
+  }
+}
+
+.table-wrapper {
+  flex: 1;
+  overflow: auto;
+}
+
+.table-footer {
+  position: sticky;
+  bottom: 0;
+  background: var(--background-color);
+  border-top: 2px solid var(--secondary-background-color);
+  z-index: 2;
+}
+
+.table-footer td {
+  padding: 12px 16px;
+  font-size: 0.9em;
+  color: var(--secondary-text-color);
+  text-align: right;
 }
 </style>

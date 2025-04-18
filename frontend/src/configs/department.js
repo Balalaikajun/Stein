@@ -17,10 +17,9 @@ export const tableConfig = {
 
 export const filters = [
   {
-    id: 'activeFilter',
+    id: 'ActiveFilter', // Должно совпадать с ключом в данных
     title: 'Статус',
-    dataType: 'boolean',
-    paramKey: 'ActiveFilter'
+    dataType: 'boolean'
   }
 ]
 

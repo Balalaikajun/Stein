@@ -4,4 +4,5 @@ namespace Application.DTOs.Department;
 
 public record DepartmentOptionResultDto(
     IEnumerable<DepartmentGetDto> Items,
-    bool HasMore);
+    bool HasMore,
+    int? Total = null);

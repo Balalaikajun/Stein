@@ -32,9 +32,25 @@ defineProps({ columns: Array, items: Array, loading: Boolean, hasMore: Boolean }
 </script>
 
 <style scoped>
-td { padding: 12px 16px; border-bottom: 1px solid #e0e0e0; text-align: left; }
-tr:hover { background-color: #f5f5f5; }
-tr:nth-child(even) { background-color: #fafafa; }
-.no-data { padding: 24px; color: #757575; text-align: center; font-style: italic; }
-.loading-indicator { text-align: center; padding: 16px 0; font-size: 14px; color: #757575; }
+td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--secondary-background-color);
+  color: var(--text-color);
+}
+
+tr:hover {
+  background-color: var(--hover-color);
+}
+
+tr:nth-child(even) {
+  background-color: var(--secondary-background-color);
+}
+
+.no-data {
+  color: var(--secondary-text-color);
+}
+
+.loading-indicator {
+  color: var(--secondary-text-color);
+}
 </style>
