@@ -5,6 +5,7 @@
         :title="filter.title"
         @toggle="toggle"
         :isOpen="isOpen"
+        :hasValue="modelValue !== null"
     />
     <FilterModal
         v-if="isOpen"
@@ -14,9 +15,20 @@
         @cancel="close"
     >
       <template #body>
-        <label><input type="radio" value="" v-model="local" /> Все</label>
-        <label><input type="radio" value="true"  v-model="local" /> Да</label>
-        <label><input type="radio" value="false" v-model="local" /> Нет</label>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" value="" v-model="local" />
+            <span class="radio-label">Все</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" value="true" v-model="local" />
+            <span class="radio-label">Да</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" value="false" v-model="local" />
+            <span class="radio-label">Нет</span>
+          </label>
+        </div>
       </template>
     </FilterModal>
   </div>
@@ -25,23 +37,22 @@
 <script setup>
 import { ref, nextTick } from 'vue'
 import FilterButton from '../FilterButton.vue'
-import FilterModal  from '../FilterModal.vue'
+import FilterModal from '../FilterModal.vue'
 
 const props = defineProps({
   filter: Object,
-  modelValue: {
-    type: [Boolean, null],
-    default: null
-  }
+  modelValue: [Boolean, null]
 })
+
 const emit = defineEmits(['update:modelValue'])
 
 const isOpen = ref(false)
-const local = ref(props.modelValue === true ? 'true' : props.modelValue === false ? 'false' : '')
+const local = ref('')
 const anchorRect = ref(null)
 const btnRef = ref(null)
 
-function toggle(event) {
+// Логика обработки значений
+function toggle() {
   isOpen.value = !isOpen.value
   if (isOpen.value) {
     nextTick(() => {
@@ -52,14 +63,12 @@ function toggle(event) {
 }
 
 function apply() {
-  emit('update:modelValue',
-      local.value === 'true' ? true :
-          local.value === 'false' ? false : null
-  )
+  const value = local.value === 'true' ? true : local.value === 'false' ? false : null
+  emit('update:modelValue', value)
   close()
 }
+
 function close() {
-  local.value = props.modelValue != null ? String(props.modelValue) : ''
   isOpen.value = false
 }
 </script>

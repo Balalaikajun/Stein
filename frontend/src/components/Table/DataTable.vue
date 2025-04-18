@@ -1,24 +1,23 @@
-<template>
-  <!-- Контейнер с рефом и обработчиком скролла -->
-  <div class="table-container" ref="containerRef" @scroll="onScroll">
-    <table class="data-table">
-      <TableHeader
-          :columns="columns"
-          :sort-by="sortBy"
-          :sort-descending="sortDescending"
-          :editable="editable"
-          @sort="handleSort"
-      />
-      <TableBody
-          :columns="columns"
-          :items="items"
-          :loading="loading"
-          :has-more="hasMore"
-          :slots="$slots"
-      />
-    </table>
-  </div>
-</template>
+ <template>
+    <div class="table-container" ref="containerRef" @scroll="onScroll">
+      <table class="data-table">
+        <TableHeader
+            :columns="columns"
+            :sort-by="sortBy"
+            :sort-descending="sortDescending"
+            :editable="editable"
+            @sort="handleSort"
+        />
+        <TableBody
+            :columns="columns"
+            :items="items"
+            :loading="loading"
+            :has-more="hasMore"
+            :slots="$slots"
+        />
+      </table>
+    </div>
+  </template>
 
 <script setup>
 import { toRefs, ref, watch, nextTick } from 'vue'
@@ -73,32 +72,20 @@ const handleSort = (key) => {
 
 <style scoped>
 .table-container {
-  flex: 1 1 0;
-  min-height: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;         /* Горизонтальный и вертикальный скролл */
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: var(--background-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .data-table {
-  display: block;         /* Для работы sticky внутри контейнера */
-  width: 100%;
-  min-width: 600px;
   border-collapse: collapse;
-}
-
-/* Сохраняем группировку заголовка для sticky */
-.data-table thead {
-  display: table-header-group;
+  min-width: 600px;
 }
 
 .data-table thead th {
-  position: sticky;
-  top: 0;
-  background: #f8f9fa;
-  z-index: 2;
+  background: var(--background-color);
+  border-bottom: 1px solid var(--secondary-background-color);
+  z-index: 5;
 }
 </style>
+

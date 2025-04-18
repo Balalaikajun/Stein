@@ -1,7 +1,10 @@
 <template>
   <button
       class="filter-btn"
-      :class="{ 'filter-btn--open': isOpen, 'filter-btn--active': hasValue }"
+      :class="{
+      'filter-btn--open': isOpen,
+      'filter-btn--active': hasValue
+    }"
       type="button"
       @click="$emit('toggle', $event)"
       :aria-expanded="isOpen.toString()"
@@ -16,11 +19,11 @@
 </template>
 
 <script setup>
-const props = defineProps({
-  title:      { type: String, required: true },
-  isOpen:     { type: Boolean, default: false },
+defineProps({
+  title: { type: String, required: true },
+  isOpen: { type: Boolean, default: false },
   badgeCount: { type: Number, default: 0 },
-  hasValue:   { type: Boolean, default: false }
+  hasValue: { type: Boolean, default: false }
 })
 </script>
 
@@ -28,33 +31,42 @@ const props = defineProps({
 .filter-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--background-color);
+  border: 1px solid var(--secondary-text-color);
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
+  transition: all var(--transition-duration) var(--transition-timing);
   cursor: pointer;
-  font-size: 14px;
-  position: relative;
-  transition: border-color .2s, background .2s;
 }
-.filter-btn:hover { border-color: #007bff; }
+
+.filter-btn:hover {
+  border-color: var(--primary-color);
+  background: var(--hover-color);
+}
+
 .filter-btn--open,
-.filter-btn--active { background: #f0f8ff; border-color: #007bff; }
-.filter-btn__title { white-space: nowrap; }
+.filter-btn--active {
+  background: var(--active-bg-color);
+  border-color: var(--primary-color);
+}
+
 .filter-btn__badge {
-  background: #007bff;
-  color: #fff;
-  border-radius: 10px;
-  padding: 0 6px;
-  font-size: 12px;
+  background: var(--primary-color);
+  color: var(--background-color);
+  border-radius: 0.625rem;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
+
 .filter-btn__icon {
-  width: 16px; height: 16px;
-  fill: currentColor;
-  transform: rotate(0deg);
-  transition: transform .2s;
+  width: 1rem;
+  height: 1rem;
+  transition: transform var(--transition-duration) var(--transition-timing);
 }
+
 .filter-btn--open .filter-btn__icon {
   transform: rotate(180deg);
 }

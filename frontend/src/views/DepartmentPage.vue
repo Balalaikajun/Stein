@@ -36,7 +36,6 @@ const handleSort = (key) => {
     key,
     descending: currentSort.value.key === key ? !currentSort.value.descending : false
   }
-  console.log(currentSort.value.descending)
   loadData(true)
 }
 
@@ -52,7 +51,6 @@ const buildRequestParams = (resetPagination = false) => {
     skip.value = 0
   }
 
-  console.log(skip.value)
   // Всегда явно передаем параметры сортировки
   const params = {
     [apiConfig.paramsMapping.search]: searchQuery.value,
@@ -64,7 +62,7 @@ const buildRequestParams = (resetPagination = false) => {
   }
 
   console.log(params)
-
+  console.log(currentFilters.value)
 
   return params
 }
@@ -74,7 +72,6 @@ const loadData = async (reset = false) => {
     loading.value = true
     const params = buildRequestParams(reset)
 
-    console.log(params)
     const { data } = await axios.post(
         `https://localhost:7203${apiConfig.endpoint}`,
         params
@@ -89,7 +86,6 @@ const loadData = async (reset = false) => {
     hasMore.value = data.hasMore
     skip.value += data.items.length
 
-    console.log(data)
   } catch (error) {
     console.error('Ошибка загрузки данных:', error)
   } finally {
@@ -126,17 +122,19 @@ const toggleVisibility = () => {
                 type="text"
                 placeholder="Поиск по тексту"
                 @change="onFilterChange"
+                class="search-input"
             />
           </div>
           <slot name="options"></slot>
         </div>
         <div class="selection-right">
-          <button class="exit-button" @click="toggleVisibility">
+          <button class="button primary" @click="toggleVisibility">
             <span>{{ isOpen ? '▲' : '▼' }}</span>
             <span>Фильтры</span>
           </button>
         </div>
       </div>
+
       <div v-if="isOpen">
         <FiltersContainer
             :filters="filters"
@@ -145,87 +143,111 @@ const toggleVisibility = () => {
         />
       </div>
 
-      <DataTable
-          :columns="tableConfig.columns"
-          :items="tableItems"
-          :loading="loading"
-          :has-more="hasMore"
-          :sort-by="currentSort.key"
-          :sort-descending="currentSort.descending"
-          editable
-          @sort="handleSort"
-          @load-more="loadMore"
-      >
-        <template #cell-isActive="{ item }">
-          <StatusBadge :status="item.isActive"/>
-        </template>
-      </DataTable>
+      <div class="table-container">
+        <DataTable
+            :columns="tableConfig.columns"
+            :items="tableItems"
+            :loading="loading"
+            :has-more="hasMore"
+            :sort-by="currentSort.key"
+            :sort-descending="currentSort.descending"
+            editable
+            @sort="handleSort"
+            @load-more="loadMore"
+        >
+          <template #cell-isActive="{ item }">
+            <StatusBadge :status="item.isActive"/>
+          </template>
+        </DataTable>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .main-layout {
-  display: flex;
-  min-height: 100vh;
+  height: 100vh;
 }
 
 .content-area {
-  flex: 1;
   padding: 2rem;
-  background: #f5f5f5;
+  gap: 1.5rem;
+  background: var(--secondary-background-color);
 }
 
 h1 {
-  margin-bottom: 1.5rem;
-  color: #333;
-  font-size: 24px;
+  margin-bottom: 0;
+  color: var(--text-color);
 }
-
-.search-block {
-  margin-bottom: 1rem;
-}
-
-.search-input {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  width: 300px;
-  max-width: 100%;
-}
-
 
 .selection {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 12px;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .selection-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
-.selection-right {
-  display: flex;
-  align-items: center;
+.search-input {
+  width: 100%;
+  max-width: 300px;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--secondary-text-color);
+  border-radius: var(--border-radius);
+  transition: border-color var(--transition-duration) var(--transition-timing);
 }
 
-.exit-button {
-  background: #1976d2;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
-  display: flex;
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(91, 0, 225, 0.1);
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  border: 1px solid transparent;
+  transition: all var(--transition-duration) var(--transition-timing);
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  transition: background 0.2s;
+  gap: 0.5rem;
+}
+
+.button.primary {
+  background: var(--primary-color);
+  color: var(--background-color);
+}
+
+.button.primary:hover {
+  background: var(--secondary-color);
+}
+
+.table-container {
+  flex: 1;
+  background: var(--background-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+  .content-area {
+    padding: 1rem;
+  }
+
+  .selection {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-input {
+    max-width: none;
+  }
 }
 </style>

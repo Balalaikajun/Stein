@@ -16,7 +16,7 @@
             </slot>
           </header>
           <div class="modal-body">
-            <slot name="body"/>
+            <slot name="body"></slot>
           </div>
           <footer class="modal-footer">
             <slot name="footer">
@@ -35,25 +35,27 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 
 const props = defineProps({
-  title:       { type: String, default: '' },
-  visible:     { type: Boolean, default: false },
-  anchorRect:  { type: Object, default: null }  // { top, left, width, bottom }
+  title: { type: String, default: '' },
+  visible: { type: Boolean, default: false },
+  anchorRect: { type: Object, default: null }
 })
-const emit = defineEmits(['apply','cancel'])
+
+const emit = defineEmits(['apply', 'cancel'])
 const modalRef = ref(null)
 
-// Позиция рядом с кнопкой
 const positionStyle = computed(() => {
   if (!props.anchorRect) return {}
   return {
-    position: 'absolute',
-    top:  `${props.anchorRect.bottom + 4}px`,
-    left: `${props.anchorRect.left}px`,
-    minWidth: `${props.anchorRect.width}px`
+    position: 'fixed',
+    top: `${props.anchorRect.bottom + window.scrollY + 4}px`,
+    left: `${props.anchorRect.left + window.scrollX}px`,
+    minWidth: `${props.anchorRect.width}px`,
+    zIndex: 1001
   }
 })
 
-function apply()  { emit('apply') }
+// Обработчики событий
+function apply() { emit('apply') }
 function cancel() { emit('cancel') }
 
 onMounted(() => {
@@ -71,64 +73,110 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active { transition: opacity .2s; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s var(--transition-timing);
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 
 .modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.2);
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
   z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 1rem;
 }
 
 .modal-window {
-  background: #fff;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background: var(--background-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  max-height: 300px;
+  max-height: 80vh;
   overflow: hidden;
-  z-index: 1001;
 }
 
 .modal-header {
-  padding: 8px 12px;
-  border-bottom: 1px solid #eee;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--secondary-background-color);
 }
 
 .modal-title {
   margin: 0;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
+  color: var(--text-color);
 }
 
 .modal-body {
-  padding: 12px;
+  padding: 1rem;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px; /* расстояние между элементами списка */
 }
 
 .modal-footer {
-  padding: 8px 12px;
-  border-top: 1px solid #eee;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--secondary-background-color);
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 0.75rem;
 }
 
 .btn {
-  padding: 6px 14px;
-  border-radius: 4px;
-  font-size: 14px;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
   cursor: pointer;
   border: none;
-  transition: background .2s;
+  transition: background-color var(--transition-duration) var(--transition-timing);
 }
 
-.btn--apply { background: #007bff; color: #fff; }
-.btn--apply:hover { background: #0056b3; }
-.btn--cancel { background: #f5f5f5; }
-.btn--cancel:hover { background: #e0e0e0; }
+.btn--apply {
+  background: var(--primary-color);
+  color: var(--background-color);
+}
+
+.btn--apply:hover {
+  background: var(--secondary-color);
+}
+
+.btn--cancel {
+  background: var(--secondary-background-color);
+  color: var(--text-color);
+}
+
+.btn--cancel:hover {
+  background: var(--hover-color);
+}
+
+:deep(.radio-group) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+:deep(.radio-option) {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: calc(var(--border-radius) / 2);
+  transition: background-color var(--transition-duration) var(--transition-timing);
+}
+
+:deep(.radio-option:hover) {
+  background-color: var(--hover-color);
+}
+
+:deep(input[type="radio"]) {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--primary-color);
+}
 </style>

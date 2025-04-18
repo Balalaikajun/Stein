@@ -1,22 +1,25 @@
 <template>
   <div class="filters-wrapper">
     <div class="filters-container">
-      <template v-for="filter in filters" :key="filter.id">
-        <BooleanFilter
-            v-if="filter.dataType === 'boolean'"
-            :filter="filter"
-            v-model="selectedFilters[filter.id]"
-            @update:modelValue="handleFilterChange"
-        />
-
-        <LookupFilter
-            v-else-if="filter.dataType === 'lookup'"
-            :filter="filter"
-            v-model="selectedFilters[filter.id]"
-            @update:modelValue="handleFilterChange"
-        />
+      <template v-if="filters.length">
+        <template v-for="filter in filters" :key="filter.id">
+          <BooleanFilter
+              v-if="filter.dataType === 'boolean'"
+              :filter="filter"
+              v-model="selectedFilters[filter.id]"
+              @update:modelValue="handleFilterChange"
+          />
+          <LookupFilter
+              v-else-if="filter.dataType === 'lookup'"
+              :filter="filter"
+              v-model="selectedFilters[filter.id]"
+              @update:modelValue="handleFilterChange"
+          />
+        </template>
       </template>
-
+      <div v-else class="no-filters">
+        Нет доступных фильтров
+      </div>
       <slot name="additional-filters"></slot>
     </div>
   </div>
@@ -24,8 +27,8 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import BooleanFilter from '@/components/Selectors/Filters/BooleanFilter.vue'
-import LookupFilter from '@/components/Selectors/Filters/LookupFilter.vue'
+import BooleanFilter from './Filters/BooleanFilter.vue'
+import LookupFilter from './Filters/LookupFilter.vue'
 
 const props = defineProps({
   filters: {
@@ -35,15 +38,10 @@ const props = defineProps({
   values: {
     type: Object,
     default: () => ({})
-  },
-  showHeader: {
-    type: Boolean,
-    default: true
   }
 })
 
 const emit = defineEmits(['update-filters'])
-
 const selectedFilters = ref({ ...props.values })
 
 const handleFilterChange = () => {
@@ -57,28 +55,23 @@ watch(() => props.values, (newVal) => {
 
 <style scoped>
 .filters-wrapper {
-  margin-bottom: 16px;
-}
-
-.filters-header {
-  margin-bottom: 8px;
-}
-
-.toggle-button {
-  background: none;
-  border: none;
-  color: #1976d2;
-  cursor: pointer;
-  padding: 4px 8px;
-  font-size: 14px;
+  margin-bottom: 1.5rem;
 }
 
 .filters-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--secondary-background-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  min-height: 60px;
+}
+
+.no-filters {
+  padding: 0.5rem;
+  color: var(--secondary-text-color);
+  font-style: italic;
 }
 </style>
