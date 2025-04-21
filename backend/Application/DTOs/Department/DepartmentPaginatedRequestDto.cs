@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.Department;
 
-public record DepartmentOptionRequestDto(
+public record DepartmentPaginatedRequestDto(
     int Skip = 0,
     int Take = 10,
     string? SearchText = null,

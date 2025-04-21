@@ -20,11 +20,9 @@ public class DepartmentController: ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult> GetDepartments(DepartmentOptionRequestDto request)
+    public async Task<ActionResult> GetDepartments(DepartmentPaginatedRequestDto request)
     {
-        Console.WriteLine(JsonSerializer.Serialize(request));
-        
-        var result = await _departmentService.GetDepartments(request);
+        var result = await _departmentService.GetPaginated(request);
         
         return Ok(result);
     }

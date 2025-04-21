@@ -1,39 +1,49 @@
+using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
 using Application.DTOs.Department;
+using Application.DTOs.Specialization;
 using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace Application.Services;
 
-public class DepartmentService : IDepartmentService
+public class SpecializationService:ISpecializationService
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-    private static readonly Dictionary<string, Expression<Func<Department, object>>> _sortSelectors = new()
+    private IApplicationDbContext _context;
+    private IMapper _mapper;
+    private static readonly Dictionary<string, Expression<Func<Specialization, object>>> _sortSelectors = new()
     {
-        ["Title"] = d => d.Title,
-        ["IsActive"] = d => d.IsActive,
-        ["Id"] = d => d.Id
+        ["Id"] = s => s.Id,
+        ["Code"] = s => s.Code,
+        ["Title"] = s => s.Acronym,
+        ["Acronym"] = s => s.Acronym,
+        ["IsActive"] = s => s.IsActive,
+        ["Department"] = s => s.Department.Title,
     };
 
-    public DepartmentService(IApplicationDbContext context, IMapper mapper)
+    public SpecializationService(IApplicationDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
     }
 
-    public async Task<BasePaginatedResultDto<DepartmentGetDto>> GetPaginated(DepartmentPaginatedRequestDto request)
+    public async Task<BasePaginatedResultDto<SpecializationGetDto>> GetPaginated(SpecializationPaginatedRequestDto request)
     {
-        var query = _context.Departments.AsQueryable();
+        var query = _context.Specializations.AsQueryable();
 
         // Фильтрация
         if (request.ActiveFilter.HasValue)
             query = query.Where(d => d.IsActive == request.ActiveFilter.Value);
 
+        if ( request.DepartmentIds != null && request.DepartmentIds.Any())
+        {
+            query = query.Where(d => request.DepartmentIds.Contains(d.DepartmentId));
+        }
+        
         if (!string.IsNullOrWhiteSpace(request.SearchText))
             query = query.Where(d => EF.Functions.Like(d.Title, $"%{request.SearchText}%"));
 
@@ -53,9 +63,10 @@ public class DepartmentService : IDepartmentService
         
         // Пагинацияs
         var items = await query
+            .Include(s => s.Department)
             .Skip(request.Skip)
             .Take(request.Take + 1) // берём на 1 больше, чтобы узнать, есть ли ещё
-            .ProjectTo<DepartmentGetDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<SpecializationGetDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
         
@@ -63,7 +74,7 @@ public class DepartmentService : IDepartmentService
         var hasMore = items.Count > request.Take;
         var resultItems = hasMore ? items.Take(request.Take) : items;
 
-        return new BasePaginatedResultDto<DepartmentGetDto>(
+        return new BasePaginatedResultDto<SpecializationGetDto>(
             Items: resultItems,
             HasMore: hasMore,
             Total: total);
