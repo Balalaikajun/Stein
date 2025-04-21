@@ -2,7 +2,7 @@ import {createRouter, createWebHistory} from "vue-router";
 import TestPage from "@/views/TestPage.vue";
 import Authentication from "@/views/Authentication.vue";
 import DepartmentPage from '@/views/DepartmentPage.vue'
-import Specialization from '@/views/Specialization.vue'
+import SpecializationPage from '@/views/SpecializationPage.vue'
 
 
 const routes = [
@@ -24,7 +24,7 @@ const routes = [
     {
         path: "/specializations",
         name: "specializations",
-        component: Specialization,
+        component: SpecializationPage,
     }
 
 ]

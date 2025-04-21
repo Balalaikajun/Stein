@@ -25,7 +25,7 @@ export default [
     isOpen: false,
     children: [
       { title: 'Отделения', path: '/departments' },
-      { title: 'Специальности', path: '/nomenclature/specialties' },
+      { title: 'Специальности', path: '/specializations' },
       { title: 'Группы', path: '/nomenclature/groups' },
       { title: 'Студенты', path: '/nomenclature/students' },
       { title: 'Преподаватели', path: '/nomenclature/teachers' },

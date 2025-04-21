@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import axios from 'axios'
-import Config from '@/configs/department'
+import Config from '@/configs/specialization.js'
 import StatusBadge from '@/components/Table/StatusBadge.vue'
 import DataTable from '@/components/Table/DataTable.vue'
 import FiltersContainer from '@/components/Selectors/FiltersContainer.vue'
@@ -74,6 +74,7 @@ const loadData = async (reset = false) => {
     loading.value = true
     const params = buildRequestParams(reset)
 
+    console.log(params)
     const { data } = await axios.post(
         `https://localhost:7203${apiConfig.endpoint}`,
         params
@@ -119,7 +120,7 @@ const toggleVisibility = () => {
     <Sidebar :items="menuItems"/>
 
     <div class="content-area">
-      <h1>Отделения</h1>
+      <h1>Специальности</h1>
 
       <div class="selection">
         <div class="selection-left">
