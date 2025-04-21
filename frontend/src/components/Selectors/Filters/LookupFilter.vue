@@ -61,7 +61,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, toRaw, watch } from 'vue'
 import axios from 'axios'
 import { debounce } from 'lodash-es'
 import FilterButton from '@/components/Selectors/FilterButton.vue'
@@ -71,7 +71,8 @@ import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 // Props include filter config and v-model value
 const props = defineProps({
   filter: { type: Object, required: true },
-  modelValue: { type: Array, default: () => [] }
+  modelValue: { type: Array, default: () => [] },
+  activeFilters: { type: Object, default: () => ({}) }
 })
 const emit = defineEmits(['update:modelValue'])
 
@@ -96,20 +97,25 @@ function uniqueKey (opt) {
 }
 
 // Build request payload using config
-function buildRequestBody () {
-  const { params = {}, paramKeys = {} } = props.filter
-  return {
+function buildRequestBody() {
+  const { params = {}, paramKeys = {}, dependentParams = {} } = props.filter;
+  const body = {
     [paramKeys.skip || 'skip']: skip.value,
     [paramKeys.take || 'take']: params.take || 50,
     [paramKeys.search || 'searchText']: search.value,
-    ...(params.activeFilter !== undefined && {
-      [paramKeys.activeFilter || 'activeFilter']: params.activeFilter
-    }),
-    ...(params.sortBy && {
-      [paramKeys.sortKey || 'sortBy']: params.sortBy,
-      [paramKeys.sortOrder || 'descending']: params.descending || false
-    })
-  }
+    ...params
+  };
+
+  // Добавляем зависимые параметры
+  Object.entries(dependentParams).forEach(([filterId, apiParam]) => {
+    const value = props.activeFilters[filterId];
+
+    if (value?.length > 0) {
+      body[apiParam] = toRaw(value);
+    }
+  });
+
+  return body;
 }
 
 // Fetch options from API
@@ -189,6 +195,23 @@ watch(
     () => props.modelValue,
     v => { localValue.value = [...v] }
 )
+
+watch(
+    () => props.activeFilters,
+    (newVal, oldVal) => {
+      if (!props.filter.dependentParams) return;
+      const relevantKeys = Object.keys(props.filter.dependentParams);
+      const hasChange = relevantKeys.some(key =>
+          JSON.stringify(newVal[key]) !== JSON.stringify(oldVal[key])
+      );
+
+      if (hasChange && isOpen.value) {
+        resetLoad();
+        loadOptions();
+      }
+    },
+    { deep: true }
+);
 </script>
 
 <style scoped>

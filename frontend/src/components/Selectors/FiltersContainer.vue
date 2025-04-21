@@ -7,13 +7,15 @@
               v-if="filter.dataType === 'boolean'"
               :filter="filter"
               v-model="selectedFilters[filter.id]"
-              @update:modelValue="handleFilterChange"
+              @update:modelValue="value => updateFilterValue(filter.id, value)"
           />
           <LookupFilter
               v-else-if="filter.dataType === 'lookup'"
               :filter="filter"
+              :active-filters="selectedFilters"
               v-model="selectedFilters[filter.id]"
-              @update:modelValue="handleFilterChange"
+              @update:modelValue="value => updateFilterValue(filter.id, value)"
+
           />
         </template>
       </template>
@@ -26,9 +28,10 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, toRaw, watch } from 'vue'
 import BooleanFilter from './Filters/BooleanFilter.vue'
 import LookupFilter from './Filters/LookupFilter.vue'
+import { debounce } from 'lodash-es'
 
 const props = defineProps({
   filters: {
@@ -51,9 +54,29 @@ const handleFilterChange = () => {
 watch(() => props.values, (newVal) => {
   selectedFilters.value = { ...newVal }
 }, { deep: true })
+
+function updateFilterValue(filterId, value) {
+  selectedFilters.value[filterId] = value;
+
+  // Сбрасываем все фильтры, зависящие от filterId
+  props.filters
+      .filter(f => f.dependsOn?.includes(filterId))
+      .forEach(dep => {
+        selectedFilters.value[dep.id] = [];
+      });
+
+  // Эмитим единожды
+  emit('update-filters', { ...selectedFilters.value });
+}
+
+const debouncedEmit = debounce(filters => {
+  emit('update-filters', filters);
+}, 300);
 </script>
 
 <style scoped>
+
+
 .filters-wrapper {
 }
 

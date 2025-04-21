@@ -59,13 +59,11 @@ export const filters = [
   {
     id: 'SpecializationIds',
     title: 'Специализации',
-    dependsOn: ['DepartmentIds'],
     dataType: 'lookup',
     apiEndpoint: '/api/Specialization',
-    params: {
-      take: 100,
-      sortBy: 'Title',
-      descending: false
+    dependsOn: ['DepartmentIds'],
+    dependentParams: {
+      DepartmentIds: 'departmentIds'
     },
     paramKeys: {
       skip: 'skip',
@@ -79,7 +77,12 @@ export const filters = [
   {
     id: 'Years',
     title: 'Годы обучения',
-    dataType: 'number[]'
+    dataType: 'lookup',
+    staticOptions: [
+      { value: 2024, label: '2024' },
+      { value: 'spb',    label: 'Санкт‑Петербург' },
+      { value: 'kzn',    label: 'Казань' }
+    ]
   }
 ]
 
