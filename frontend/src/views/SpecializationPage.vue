@@ -8,6 +8,7 @@ import FiltersContainer from '@/components/Selectors/FiltersContainer.vue'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import menuItems from '@/router/menuData.js'
 import Table from '@/components/Table/Table.vue'
+import {BACKEND_API_HOST} from '@/configs/apiConfig.js'
 
 const {
   tableConfig,
@@ -63,8 +64,6 @@ const buildRequestParams = (resetPagination = false) => {
     ...currentFilters.value
   }
 
-  console.log(params)
-  console.log(currentFilters.value)
 
   return params
 }
@@ -74,9 +73,8 @@ const loadData = async (reset = false) => {
     loading.value = true
     const params = buildRequestParams(reset)
 
-    console.log(params)
     const { data } = await axios.post(
-        `https://localhost:7203${apiConfig.endpoint}`,
+        `${BACKEND_API_HOST}${apiConfig.endpoint}`,
         params
     )
 
@@ -90,7 +88,6 @@ const loadData = async (reset = false) => {
     if(params.Skip===0){
       total.value = data.total
     }
-console.log(total.value)
 
     hasMore.value = data.hasMore
     skip.value += data.items.length

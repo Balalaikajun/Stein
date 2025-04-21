@@ -16,39 +16,42 @@
         @apply="apply"
         @cancel="close"
     >
+      <template #header>
+        <input
+            v-model.lazy="search"
+            @change="onSearchInput"
+            placeholder="Поиск..."
+            class="filter-input"
+            :disabled="loading"
+        />
+      </template>
       <template #body>
-        <div class="filter-modal-content">
-          <input
-              v-if="filter.searchable"
-              v-model="search"
-              @input="handleSearch"
-              placeholder="Поиск..."
-              class="filter-input"
-              :disabled="loading"
-          />
-
-          <div v-if="loading" class="loading-state">
+        <div class="filter-modal-content" ref="listContainer" @scroll="onScroll">
+          <div v-if="loading && !options.length" class="loading-state">
             <span class="loader"></span>
             <span>Загрузка...</span>
-          </div>
-
-          <div v-else-if="error" class="error-state">
-            Ошибка загрузки: {{ error }}
-            <button @click="loadOptions" class="retry-button">Повторить</button>
           </div>
 
           <ul v-else class="options-list">
             <li
                 v-for="opt in options"
-                :key="getOptionKey(opt)"
-                @click="select(opt.value)"
-                :class="{ selected: isSelected(opt.value) }"
+                :key="uniqueKey(opt)"
+                class="options-list__item"
             >
-              {{ opt.label }}
+              <label>
+                <input
+                    type="checkbox"
+                    :value="opt.value"
+                    v-model="localValue"
+                />
+                {{ opt.label }}
+              </label>
             </li>
-
-            <li v-if="options.length === 0" class="empty-state">
+            <li v-if="!loading && !options.length" class="empty-state">
               Ничего не найдено
+            </li>
+            <li v-if="loading && options.length" class="loading-more">
+              Загрузка...
             </li>
           </ul>
         </div>
@@ -58,141 +61,141 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, nextTick, computed } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import axios from 'axios'
-import isEqual from 'lodash.isequal'
+import { debounce } from 'lodash-es'
 import FilterButton from '@/components/Selectors/FilterButton.vue'
 import FilterModal from '@/components/Selectors/FilterModal.vue'
-import { debounce } from 'lodash-es'
+import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 
+// Props include filter config and v-model value
 const props = defineProps({
-  filter: {
-    type: Object,
-    required: true,
-    validator: (f) => f.api && f.mapOption
-  },
-  modelValue: {
-    type: [Object, Number, Array, String, Boolean],
-    default: null
-  }
+  filter: { type: Object, required: true },
+  modelValue: { type: Array, default: () => [] }
 })
-
 const emit = defineEmits(['update:modelValue'])
 
-// State
+// Reactive state
 const isOpen = ref(false)
 const search = ref('')
 const options = ref([])
-const local = ref(null)
-const anchorRect = ref(null)
-const btnRef = ref(null)
+const localValue = ref([...props.modelValue])
 const loading = ref(false)
-const error = ref(null)
+const skip = ref(0)
+const hasMore = ref(true)
+const btnRef = ref(null)
+const anchorRect = ref(null)
+const listContainer = ref(null)
 
 // Computed
-const hasValue = computed(() => {
-  return !isEqual(props.modelValue, null) &&
-      !isEqual(props.modelValue, undefined) &&
-      !(Array.isArray(props.modelValue) && props.modelValue.length === 0)
-})
+const hasValue = computed(() => localValue.value.length > 0)
 
-// Methods
-const getOptionKey = (opt) => {
-  return typeof opt.value === 'object'
-      ? JSON.stringify(opt.value)
-      : opt.value
+// Generate a stable key for v-for
+function uniqueKey (opt) {
+  return typeof opt.value === 'object' ? JSON.stringify(opt.value) : opt.value
 }
 
-const loadOptions = async () => {
-  try {
-    loading.value = true
-    error.value = null
-
-    const params = {
-      q: search.value,
-      // Можно добавить другие параметры из props.filter
-      ...(props.filter.apiParams || {})
-    }
-
-    console.log(params)
-    const { data } = await axios.get(props.filter.api, {
-      params
+// Build request payload using config
+function buildRequestBody () {
+  const { params = {}, paramKeys = {} } = props.filter
+  return {
+    [paramKeys.skip || 'skip']: skip.value,
+    [paramKeys.take || 'take']: params.take || 50,
+    [paramKeys.search || 'searchText']: search.value,
+    ...(params.activeFilter !== undefined && {
+      [paramKeys.activeFilter || 'activeFilter']: params.activeFilter
+    }),
+    ...(params.sortBy && {
+      [paramKeys.sortKey || 'sortBy']: params.sortBy,
+      [paramKeys.sortOrder || 'descending']: params.descending || false
     })
+  }
+}
 
-    // Обработка разных форматов ответа
-    const items = Array.isArray(data)
-        ? data
-        : data?.results || data?.items || data?.data || []
-
-    options.value = items.map(props.filter.mapOption)
+// Fetch options from API
+async function loadOptions () {
+  if (!hasMore.value || loading.value) return
+  loading.value = true
+  try {
+    const body = buildRequestBody()
+    const { data } = await axios.post(
+        `${BACKEND_API_HOST}${props.filter.apiEndpoint}`,
+        body
+    )
+    const items = data.items || []
+    // Map and append
+    options.value.push(...items.map(props.filter.mapOption))
+    hasMore.value = data.hasMore
+    skip.value += items.length
   } catch (err) {
     console.error('Ошибка загрузки опций:', err)
-    error.value = err.message
-    options.value = []
   } finally {
     loading.value = false
   }
 }
 
+// Reset pagination and options
+function resetLoad () {
+  options.value = []
+  skip.value = 0
+  hasMore.value = true
+}
+
+// Handlers
 const toggle = () => {
   isOpen.value = !isOpen.value
   if (isOpen.value) {
     nextTick(() => {
-      const rect = btnRef.value?.$el?.getBoundingClientRect?.()
-      if (rect) anchorRect.value = rect
+      anchorRect.value = btnRef.value.$el.getBoundingClientRect()
+      resetLoad()
+      loadOptions()
     })
   }
 }
-
-const select = (value) => {
-  local.value = isEqual(local.value, value) ? null : value
-}
-
-const isSelected = (value) => {
-  return isEqual(local.value, value)
-}
-
 const apply = () => {
-  emit('update:modelValue', local.value)
+  emit('update:modelValue', [...localValue.value])
   close()
 }
-
 const close = () => {
   isOpen.value = false
   search.value = ''
-  local.value = props.modelValue
+  resetLoad()
+  localValue.value = [...props.modelValue]
 }
 
-const handleSearch = debounce(() => {
+const onSearchInput = debounce(() => {
+  resetLoad()
   loadOptions()
 }, 300)
 
-// Hooks
-onMounted(async () => {
-  await loadOptions()
-  local.value = props.modelValue
-})
+const onScroll = () => {
+  const c = listContainer.value
+  if (
+      hasMore.value && !loading.value &&
+      c.scrollHeight - c.scrollTop <= c.clientHeight + 50
+  ) {
+    loadOptions()
+  }
+}
 
-// Watchers
-watch(search, () => {
-  if (!isOpen.value) return
+// Initial load
+onMounted(() => {
+  resetLoad()
   loadOptions()
 })
 
-watch(() => props.modelValue, (newVal) => {
-  local.value = newVal
-})
+// Sync external changes
+watch(
+    () => props.modelValue,
+    v => { localValue.value = [...v] }
+)
 </script>
 
 <style scoped>
-.filter-item {
-  position: relative;
-  display: inline-block;
-}
-
 .filter-modal-content {
-  padding: 12px;
-  min-width: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 8px;
 }
 
 .filter-input {
@@ -201,74 +204,78 @@ watch(() => props.modelValue, (newVal) => {
   margin-bottom: 12px;
   border: 1px solid var(--secondary-background-color);
   border-radius: var(--border-radius);
+  transition: border-color var(--transition-duration) var(--transition-timing);
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(91, 0, 225, 0.1);
+}
+
+.filter-input:disabled {
+  background-color: var(--secondary-background-color);
+  cursor: not-allowed;
 }
 
 .options-list {
-  max-height: 300px;
-  overflow-y: auto;
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.options-list li {
+.options-list__item {
   padding: 8px 12px;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-duration) var(--transition-timing);
+  border-radius: var(--border-radius);
 }
 
-.options-list li:hover {
+.options-list__item:hover {
   background-color: var(--hover-color);
 }
 
-.options-list li.selected {
-  background-color: var(--active-bg-color);
-  font-weight: 500;
+.options-list__item label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
 }
 
-.options-list li.empty-state {
-  cursor: default;
-  color: var(--secondary-text-color);
+.options-list__item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary-color);
+}
+
+.empty-state,
+.loading-more {
+  padding: 12px;
   text-align: center;
-  padding: 16px;
+  color: var(--secondary-text-color);
 }
 
 .loading-state {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   padding: 16px;
   color: var(--secondary-text-color);
 }
 
 .loader {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--primary-color);
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--secondary-background-color);
+  border-top-color: var(--primary-color);
   border-radius: 50%;
-  border-top-color: transparent;
   animation: spin 1s linear infinite;
-  margin-right: 8px;
-}
-
-.error-state {
-  color: var(--error-color);
-  padding: 12px;
-  text-align: center;
-}
-
-.retry-button {
-  margin-top: 8px;
-  padding: 4px 8px;
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

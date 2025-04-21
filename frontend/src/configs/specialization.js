@@ -42,13 +42,24 @@ export const filters = [
     id: 'DepartmentIds',
     title: 'Отделения',
     dataType: 'lookup',
-    api: '/api/Department', // Эндпоинт для загрузки отделений
-    searchable: true,
-    mapOption: (department) => ({
-      label: department.title, // Отображаемое название
-      value: department.id     // Значение для фильтрации
-    })
+    apiEndpoint: '/api/Department',
+    params: {
+      take: 100,
+      activeFilter: true,
+      sortBy: 'Title',
+      descending: false
+    },
+    paramKeys: {
+      skip: 'skip',
+      take: 'take',
+      search: 'searchText',
+      sortKey: 'sortBy',
+      sortOrder: 'descending',
+      activeFilter: 'activeFilter'
+    },
+    mapOption: opt => ({ label: opt.title, value: opt.id })
   }
+
 ]
 
 export const apiConfig = {
