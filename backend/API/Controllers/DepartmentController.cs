@@ -20,7 +20,7 @@ public class DepartmentController: ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult> GetDepartments(DepartmentPaginatedRequestDto request)
+    public async Task<ActionResult> GetDepartments(DepartmentPaginatedRequest request)
     {
         var result = await _departmentService.GetPaginated(request);
         

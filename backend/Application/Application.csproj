@@ -25,7 +25,6 @@
       <Folder Include="DTOs\Group\" />
       <Folder Include="DTOs\Order\" />
       <Folder Include="DTOs\Student\" />
-      <Folder Include="DTOs\Teacher\" />
     </ItemGroup>
 
 </Project>

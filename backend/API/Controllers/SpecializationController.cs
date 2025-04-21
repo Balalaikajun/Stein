@@ -17,7 +17,7 @@ public class SpecializationController:ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult> GetSpecializations(SpecializationPaginatedRequestDto request)
+    public async Task<ActionResult> GetSpecializations(SpecializationPaginatedRequest request)
     {
         var result = await _specializationService.GetPaginated(request);
         

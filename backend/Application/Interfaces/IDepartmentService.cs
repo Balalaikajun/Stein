@@ -4,5 +4,5 @@ namespace Application.Interfaces;
 
 public interface IDepartmentService
 {
-    Task<BasePaginatedResultDto<DepartmentGetDto>> GetPaginated(DepartmentPaginatedRequestDto request);
+    Task<BasePaginatedResult<DepartmentGetDto>> GetPaginated(DepartmentPaginatedRequest request);
 }

@@ -1,6 +1,6 @@
 namespace Application.DTOs.Specialization;
 
-public record SpecializationPaginatedRequestDto(
+public record SpecializationPaginatedRequest(
     int Skip = 0,
     int Take = 10,
     string? SearchText = null,

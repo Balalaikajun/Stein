@@ -26,7 +26,7 @@ public class DepartmentService : IDepartmentService
         _mapper = mapper;
     }
 
-    public async Task<BasePaginatedResultDto<DepartmentGetDto>> GetPaginated(DepartmentPaginatedRequestDto request)
+    public async Task<BasePaginatedResult<DepartmentGetDto>> GetPaginated(DepartmentPaginatedRequest request)
     {
         var query = _context.Departments.AsQueryable();
 
@@ -63,7 +63,7 @@ public class DepartmentService : IDepartmentService
         var hasMore = items.Count > request.Take;
         var resultItems = hasMore ? items.Take(request.Take) : items;
 
-        return new BasePaginatedResultDto<DepartmentGetDto>(
+        return new BasePaginatedResult<DepartmentGetDto>(
             Items: resultItems,
             HasMore: hasMore,
             Total: total);

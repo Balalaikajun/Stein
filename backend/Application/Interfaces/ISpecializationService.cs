@@ -5,5 +5,5 @@ namespace Application.Interfaces;
 
 public interface ISpecializationService
 {
-    Task<BasePaginatedResultDto<SpecializationGetDto>>GetPaginated(SpecializationPaginatedRequestDto request);
+    Task<BasePaginatedResult<SpecializationGetDto>>GetPaginated(SpecializationPaginatedRequest request);
 }

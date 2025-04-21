@@ -3,6 +3,7 @@ import TestPage from "@/views/TestPage.vue";
 import Authentication from "@/views/Authentication.vue";
 import DepartmentPage from '@/views/DepartmentPage.vue'
 import SpecializationPage from '@/views/SpecializationPage.vue'
+import TeachersPage from '@/views/TeachersPage.vue'
 
 
 const routes = [
@@ -25,6 +26,11 @@ const routes = [
         path: "/specializations",
         name: "specializations",
         component: SpecializationPage,
+    },
+    {
+        path: "/teachers",
+        name: "teachers",
+        component: TeachersPage,
     }
 
 ]
