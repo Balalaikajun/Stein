@@ -81,10 +81,12 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<ISpecializationService, SpecializationService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
+builder.Services.AddScoped<IGroupService, GroupService>();
 
 builder.Services.AddAutoMapper(typeof(DepartmentProfile));
 builder.Services.AddAutoMapper(typeof(SpecializationProfile));
 builder.Services.AddAutoMapper(typeof(TeacherProfile));
+builder.Services.AddAutoMapper(typeof(GroupProfile));
 
 builder.Services.AddCors(options =>
 {
