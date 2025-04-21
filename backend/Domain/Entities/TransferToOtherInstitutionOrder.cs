@@ -7,7 +7,7 @@ public class TransferToOtherInstitutionOrder:Order,IHasGroupTo
 {
     public string ToInstituteAcronym { get; set; }
     public int ToSpecializationId { get; set; }
-    public string ToYear { get; set; }
+    public int ToYear { get; set; }
     public string ToGroupId { get; set; }
     
     public Group ToGroup { get; set; }

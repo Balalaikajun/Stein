@@ -9,7 +9,7 @@ public class Student
     public string Name { get; set; }
     public string Patronymic { get; set; }
     public int GroupSpecializationId { get; set; }
-    public string GroupYear { get; set; }
+    public int GroupYear { get; set; }
     public string GroupId { get; set; }
     public bool IsCitizen { get; set; } 
     public Gender Gender { get; set; }

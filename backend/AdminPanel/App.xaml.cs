@@ -1,10 +1,5 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Reflection;
-using System.Windows;
-using Application.Interfaces;
+﻿using Application.Interfaces;
 using Application.Services;
-using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Mapping;

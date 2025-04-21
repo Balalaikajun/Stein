@@ -3,7 +3,7 @@ namespace Domain.Entities;
 public class Group
 {
     public int SpecializationId { get; set; }
-    public string Year { get; set; }
+    public int Year { get; set; }
     public string Id { get; set; }
     public string Acronym { get; set; }
     public int TeacherId { get; set; }

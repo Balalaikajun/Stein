@@ -21,9 +21,8 @@ public class GroupConfiguration: IEntityTypeConfiguration<Group>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(g => g.Year)
-            .IsRequired()
-            .HasMaxLength(4);
-
+            .IsRequired();
+            
         builder.Property(g => g.Id)
             .IsRequired()
             .HasMaxLength(3);
