@@ -20,22 +20,18 @@ public class OrderProfile: Profile
 
         CreateMap<EnrollmentOrder, OrderGetDto>()
             .IncludeBase<Order, OrderGetDto>()
-            .ForMember(d => d.GroupTo,
-                o => o.MapFrom(
-                    src => new GroupKeyDto(src.ToSpecializationId, src.ToYear, src.ToGroupId)));
+            .ForMember(d => d.GroupToAcronym,
+                o => o.MapFrom(src => src.ToGroup.Acronym));
         CreateMap<ExpulsionOrder, OrderGetDto>()
             .IncludeBase<Order, OrderGetDto>()
-            .ForMember(d => d.GroupFrom,
-                o => o.MapFrom(
-                    src => new GroupKeyDto(src.FromSpecializationId, src.FromYear, src.FromGroupId)));
+            .ForMember(d => d.GroupFromAcronym,
+                o => o.MapFrom(src => src.FromGroup.Acronym));
         CreateMap<TransferOrder, OrderGetDto>()
             .IncludeBase<Order, OrderGetDto>()
-            .ForMember(d => d.GroupTo,
-                o => o.MapFrom(
-                    src => new GroupKeyDto(src.ToSpecializationId, src.ToYear, src.ToGroupId)))
-            .ForMember(d => d.GroupFrom,
-                o => o.MapFrom(
-                    src => new GroupKeyDto(src.FromSpecializationId, src.FromYear, src.FromGroupId)));
+            .ForMember(d => d.GroupToAcronym,
+                o => o.MapFrom(src => src.ToGroup.Acronym))
+            .ForMember(d => d.GroupFromAcronym,
+                o => o.MapFrom(src => src.FromGroup.Acronym));
        
         
     }

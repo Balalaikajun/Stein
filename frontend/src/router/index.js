@@ -6,6 +6,7 @@ import SpecializationPage from '@/views/SpecializationPage.vue'
 import TeachersPage from '@/views/TeachersPage.vue'
 import GroupsPage from '@/views/GroupsPage.vue'
 import StudentsPage from '@/views/StudentsPage.vue'
+import OrderPage from '@/views/OrderPage.vue'
 
 
 const routes = [
@@ -43,6 +44,11 @@ const routes = [
         path: "/students",
         name: "students",
         component: StudentsPage,
+    },
+    {
+        path: "/orders",
+        name: "orders",
+        component: OrderPage,
     }
 
 ]

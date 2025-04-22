@@ -38,7 +38,7 @@ public class OrderService: IOrderService
             query = query.Where(d => request.OrderTypesFilter.Contains(d.OrderType));
 
         if (!string.IsNullOrWhiteSpace(request.SearchText))
-            query = query.Where(d => EF.Functions.Like(d.OrderNumber.ToString(), $"%{request.SearchText}%"));
+            query = query.Where(d => EF.Functions.Like(d.OrderNumber, $"%{request.SearchText}%"));
 
         if (request.DateRangeFilter!= null && request.DateRangeFilter.FromDate.HasValue)
             query = query.Where(s => s.Date >= request.DateRangeFilter.FromDate);
@@ -66,8 +66,6 @@ public class OrderService: IOrderService
             .Take(request.Take + 1) // берём на 1 больше, чтобы узнать, есть ли ещё
             .ProjectTo<OrderGetDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
-
-        
         
         var hasMore = items.Count > request.Take;
         var resultItems = hasMore ? items.Take(request.Take) : items;

@@ -29,7 +29,7 @@ export default [
       { title: 'Группы', path: '/groups' },
       { title: 'Студенты', path: '/students' },
       { title: 'Преподаватели', path: '/teachers' },
-      { title: 'Приказы', path: '/nomenclature/orders' },
+      { title: 'Приказы', path: '/orders' },
       { title: 'Успеваемость', path: '/nomenclature/performance' }
     ]
   },
