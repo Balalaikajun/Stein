@@ -17,6 +17,21 @@
               @update:modelValue="value => updateFilterValue(filter.id, value)"
 
           />
+          <DateRangeFilter
+              v-else-if="filter.dataType === 'dateRange'"
+              :filter="filter"
+              :active-filters="selectedFilters"
+              v-model="selectedFilters[filter.id]"
+              @update:modelValue="value => updateFilterValue(filter.id, value)"
+
+          />
+          <RadioFilter
+              v-else-if="filter.dataType === 'radio'"
+              :filter="filter"
+              v-model="selectedFilters[filter.id]"
+              @update:modelValue="value => updateFilterValue(filter.id, value)"
+
+          />
         </template>
       </template>
       <div v-else class="no-filters">
@@ -31,7 +46,9 @@
 import { ref, toRaw, watch } from 'vue'
 import BooleanFilter from './Filters/BooleanFilter.vue'
 import LookupFilter from './Filters/LookupFilter.vue'
+import DateRangeFilter from '@/components/Selectors/Filters/DateRangeFilter.vue'
 import { debounce } from 'lodash-es'
+import RadioFilter from '@/components/Selectors/Filters/RadioFilter.vue'
 
 const props = defineProps({
   filters: {

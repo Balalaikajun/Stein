@@ -76,13 +76,13 @@ const loadData = async (reset = false) => {
   try {
     loading.value = true
     const params = buildRequestParams(reset)
-
+    console.log(params)
     const { data } = await axios.post(
         `${BACKEND_API_HOST}${apiConfig.endpoint}`,
         params
     )
 
-    console.log(params)
+
     tableItems.value = reset ? data.items : [...tableItems.value, ...data.items]
     if(params.Skip===0)
     {
