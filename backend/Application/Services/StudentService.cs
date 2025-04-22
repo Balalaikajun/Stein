@@ -42,8 +42,8 @@ public class StudentService: IStudentService
         .AsQueryable();
 
     // Фильтр по статусу
-    if (request.Status.HasValue)
-        query = query.Where(s => s.Status == request.Status.Value);
+    if (request.StudentStatusesFilter?.Any()==true)
+        query = query.Where(s => request.StudentStatusesFilter.Contains(s.Status));
 
     // Фильтр по отделениям и специализациям
     if (request.DepartmentIds?.Any() == true)

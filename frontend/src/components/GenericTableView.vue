@@ -82,6 +82,7 @@ const loadData = async (reset = false) => {
         params
     )
 
+    console.log(params)
     tableItems.value = reset ? data.items : [...tableItems.value, ...data.items]
     if(params.Skip===0)
     {

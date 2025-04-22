@@ -44,7 +44,7 @@
             }"
         >
           <slot :name="`cell-${col.key}`" :item="item">
-            {{ col.formatter ? col.formatter(item[col.key]) : item[col.key] }}
+            {{ col.formatter ? col.formatter(item) : item[col.key] }}
           </slot>
         </td>
       </tr>
@@ -124,6 +124,7 @@ onMounted(() => {
       emit('load-more')
     }
   })
+  console.log(items)
 })
 </script>
 
