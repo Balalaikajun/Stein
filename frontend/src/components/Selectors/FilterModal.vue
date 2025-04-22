@@ -1,6 +1,5 @@
 <template>
   <Teleport to="body">
-    <transition name="fade">
       <div v-if="visible" class="modal-overlay" @click="cancel">
         <div
             class="modal-window"
@@ -26,7 +25,6 @@
           </footer>
         </div>
       </div>
-    </transition>
   </Teleport>
 </template>
 
@@ -45,31 +43,30 @@ const modalRef = ref(null)
 
 const positionStyle = computed(() => {
   if (!props.anchorRect) return {}
+  const sy = window.scrollY, sx = window.scrollX
   return {
     position: 'fixed',
-    top: `${props.anchorRect.bottom + window.scrollY + 4}px`,
-    left: `${props.anchorRect.left + window.scrollX}px`,
+    top:  `${props.anchorRect.bottom + sy + 4}px`,
+    left: `${props.anchorRect.left   + sx}px`,
     minWidth: `${props.anchorRect.width}px`,
     zIndex: 1001
   }
 })
+
+
 
 // Обработчики событий
 function apply() { emit('apply') }
 function cancel() { emit('cancel') }
 
 onMounted(() => {
-  onClickOutside(modalRef, cancel)
+  onClickOutside(modalRef, () => emit('cancel'))
   window.addEventListener('keydown', onEsc)
 })
 
-function onEsc(e) {
-  if (e.key === 'Escape') cancel()
-}
+function onEsc(e) { if (e.key === 'Escape') emit('cancel') }
+onBeforeUnmount(() => window.removeEventListener('keydown', onEsc))
 
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onEsc)
-})
 </script>
 
 <style scoped>
@@ -100,6 +97,8 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   max-height: 80vh;
+  max-width: 90vw;
+  width: auto;
   overflow: hidden;
 }
 
@@ -116,7 +115,7 @@ onBeforeUnmount(() => {
 }
 
 .modal-body {
-  padding: 1rem;
+  flex: 1 1 auto;
   overflow-y: auto;
 }
 
