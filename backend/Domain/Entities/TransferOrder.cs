@@ -3,7 +3,7 @@ using Domain.Interfaces;
 
 namespace Domain.Entities;
 
-public class TransferBetweenGroupsOrder:Order,IHasGroupFrom,IHasGroupTo
+public class TransferOrder:Order,IHasGroupFrom,IHasGroupTo
 {
     public int FromSpecializationId { get; set; }
     public int FromYear { get; set; }
@@ -14,9 +14,4 @@ public class TransferBetweenGroupsOrder:Order,IHasGroupFrom,IHasGroupTo
 
     public Group FromGroup { get; set; }
     public Group ToGroup { get; set; }
-
-    public TransferBetweenGroupsOrder()
-    {
-        OrderType = OrderTypes.TransferBetweenGroups;
-    }
 }

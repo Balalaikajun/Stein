@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Data.Configurations;
 
-public class TransferBetweenGroupsOrderConfiguration:IEntityTypeConfiguration<TransferBetweenGroupsOrder>
+public class TransferOrderConfiguration:IEntityTypeConfiguration<TransferOrder>
 {
-    public void Configure(EntityTypeBuilder<TransferBetweenGroupsOrder> builder)
+    public void Configure(EntityTypeBuilder<TransferOrder> builder)
     {
         builder.ConfigureGroupFrom();
         builder.ConfigureGroupTo();

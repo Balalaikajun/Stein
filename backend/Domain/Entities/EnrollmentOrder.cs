@@ -10,9 +10,4 @@ public class EnrollmentOrder:Order,IHasGroupTo
     public string ToGroupId { get; set; }
     
     public Group ToGroup { get; set; }
-
-    public EnrollmentOrder()
-    {
-        OrderType = OrderTypes.Enrollment;
-    }
 }

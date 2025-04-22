@@ -2,5 +2,5 @@ namespace Application.DTOs.Group;
 
 public record GroupKeyDto(
     int SpecializationId,
-    string Year,
+    int Year,
     string Id);

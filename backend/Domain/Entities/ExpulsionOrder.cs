@@ -10,9 +10,4 @@ public class ExpulsionOrder:Order,IHasGroupFrom
     public string FromGroupId { get; set; }
     
     public Group FromGroup { get; set; }
-
-    public ExpulsionOrder()
-    {
-        OrderType = OrderTypes.Expulsion;
-    }
 }
