@@ -19,10 +19,10 @@
       <template #header>
         <input
             v-model.lazy="search"
-            @change="onSearchInput"
-            placeholder="Поиск..."
+            @input="onSearchInput"
+            :placeholder="filter.searchPlaceholder || 'Поиск...'"
             class="filter-input"
-            :disabled="loading"
+            :disabled="loading || isStatic"
         />
       </template>
       <template #body>
@@ -68,7 +68,6 @@ import FilterButton from '@/components/Selectors/FilterButton.vue'
 import FilterModal from '@/components/Selectors/FilterModal.vue'
 import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 
-// Props include filter config and v-model value
 const props = defineProps({
   filter: { type: Object, required: true },
   modelValue: { type: Array, default: () => [] },
@@ -88,40 +87,66 @@ const btnRef = ref(null)
 const anchorRect = ref(null)
 const listContainer = ref(null)
 
+// Flags
+const isStatic = computed(() => Array.isArray(props.filter.staticOptions))
+const take = props.filter.params?.take || props.filter.take || 50
+const debounceMs = props.filter.debounceMs ?? 300
+
 // Computed
 const hasValue = computed(() => localValue.value.length > 0)
 
-// Generate a stable key for v-for
-function uniqueKey (opt) {
+// Helpers
+function uniqueKey(opt) {
   return typeof opt.value === 'object' ? JSON.stringify(opt.value) : opt.value
 }
 
-// Build request payload using config
 function buildRequestBody() {
-  const { params = {}, paramKeys = {}, dependentParams = {} } = props.filter;
+  const { params = {}, paramKeys = {}, dependentParams = {} } = props.filter
   const body = {
     [paramKeys.skip || 'skip']: skip.value,
-    [paramKeys.take || 'take']: params.take || 50,
+    [paramKeys.take || 'take']: take,
     [paramKeys.search || 'searchText']: search.value,
     ...params
-  };
-
-  // Добавляем зависимые параметры
+  }
   Object.entries(dependentParams).forEach(([filterId, apiParam]) => {
-    const value = props.activeFilters[filterId];
-
+    const value = props.activeFilters[filterId]
     if (value?.length > 0) {
-      body[apiParam] = toRaw(value);
+      body[apiParam] = toRaw(value)
     }
-  });
-
-  return body;
+  })
+  return body
 }
 
-// Fetch options from API
-async function loadOptions () {
-  if (!hasMore.value || loading.value) return
+async function loadOptions() {
+  if (loading.value) return
   loading.value = true
+
+  // Статичные опции: фильтрация на клиенте
+  if (isStatic.value) {
+    const all = props.filter.staticOptions
+    options.value = search.value
+        ? all.filter(opt =>
+            opt.label.toLowerCase().includes(search.value.toLowerCase())
+        )
+        : [...all]
+    // Soft reset выбранных
+    const valid = options.value.map(o => o.value)
+    const filtered = localValue.value.filter(v => valid.includes(v))
+    if (filtered.length !== localValue.value.length) {
+      localValue.value = filtered
+      emit('update:modelValue', [...filtered])
+    }
+    loading.value = false
+    hasMore.value = false
+    return
+  }
+
+  // Динамические: запрос к API
+  if (!hasMore.value) {
+    loading.value = false
+    return
+  }
+
   try {
     const body = buildRequestBody()
     const { data } = await axios.post(
@@ -129,10 +154,19 @@ async function loadOptions () {
         body
     )
     const items = data.items || []
-    // Map and append
     options.value.push(...items.map(props.filter.mapOption))
     hasMore.value = data.hasMore
     skip.value += items.length
+
+    // Soft reset
+    if (props.filter.softReset) {
+      const valid = options.value.map(o => o.value)
+      const filtered = localValue.value.filter(v => valid.includes(v))
+      if (filtered.length !== localValue.value.length) {
+        localValue.value = filtered
+        emit('update:modelValue', [...filtered])
+      }
+    }
   } catch (err) {
     console.error('Ошибка загрузки опций:', err)
   } finally {
@@ -140,8 +174,7 @@ async function loadOptions () {
   }
 }
 
-// Reset pagination and options
-function resetLoad () {
+function resetLoad() {
   options.value = []
   skip.value = 0
   hasMore.value = true
@@ -153,15 +186,18 @@ const toggle = () => {
   if (isOpen.value) {
     nextTick(() => {
       anchorRect.value = btnRef.value.$el.getBoundingClientRect()
+      search.value = ''
       resetLoad()
       loadOptions()
     })
   }
 }
+
 const apply = () => {
   emit('update:modelValue', [...localValue.value])
   close()
 }
+
 const close = () => {
   isOpen.value = false
   search.value = ''
@@ -172,25 +208,29 @@ const close = () => {
 const onSearchInput = debounce(() => {
   resetLoad()
   loadOptions()
-}, 300)
+}, debounceMs)
 
 const onScroll = () => {
   const c = listContainer.value
   if (
-      hasMore.value && !loading.value &&
+      !isStatic.value && hasMore.value && !loading.value &&
       c.scrollHeight - c.scrollTop <= c.clientHeight + 50
   ) {
     loadOptions()
   }
 }
 
-// Initial load
+// Lifecycle
 onMounted(() => {
-  resetLoad()
-  loadOptions()
+  if (isStatic.value) {
+    loadOptions()
+  } else {
+    resetLoad()
+    loadOptions()
+  }
 })
 
-// Sync external changes
+// Sync
 watch(
     () => props.modelValue,
     v => { localValue.value = [...v] }
@@ -199,19 +239,18 @@ watch(
 watch(
     () => props.activeFilters,
     (newVal, oldVal) => {
-      if (!props.filter.dependentParams) return;
-      const relevantKeys = Object.keys(props.filter.dependentParams);
-      const hasChange = relevantKeys.some(key =>
-          JSON.stringify(newVal[key]) !== JSON.stringify(oldVal[key])
-      );
-
-      if (hasChange && isOpen.value) {
-        resetLoad();
-        loadOptions();
+      if (!props.filter.dependentParams) return
+      const keys = Object.keys(props.filter.dependentParams)
+      const changed = keys.some(k =>
+          JSON.stringify(newVal[k]) !== JSON.stringify(oldVal[k])
+      )
+      if (changed && isOpen.value && !isStatic.value) {
+        resetLoad()
+        loadOptions()
       }
     },
     { deep: true }
-);
+)
 </script>
 
 <style scoped>
@@ -301,4 +340,6 @@ watch(
     transform: rotate(360deg);
   }
 }
+
+
 </style>
