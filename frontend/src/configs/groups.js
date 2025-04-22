@@ -1,4 +1,6 @@
 // group.config.js
+import { generateYearOptions } from '@/utils/dateUtils.js'
+
 export const tableConfig = {
   columns: [
     {
@@ -41,7 +43,7 @@ export const filters = [
     dataType: 'lookup',
     apiEndpoint: '/api/Department',
     params: {
-      take: 100,
+      take: 15,
       activeFilter: true,
       sortBy: 'Title',
       descending: false
@@ -65,6 +67,9 @@ export const filters = [
     dependentParams: {
       DepartmentIds: 'departmentIds'
     },
+    params: {
+      take: 15,
+    },
     paramKeys: {
       skip: 'skip',
       take: 'take',
@@ -73,16 +78,6 @@ export const filters = [
       sortOrder: 'descending'
     },
     mapOption: opt => ({ label: opt.title, value: opt.id })
-  },
-  {
-    id: 'Years',
-    title: 'Годы обучения',
-    dataType: 'lookup',
-    staticOptions: [
-      { value: 2024, label: '2024' },
-      { value: 'spb',    label: 'Санкт‑Петербург' },
-      { value: 'kzn',    label: 'Казань' }
-    ]
   }
 ]
 
@@ -104,7 +99,19 @@ export const initialSort = {
 
 export default {
   tableConfig,
-  filters,
+  filters: [
+    ...filters,
+    {
+      id: 'Years',
+      title: 'Годы обучения',
+      dataType: 'lookup',
+      staticOptions: generateYearOptions({
+        from: 2018,
+        to: new Date().getFullYear()
+      }),
+      searchPlaceholder: 'Введите год'
+    }
+  ],
   apiConfig,
   initialSort
 }

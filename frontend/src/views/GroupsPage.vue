@@ -6,6 +6,6 @@ import groups from '@/configs/groups.js'
 <template>
   <GenericTableView
       :config="groups"
-      page-title="Отделения"
+      page-title="Группы"
   />
 </template>

@@ -27,7 +27,7 @@ export default [
       { title: 'Отделения', path: '/departments' },
       { title: 'Специальности', path: '/specializations' },
       { title: 'Группы', path: '/groups' },
-      { title: 'Студенты', path: '/nomenclature/students' },
+      { title: 'Студенты', path: '/students' },
       { title: 'Преподаватели', path: '/teachers' },
       { title: 'Приказы', path: '/nomenclature/orders' },
       { title: 'Успеваемость', path: '/nomenclature/performance' }

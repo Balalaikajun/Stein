@@ -5,6 +5,7 @@ import DepartmentPage from '@/views/DepartmentPage.vue'
 import SpecializationPage from '@/views/SpecializationPage.vue'
 import TeachersPage from '@/views/TeachersPage.vue'
 import GroupsPage from '@/views/GroupsPage.vue'
+import StudentsPage from '@/views/StudentsPage.vue'
 
 
 const routes = [
@@ -37,6 +38,11 @@ const routes = [
         path: "/groups",
         name: "groups",
         component: GroupsPage,
+    },
+    {
+        path: "/students",
+        name: "students",
+        component: StudentsPage,
     }
 
 ]
