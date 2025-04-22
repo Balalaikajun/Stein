@@ -1,3 +1,4 @@
+using Application.DTOs.Department;
 using Domain.Enums;
 
 namespace Application.DTOs.Student;
@@ -12,7 +13,6 @@ public record StudentPaginatedRequest(
     IEnumerable<int>? Years = null,
     bool? IsCitizen = null,
     Gender? Gender = null,
-    DateOnly? BirthDateFrom = null,
-    DateOnly? BirthDateTo = null,
+    DateRangeDto? DateRange = null,
     string SortBy = "Title",
     bool Descending = false);

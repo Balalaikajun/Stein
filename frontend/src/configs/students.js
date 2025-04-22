@@ -14,7 +14,7 @@ export const tableConfig = {
     {
       title: 'Группа',
       key: 'groupAcronym',
-      sortKey: 'GroupAcronym',
+      sortKey: 'Group',
       width: '120px'
     },
     {
@@ -63,19 +63,19 @@ export const filters = [
   {
     id: 'gender',
     title: 'Пол',
-    dataType: 'select',
+    dataType: 'radio',
     staticOptions: [
       { label: 'Мужской', value: 0 },
       { label: 'Женский', value: 1 }
     ]
   },
   {
-    id: 'birthDate',
+    id: 'dateRange',
     title: 'Дата рождения',
     dataType: 'dateRange',
     paramKeys: {
-      from: 'birthDateFrom',
-      to: 'birthDateTo'
+      from: 'fromDate',
+      to: 'toDate'
     }
   },
   {

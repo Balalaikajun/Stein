@@ -75,11 +75,11 @@ public class StudentService: IStudentService
         query = query.Where(s => s.Gender == request.Gender.Value);
 
     // Фильтр по дате рождения
-    if (request.BirthDateFrom.HasValue)
-        query = query.Where(s => s.DateOfBirth >= request.BirthDateFrom.Value);
+    if (request.DateRange!= null && request.DateRange.FromDate.HasValue)
+        query = query.Where(s => s.DateOfBirth >= request.DateRange.FromDate);
 
-    if (request.BirthDateTo.HasValue)
-        query = query.Where(s => s.DateOfBirth <= request.BirthDateTo.Value);
+    if (request.DateRange != null && request.DateRange.ToDate.HasValue)
+        query = query.Where(s => s.DateOfBirth <= request.DateRange.ToDate);
 
     // Сортировка
     var sortBy = _sortSelectors.ContainsKey(request.SortBy) ? request.SortBy : "Surname";
