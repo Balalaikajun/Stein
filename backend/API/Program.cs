@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Application.DTOs.Order;
 using Application.Interfaces;
 using Application.Services;
 using Domain.Exceptions;
@@ -83,12 +84,14 @@ builder.Services.AddScoped<ISpecializationService, SpecializationService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddAutoMapper(typeof(DepartmentProfile));
 builder.Services.AddAutoMapper(typeof(SpecializationProfile));
 builder.Services.AddAutoMapper(typeof(TeacherProfile));
 builder.Services.AddAutoMapper(typeof(GroupProfile));
 builder.Services.AddAutoMapper(typeof(StudentProfile));
+builder.Services.AddAutoMapper(typeof(OrderProfile));
 
 builder.Services.AddCors(options =>
 {
