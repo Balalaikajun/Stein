@@ -166,40 +166,44 @@ SELECT * FROM group_data;
 
 -- 5) Students
 WITH student_data (
-                   "Surname","Name","Patronymic",
-                   "GroupSpecializationId","GroupYear","GroupId",
-                   "IsCitizen","Gender","DateOfBirth"
-    ) AS (
-    VALUES
-        ('Ivanov',    'Ivan',     'Ivanovich',     1,2023,'001', true, 0, TO_DATE('2001-01-15', 'YYYY-MM-DD')),
-        ('Petrova',   'Anna',     'Sergeevna',     2,2023,'002', false,1, TO_DATE('2002-03-22', 'YYYY-MM-DD')),
-        ('Sidorov',   'Dmitry',   'Alexandrovich', 3,2023,'003', true, 0, TO_DATE('2000-07-08', 'YYYY-MM-DD')),
-        ('Smirnova',  'Elena',    'Viktorovna',    4,2023,'004', true, 1, TO_DATE('2001-11-30', 'YYYY-MM-DD')),
-        ('Kuznetsov', 'Alexey',   'Petrovich',     5,2023,'005', true, 0, TO_DATE('2002-02-14', 'YYYY-MM-DD')),
-        ('Popova',    'Maria',    'Ivanovna',      6,2022,'006', false,1, TO_DATE('2000-12-01', 'YYYY-MM-DD')),
-        ('Sokolov',   'Sergey',   'Nikolaevich',   7,2022,'007', true, 0, TO_DATE('2001-06-19', 'YYYY-MM-DD')),
-        ('Lebedeva',  'Olga',     'Sergeevna',     8,2022,'008', true, 1, TO_DATE('2002-09-05', 'YYYY-MM-DD')),
-        ('Kozlov',    'Maxim',    'Dmitrievich',   9,2022,'009', true, 0, TO_DATE('2001-04-27', 'YYYY-MM-DD')),
-        ('Novikova',  'Natalia',  'Yurievna',     10,2022,'010', true, 1, TO_DATE('2000-08-16', 'YYYY-MM-DD')),
-        ('Morozova',  'Tatiana',  'Vladimirovna', 11,2021,'011', true, 1, TO_DATE('2001-02-02', 'YYYY-MM-DD')),
-        ('Vasiliev',  'Ivan',     'Petrovich',    12,2021,'012', true, 0, TO_DATE('2000-05-21', 'YYYY-MM-DD')),
-        ('Egorova',   'Svetlana','Mikhailovna',  13,2021,'013', true, 1, TO_DATE('2001-10-29', 'YYYY-MM-DD')),
-        ('Pavlov',    'Igor',     'Konstantinovich',14,2021,'014', true, 0, TO_DATE('2002-01-11', 'YYYY-MM-DD')),
-        ('Fedorova',  'Anastasia','Alexandrovna', 15,2021,'015', true, 1, TO_DATE('2000-03-03', 'YYYY-MM-DD')),
-        ('Mikhailov', 'Oleg',     'Dmitrievich',  16,2023,'016', true, 0, TO_DATE('2001-12-24', 'YYYY-MM-DD')),
-        ('Borisova',  'Yulia',    'Sergeevna',    17,2023,'017', true, 1, TO_DATE('2000-07-07', 'YYYY-MM-DD')),
-        ('Antonov',   'Konstantin','Ivanovich',   18,2022,'018', true, 0, TO_DATE('2002-10-10', 'YYYY-MM-DD')),
-        ('Nikiforova','Ekaterina','Vladimirovna', 19,2022,'019', true, 1, TO_DATE('2001-09-09', 'YYYY-MM-DD')),
-        ('Yakovlev',  'Alexander','Petrovich',    20,2021,'020', false,0, TO_DATE('2000-11-11', 'YYYY-MM-DD')),
-        ('Grigoreva', 'Marina',   'Sergeevna',    21,2023,'021', true, 1, TO_DATE('2002-06-06', 'YYYY-MM-DD')),
-        ('Markov',    'Denis',    'Nikolaevich',  22,2023,'022', true, 0, TO_DATE('2001-08-08', 'YYYY-MM-DD')),
-        ('Filippova', 'Olga',     'Ivanovna',     23,2022,'023', true, 1, TO_DATE('2000-04-04', 'YYYY-MM-DD')),
-        ('Davydov',   'Roman',    'Sergeevich',   24,2022,'024', true, 0, TO_DATE('2002-05-05', 'YYYY-MM-DD')),
-        ('Nikolaeva', 'Irina',    'Alexeevna',    25,2021,'025', true, 1, TO_DATE('2001-03-03', 'YYYY-MM-DD')),
-        ('Morozov',   'Viktor',   'Petrovich',    27,2023,'027', true, 0, TO_DATE('2001-12-30', 'YYYY-MM-DD')),
-        ('Vinogradova','Anna',    'Nikolayevna',  28,2022,'028', false,1, TO_DATE('2002-07-07', 'YYYY-MM-DD')),
-        ('Nikitin',   'Kirill',   'Olegovich',    29,2021,'029', true, 0, TO_DATE('2000-10-10', 'YYYY-MM-DD'))
-)
+                   "Surname", "Name", "Patronymic",
+                   "GroupSpecializationId", "GroupYear", "GroupId",
+                   "IsCitizen", "Gender", "DateOfBirth"
+    ) AS (VALUES ('Ivanov', 'Ivan', 'Ivanovich', 1, 2023, '001', true, 0, TO_DATE('2001-01-15', 'YYYY-MM-DD')),
+                 ('Petrova', 'Anna', 'Sergeevna', 2, 2023, '002', false, 1, TO_DATE('2002-03-22', 'YYYY-MM-DD')),
+                 ('Sidorov', 'Dmitry', 'Alexandrovich', 3, 2023, '003', true, 0, TO_DATE('2000-07-08', 'YYYY-MM-DD')),
+                 ('Smirnova', 'Elena', 'Viktorovna', 4, 2023, '004', true, 1, TO_DATE('2001-11-30', 'YYYY-MM-DD')),
+                 ('Kuznetsov', 'Alexey', 'Petrovich', 5, 2023, '005', true, 0, TO_DATE('2002-02-14', 'YYYY-MM-DD')),
+                 ('Popova', 'Maria', 'Ivanovna', 6, 2022, '006', false, 1, TO_DATE('2000-12-01', 'YYYY-MM-DD')),
+                 ('Sokolov', 'Sergey', 'Nikolaevich', 7, 2022, '007', true, 0, TO_DATE('2001-06-19', 'YYYY-MM-DD')),
+                 ('Lebedeva', 'Olga', 'Sergeevna', 8, 2022, '008', true, 1, TO_DATE('2002-09-05', 'YYYY-MM-DD')),
+                 ('Kozlov', 'Maxim', 'Dmitrievich', 9, 2022, '009', true, 0, TO_DATE('2001-04-27', 'YYYY-MM-DD')),
+                 ('Novikova', 'Natalia', 'Yurievna', 10, 2022, '010', true, 1, TO_DATE('2000-08-16', 'YYYY-MM-DD')),
+                 ('Morozova', 'Tatiana', 'Vladimirovna', 11, 2021, '011', true, 1, TO_DATE('2001-02-02', 'YYYY-MM-DD')),
+                 ('Vasiliev', 'Ivan', 'Petrovich', 12, 2021, '012', true, 0, TO_DATE('2000-05-21', 'YYYY-MM-DD')),
+                 ('Egorova', 'Svetlana', 'Mikhailovna', 13, 2021, '013', true, 1, TO_DATE('2001-10-29', 'YYYY-MM-DD')),
+                 ('Pavlov', 'Igor', 'Konstantinovich', 14, 2021, '014', true, 0, TO_DATE('2002-01-11', 'YYYY-MM-DD')),
+                 ('Fedorova', 'Anastasia', 'Alexandrovna', 15, 2021, '015', true, 1,
+                  TO_DATE('2000-03-03', 'YYYY-MM-DD')),
+                 ('Mikhailov', 'Oleg', 'Dmitrievich', 16, 2023, '016', true, 0, TO_DATE('2001-12-24', 'YYYY-MM-DD')),
+                 ('Borisova', 'Yulia', 'Sergeevna', 17, 2023, '017', true, 1, TO_DATE('2000-07-07', 'YYYY-MM-DD')),
+                 ('Antonov', 'Konstantin', 'Ivanovich', 18, 2022, '018', true, 0, TO_DATE('2002-10-10', 'YYYY-MM-DD')),
+                 ('Nikiforova', 'Ekaterina', 'Vladimirovna', 19, 2022, '019', true, 1,
+                  TO_DATE('2001-09-09', 'YYYY-MM-DD')),
+                 ('Yakovlev', 'Alexander', 'Petrovich', 20, 2021, '020', false, 0, TO_DATE('2000-11-11', 'YYYY-MM-DD')),
+                 ('Grigoreva', 'Marina', 'Sergeevna', 21, 2023, '021', true, 1, TO_DATE('2002-06-06', 'YYYY-MM-DD')),
+                 ('Markov', 'Denis', 'Nikolaevich', 22, 2023, '022', true, 0, TO_DATE('2001-08-08', 'YYYY-MM-DD')),
+                 ('Filippova', 'Olga', 'Ivanovna', 23, 2022, '023', true, 1, TO_DATE('2000-04-04', 'YYYY-MM-DD')),
+                 ('Davydov', 'Roman', 'Sergeevich', 24, 2022, '024', true, 0, TO_DATE('2002-05-05', 'YYYY-MM-DD')),
+                 ('Nikolaeva', 'Irina', 'Alexeevna', 25, 2021, '025', true, 1, TO_DATE('2001-03-03', 'YYYY-MM-DD')),
+                 ('Morozov', 'Viktor', 'Petrovich', 27, 2023, '027', true, 0, TO_DATE('2001-12-30', 'YYYY-MM-DD')),
+                 ('Vinogradova', 'Anna', 'Nikolayevna', 28, 2022, '028', false, 1, TO_DATE('2002-07-07', 'YYYY-MM-DD')),
+                 ('Nikitin', 'Kirill', 'Olegovich', 29, 2021, '029', true, 0, TO_DATE('2000-10-10', 'YYYY-MM-DD')),
+                 ('Novikov', 'Kirill', 'Sergeevich', 1, 2023, '001', true, 0, TO_DATE('2003-05-15', 'YYYY-MM-DD')),
+                 ('Zaytseva', 'Polina', 'Igorevna', 1, 2023, '001', true, 1, TO_DATE('2003-08-21', 'YYYY-MM-DD')),
+                 ('Lebedev', 'Ivan', 'Petrovich', 1, 2023, '001', false, 0, TO_DATE('2002-12-10', 'YYYY-MM-DD')),
+                 ('Orlova', 'Sofya', 'Alexandrovna', 1, 2023, '001', true, 1, TO_DATE('2003-03-03', 'YYYY-MM-DD')),
+                 ('Smirnov', 'Artem', 'Vladimirovich', 1, 2023, '001', true, 0, TO_DATE('2003-07-07', 'YYYY-MM-DD')))
 INSERT INTO "Students"(
     "Surname","Name","Patronymic",
     "GroupSpecializationId","GroupYear","GroupId",
@@ -207,28 +211,37 @@ INSERT INTO "Students"(
 )
 SELECT *,
        CASE
-           WHEN random() < 0.8 THEN 1  -- 80% Active
-           WHEN random() < 0.9 THEN 2  -- 10% Expelled
+           WHEN random() < 0.8 THEN 1 -- 80% Active
+           WHEN random() < 0.9 THEN 2 -- 10% Expelled
            WHEN random() < 0.95 THEN 3 -- 5% Vacation
-           ELSE 4                      -- 5% Released
+           ELSE 4 -- 5% Released
            END
 FROM student_data;
 
 
--- 6) AcademicPerformances
+
+-- 6) Успеваемость для всей первой группы за 18 месяцев (январь 2023 – июнь 2024)
 INSERT INTO "AcademicPerformances"("Year","Month","StudentId","Performance")
 SELECT
-    2023,
-    ((g - 1) % 6) + 1, -- месяц от 1 до 6
-    g,                 -- StudentId 1–30
+    EXTRACT(YEAR  FROM d)::int AS "Year",
+    EXTRACT(MONTH FROM d)::int AS "Month",
+    s."Id"                   AS "StudentId",
     CASE
-        WHEN score >= 90 THEN 1  -- Excellent
-        WHEN score >= 80 THEN 2  -- Good
-        WHEN score >= 70 THEN 3  -- Normal
-        ELSE 4                   -- Falling
-        END
-FROM generate_series(1,28) AS g,
-     LATERAL (SELECT (65 + floor(random() * 36))::int AS score) AS s;
+        WHEN sc.score >= 90 THEN 1  -- Excellent
+        WHEN sc.score >= 80 THEN 2  -- Good
+        WHEN sc.score >= 70 THEN 3  -- Normal
+        ELSE 4                      -- Falling
+        END                     AS "Performance"
+FROM "Students" s
+         CROSS JOIN LATERAL generate_series(
+        DATE '2023-01-01',
+        DATE '2024-06-01',
+        INTERVAL '1 month'
+                            ) AS d
+         CROSS JOIN LATERAL (SELECT (65 + floor(random() * 36))::int AS score) AS sc
+WHERE s."GroupSpecializationId" = 1
+  AND s."GroupYear"           = 2023
+  AND s."GroupId"             = '001';
 
 -- 7) Orders (TPH)
 WITH orders_data (
@@ -258,3 +271,6 @@ INSERT INTO "Orders"(
     "FromSpecializationId","FromYear","FromGroupId"
 )
 SELECT * FROM orders_data;
+
+-- 8) Users
+INSERT INTO public."Users" ( "Login", "HashedPassword") VALUES ( 'Вася', '$2a$11$X4lUd7xUeUoEVjzDk92tu.sOFDcBuu7FznmvjwwZdZY75ETHzFTIK');

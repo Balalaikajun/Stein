@@ -60,10 +60,10 @@ public class OrderService: IOrderService
             total = await query.CountAsync();
         }
         
-        // Пагинацияs
+        // Пагинация
         var items = await query
             .Skip(request.Skip)
-            .Take(request.Take + 1) // берём на 1 больше, чтобы узнать, есть ли ещё
+            .Take(request.Take + 1) 
             .ProjectTo<OrderGetDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
         

@@ -85,6 +85,7 @@ builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IAcademicPerformanceService, AcademicPerformanceService>();
 
 builder.Services.AddAutoMapper(typeof(DepartmentProfile));
 builder.Services.AddAutoMapper(typeof(SpecializationProfile));
@@ -92,6 +93,7 @@ builder.Services.AddAutoMapper(typeof(TeacherProfile));
 builder.Services.AddAutoMapper(typeof(GroupProfile));
 builder.Services.AddAutoMapper(typeof(StudentProfile));
 builder.Services.AddAutoMapper(typeof(OrderProfile));
+builder.Services.AddAutoMapper(typeof(AcademicPerformanceProfile));
 
 builder.Services.AddCors(options =>
 {

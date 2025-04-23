@@ -8,6 +8,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Domain.Entities;
 using Domain.Interfaces;
+using LinqKit;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services;
@@ -51,6 +52,19 @@ public class StudentService: IStudentService
 
     if (request.SpecializationIds?.Any() == true)
         query = query.Where(s => request.SpecializationIds.Contains(s.Group.SpecializationId));
+
+    if (request.GroupFilter?.Any() == true)
+    {
+        var groupPredicate = PredicateBuilder.New<Student>(false);
+        foreach (var k in request.GroupFilter)
+        {
+            groupPredicate = groupPredicate.Or(s => 
+                s.GroupSpecializationId == k.SpecializationId &&
+                s.GroupYear== k.Year &&
+                s.GroupId == k.Id);
+        }
+        query = query.Where(groupPredicate);
+    }
 
     // Фильтр по текстовому поиску
     if (!string.IsNullOrWhiteSpace(request.SearchText))
