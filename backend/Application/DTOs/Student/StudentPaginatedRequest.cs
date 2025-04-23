@@ -12,7 +12,8 @@ public record StudentPaginatedRequest(
     IEnumerable<int>? DepartmentIds = null,
     IEnumerable<int>? SpecializationIds = null,
     IEnumerable<int>? Years = null,
-    IEnumerable<GroupKeyDto>? GroupFilter = null, 
+    IEnumerable<GroupKeyDto>? GroupKeys = null, 
+
 bool? IsCitizen = null,
     Gender? Gender = null,
     DateRangeDto? DateRange = null,

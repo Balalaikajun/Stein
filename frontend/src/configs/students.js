@@ -121,6 +121,28 @@ export const filters = [
     mapOption: opt => ({ label: opt.title, value: opt.id })
   },
   {
+    id: 'GroupKeys',
+    title: 'Группы',
+    dataType: 'lookup',
+    apiEndpoint: '/api/Group',
+    dependsOn: ['DepartmentIds','SpecializationIds'],
+    dependentParams: {
+      DepartmentIds: 'departmentIds',
+      SpecializationIds: 'specializationIds'
+    },
+    params: {
+      take: 15,
+    },
+    paramKeys: {
+      skip: 'skip',
+      take: 'take',
+      search: 'searchText',
+      sortKey: 'sortBy',
+      sortOrder: 'descending'
+    },
+    mapOption: opt => ({ label: opt.acronym, value: opt.key})
+  },
+  {
     id: 'Years',
     title: 'Годы обучения',
     dataType: 'lookup',

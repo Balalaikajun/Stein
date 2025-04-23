@@ -53,10 +53,10 @@ public class StudentService: IStudentService
     if (request.SpecializationIds?.Any() == true)
         query = query.Where(s => request.SpecializationIds.Contains(s.Group.SpecializationId));
 
-    if (request.GroupFilter?.Any() == true)
+    if (request.GroupKeys?.Any() == true)
     {
         var groupPredicate = PredicateBuilder.New<Student>(false);
-        foreach (var k in request.GroupFilter)
+        foreach (var k in request.GroupKeys)
         {
             groupPredicate = groupPredicate.Or(s => 
                 s.GroupSpecializationId == k.SpecializationId &&

@@ -16,7 +16,10 @@ public class GroupProfile: Profile
                         src.Teacher.Name.Substring(0, 1) + "." +
                         src.Teacher.Patronymic.Substring(0, 1) + "."))
             .ForMember(dest => dest.StudentCount,
-                opt => opt.MapFrom(src => src.Students.Count));
+                opt => opt.MapFrom(src => src.Students.Count))
+            .ForMember(d => d.Key,
+                o => o.MapFrom(
+                    src => new GroupKeyDto(src.SpecializationId, src.Year, src.Id)));
     }
     
 }
