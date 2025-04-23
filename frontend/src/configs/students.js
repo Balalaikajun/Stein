@@ -67,7 +67,8 @@ export const filters = [
     staticOptions: [
       { label: 'Мужской', value: 0 },
       { label: 'Женский', value: 1 }
-    ]
+    ],
+    allowDeselect: true,
   },
   {
     id: 'dateRange',

@@ -2,10 +2,11 @@
   <div class="filter-item">
     <FilterButton
         ref="btnRef"
-        :title="filter.title"
+        :title="selectedLabel || filter.title"
         @toggle="toggle"
         :isOpen="isOpen"
         :hasValue="hasValue"
+        :loading="loading"
     />
 
     <FilterModal
@@ -15,27 +16,45 @@
         @apply="apply"
         @cancel="close"
     >
+      <template #header>
+        <input
+            v-model.lazy="search"
+            @change="onSearchInput"
+            placeholder="Поиск..."
+            class="filter-input"
+            :disabled="loading"
+        />
+      </template>
+
       <template #body>
-        <div class="filter-modal-content">
-          <ul class="options-list">
+        <div class="filter-modal-content" ref="listContainer" @scroll="onScroll">
+          <div v-if="loading && !options.length" class="loading-state">
+            <span class="loader"></span>
+            <span>Загрузка...</span>
+          </div>
+
+          <ul v-else class="options-list">
             <li
-                v-for="opt in filteredOptions"
-                :key="opt.value"
+                v-for="opt in options"
+                :key="uniqueKey(opt)"
                 class="options-list__item"
             >
               <label class="radio-option">
                 <input
                     type="radio"
-                    :value="opt.value"
-                    :checked="localValue === opt.value"
                     :name="filter.id"
-                    @click="handleSelect(opt.value)"
+                    :value="opt.value"
+                    v-model="localValue"
                 />
                 {{ opt.label }}
               </label>
             </li>
-            <li v-if="!filteredOptions.length" class="empty-state">
+
+            <li v-if="!loading && !options.length" class="empty-state">
               Ничего не найдено
+            </li>
+            <li v-if="loading && options.length" class="loading-more">
+              Загрузка...
             </li>
           </ul>
         </div>
@@ -45,49 +64,119 @@
 </template>
 
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
+import axios from 'axios'
+import { debounce, isEqual } from 'lodash-es'
 import FilterButton from '@/components/Selectors/FilterButton.vue'
 import FilterModal from '@/components/Selectors/FilterModal.vue'
+import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 
 const props = defineProps({
-  filter: {
-    type: Object,
-    required: true,
-  },
-  modelValue: { type: [String, Number, Boolean], default: null }
+  filter: { type: Object, required: true },
+  modelValue: { type: [String, Number, Boolean, Object], default: null },
+  activeFilters: { type: Object, default: () => ({}) }
 })
-
 const emit = defineEmits(['update:modelValue'])
 
-// Reactive state
+// State
 const isOpen = ref(false)
 const search = ref('')
+const options = ref([])
 const localValue = ref(props.modelValue)
+const loading = ref(false)
+const skip = ref(0)
+const hasMore = ref(true)
 const btnRef = ref(null)
 const anchorRect = ref(null)
+const listContainer = ref(null)
 
-// Computed
+// Config
+const isStatic = computed(() => Array.isArray(props.filter.staticOptions))
+const take = props.filter.params?.take || props.filter.take || 50
+const debounceMs = props.filter.debounceMs ?? 300
+const allowDeselect = computed(() => props.filter.allowDeselect ?? false)
+
+// Computed labels and state
 const hasValue = computed(() => localValue.value !== null)
-const filteredOptions = computed(() => {
-  const searchTerm = search.value.toLowerCase()
-  return props.filter.staticOptions.filter(opt =>
-      opt.label.toLowerCase().includes(searchTerm)
-  )
+const selectedLabel = computed(() => {
+  const found = options.value.find(o => isEqual(o.value, localValue.value))
+  return found ? found.label : ''
 })
+
+// Helpers
+function uniqueKey(opt) {
+  return typeof opt.value === 'object' ? JSON.stringify(opt.value) : opt.value
+}
+
+function buildRequestBody() {
+  const { params = {}, paramKeys = {}, dependentParams = {} } = props.filter
+  const body = {
+    [paramKeys.skip || 'skip']: skip.value,
+    [paramKeys.take || 'take']: take,
+    [paramKeys.search || 'searchText']: search.value,
+    ...params
+  }
+  Object.entries(dependentParams).forEach(([fid, apiParam]) => {
+    const val = props.activeFilters[fid]
+    if (val?.length > 0) body[apiParam] = val
+  })
+  return body
+}
+
+// Load options (static or via API)
+async function loadOptions() {
+  if (loading.value) return
+  loading.value = true
+
+  if (isStatic.value) {
+    const all = props.filter.staticOptions
+    options.value = search.value
+        ? all.filter(o => o.label.toLowerCase().includes(search.value.toLowerCase()))
+        : [...all]
+    loading.value = false
+    hasMore.value = false
+    return
+  }
+
+  if (!hasMore.value) {
+    loading.value = false
+    return
+  }
+
+  try {
+    const body = buildRequestBody()
+    const { data } = await axios.post(
+        `${BACKEND_API_HOST}${props.filter.apiEndpoint}`,
+        body
+    )
+    const items = data.items || []
+    options.value.push(...items.map(props.filter.mapOption))
+    hasMore.value = data.hasMore
+    skip.value += items.length
+  } catch (err) {
+    console.error('Error loading options:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+function resetLoad() {
+  options.value = []
+  skip.value = 0
+  hasMore.value = true
+}
 
 // Handlers
 function toggle() {
   isOpen.value = !isOpen.value
   if (isOpen.value) {
+    localValue.value = props.modelValue
     nextTick(() => {
       anchorRect.value = btnRef.value.$el.getBoundingClientRect()
-      search.value = ''
+      resetLoad()
+      loadOptions()
     })
   }
-}
-
-function handleSelect(value) {
-  localValue.value = localValue.value === value ? null : value
 }
 
 function apply() {
@@ -98,13 +187,39 @@ function apply() {
 function close() {
   isOpen.value = false
   search.value = ''
-  localValue.value = props.modelValue
 }
 
-// Sync value
+const onSearchInput = debounce(() => {
+  resetLoad()
+  loadOptions()
+}, debounceMs)
+
+function onScroll() {
+  const c = listContainer.value
+  if (!isStatic.value && hasMore.value && !loading.value && c.scrollHeight - c.scrollTop <= c.clientHeight + 50) {
+    loadOptions()
+  }
+}
+
+// Initial load
+resetLoad()
+loadOptions()
+
+// Watchers
+watch(() => props.modelValue, v => { localValue.value = v })
 watch(
-    () => props.modelValue,
-    (v) => { localValue.value = v }
+    () => props.activeFilters,
+    (nv, ov) => {
+      if (!props.filter.dependentParams) return
+      const keys = Object.keys(props.filter.dependentParams)
+      if (keys.some(k => JSON.stringify(nv[k]) !== JSON.stringify(ov[k]))) {
+        if (isOpen.value) {
+          resetLoad()
+          loadOptions()
+        }
+      }
+    },
+    { deep: true }
 )
 </script>
 
@@ -127,6 +242,12 @@ watch(
 .filter-input:focus {
   outline: none;
   border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(91, 0, 225, 0.1);
+}
+
+.filter-input:disabled {
+  background-color: var(--secondary-background-color);
+  cursor: not-allowed;
 }
 
 .options-list {
@@ -159,9 +280,35 @@ input[type="radio"] {
   accent-color: var(--primary-color);
 }
 
-.empty-state {
+.empty-state,
+.loading-more {
   padding: 12px;
   text-align: center;
   color: var(--secondary-text-color);
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  color: var(--secondary-text-color);
+}
+
+.loader {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--secondary-background-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

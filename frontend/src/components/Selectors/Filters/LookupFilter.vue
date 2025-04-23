@@ -19,10 +19,10 @@
       <template #header>
         <input
             v-model.lazy="search"
-            @input="onSearchInput"
-            :placeholder="filter.searchPlaceholder || 'Поиск...'"
+            @change="onSearchInput"
+            placeholder="Поиск..."
             class="filter-input"
-            :disabled="loading || isStatic"
+            :disabled="loading"
         />
       </template>
       <template #body>

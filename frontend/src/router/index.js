@@ -1,5 +1,4 @@
 import {createRouter, createWebHistory} from "vue-router";
-import TestPage from "@/views/TestPage.vue";
 import Authentication from "@/views/Authentication.vue";
 import DepartmentPage from '@/views/DepartmentPage.vue'
 import SpecializationPage from '@/views/SpecializationPage.vue'
@@ -7,14 +6,10 @@ import TeachersPage from '@/views/TeachersPage.vue'
 import GroupsPage from '@/views/GroupsPage.vue'
 import StudentsPage from '@/views/StudentsPage.vue'
 import OrderPage from '@/views/OrderPage.vue'
+import PerformancePage from '@/views/PerformancePage.vue'
 
 
 const routes = [
-    {
-        path: "/",
-        name: "test",
-        component: TestPage,
-    },
     {
         path: "/authentication",
         name: "authentication",
@@ -49,7 +44,13 @@ const routes = [
         path: "/orders",
         name: "orders",
         component: OrderPage,
+    },
+    {
+        path: "/Performance",
+        name: "performance",
+        component: PerformancePage,
     }
+
 
 ]
 

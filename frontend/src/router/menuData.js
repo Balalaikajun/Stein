@@ -30,7 +30,7 @@ export default [
       { title: 'Студенты', path: '/students' },
       { title: 'Преподаватели', path: '/teachers' },
       { title: 'Приказы', path: '/orders' },
-      { title: 'Успеваемость', path: '/nomenclature/performance' }
+      { title: 'Успеваемость', path: '/performance' }
     ]
   },
   {
