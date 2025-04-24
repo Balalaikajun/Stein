@@ -67,8 +67,8 @@
 import { ref, computed, nextTick, watch } from 'vue'
 import axios from 'axios'
 import { debounce, isEqual } from 'lodash-es'
-import FilterButton from '@/components/Selectors/FilterButton.vue'
-import FilterModal from '@/components/Selectors/FilterModal.vue'
+import FilterButton from '@/components/Filters/FilterButton.vue'
+import FilterModal from '@/components/Filters/FilterModal.vue'
 import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 
 const props = defineProps({

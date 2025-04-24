@@ -2,7 +2,7 @@
   <div class="filter-item">
     <FilterButton
         ref="btnRef"
-        :title="filter.title"
+        :title="selectedLabel || filter.title"
         @toggle="toggle"
         :isOpen="isOpen"
         :hasValue="hasValue"
@@ -25,6 +25,7 @@
             :disabled="loading"
         />
       </template>
+
       <template #body>
         <div class="filter-modal-content" ref="listContainer" @scroll="onScroll">
           <div v-if="loading && !options.length" class="loading-state">
@@ -38,15 +39,17 @@
                 :key="uniqueKey(opt)"
                 class="options-list__item"
             >
-              <label>
+              <label class="radio-option">
                 <input
-                    type="checkbox"
+                    type="radio"
+                    :name="filter.id"
                     :value="opt.value"
                     v-model="localValue"
                 />
                 {{ opt.label }}
               </label>
             </li>
+
             <li v-if="!loading && !options.length" class="empty-state">
               Ничего не найдено
             </li>
@@ -61,58 +64,62 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, toRaw, watch } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import axios from 'axios'
-import { debounce } from 'lodash-es'
-import FilterButton from '@/components/Selectors/FilterButton.vue'
-import FilterModal from '@/components/Selectors/FilterModal.vue'
+import { debounce, isEqual } from 'lodash-es'
+import FilterButton from '@/components/Filters/FilterButton.vue'
+import FilterModal from '@/components/Filters/FilterModal.vue'
 import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 
 const props = defineProps({
-  filter: { type: Object, required: true },
-  modelValue: { type: Array, default: () => [] },
+  filter:  { type: Object, required: true },
+  modelValue: { required: false },
   activeFilters: { type: Object, default: () => ({}) }
 })
 const emit = defineEmits(['update:modelValue'])
 
-// Reactive state
-const isOpen = ref(false)
-const search = ref('')
-const options = ref([])
-const localValue = ref([...props.modelValue])
-const loading = ref(false)
-const skip = ref(0)
-const hasMore = ref(true)
-const btnRef = ref(null)
-const anchorRect = ref(null)
+// state
+const isOpen      = ref(false)
+const search      = ref('')
+const options     = ref([])
+const localValue  = ref(props.modelValue)
+const loading     = ref(false)
+const skip        = ref(0)
+const hasMore     = ref(true)
+const btnRef      = ref(null)
+const anchorRect  = ref(null)
 const listContainer = ref(null)
 
-// Flags
-const isStatic = computed(() => Array.isArray(props.filter.staticOptions))
-const take = props.filter.params?.take || props.filter.take || 50
-const debounceMs = props.filter.debounceMs ?? 300
+// config
+const isStatic    = computed(() => Array.isArray(props.filter.staticOptions))
+const take        = props.filter.params?.take || props.filter.take || 50
+const debounceMs  = props.filter.debounceMs ?? 300
 
-// Computed
-const hasValue = computed(() => localValue.value.length > 0)
+// computed
+const hasValue      = computed(() => localValue.value !== null)
+const selectedLabel = computed(() => {
+  const found = options.value.find(o => isEqual(o.value, localValue.value))
+  return found ? found.label : ''
+})
 
-// Helpers
+// helpers
 function uniqueKey(opt) {
-  return typeof opt.value === 'object' ? JSON.stringify(opt.value) : opt.value
+  return typeof opt.value === 'object'
+      ? JSON.stringify(opt.value)
+      : opt.value
 }
 
 function buildRequestBody() {
   const { params = {}, paramKeys = {}, dependentParams = {} } = props.filter
   const body = {
-    [paramKeys.skip || 'skip']: skip.value,
-    [paramKeys.take || 'take']: take,
-    [paramKeys.search || 'searchText']: search.value,
+    [paramKeys.skip  || 'skip']:  skip.value,
+    [paramKeys.take  || 'take']:  take,
+    [paramKeys.search|| 'searchText']: search.value,
     ...params
   }
-  Object.entries(dependentParams).forEach(([filterId, apiParam]) => {
-    const value = props.activeFilters[filterId]
-    if (value?.length > 0) {
-      body[apiParam] = toRaw(value)
-    }
+  Object.entries(dependentParams).forEach(([fid, apiParam]) => {
+    const val = props.activeFilters[fid]
+    if (val?.length > 0) body[apiParam] = val
   })
   return body
 }
@@ -121,27 +128,17 @@ async function loadOptions() {
   if (loading.value) return
   loading.value = true
 
-  // Статичные опции: фильтрация на клиенте
   if (isStatic.value) {
+    // локальный фильтр
     const all = props.filter.staticOptions
     options.value = search.value
-        ? all.filter(opt =>
-            opt.label.toLowerCase().includes(search.value.toLowerCase())
-        )
+        ? all.filter(o => o.label.toLowerCase().includes(search.value.toLowerCase()))
         : [...all]
-    // Soft reset выбранных
-    const valid = options.value.map(o => o.value)
-    const filtered = localValue.value.filter(v => valid.includes(v))
-    if (filtered.length !== localValue.value.length) {
-      localValue.value = filtered
-      emit('update:modelValue', [...filtered])
-    }
-    loading.value = false
     hasMore.value = false
+    loading.value = false
     return
   }
 
-  // Динамические: запрос к API
   if (!hasMore.value) {
     loading.value = false
     return
@@ -157,18 +154,8 @@ async function loadOptions() {
     options.value.push(...items.map(props.filter.mapOption))
     hasMore.value = data.hasMore
     skip.value += items.length
-
-    // Soft reset
-    if (props.filter.softReset) {
-      const valid = options.value.map(o => o.value)
-      const filtered = localValue.value.filter(v => valid.includes(v))
-      if (filtered.length !== localValue.value.length) {
-        localValue.value = filtered
-        emit('update:modelValue', [...filtered])
-      }
-    }
-  } catch (err) {
-    console.error('Ошибка загрузки опций:', err)
+  } catch (e) {
+    console.error(e)
   } finally {
     loading.value = false
   }
@@ -180,29 +167,25 @@ function resetLoad() {
   hasMore.value = true
 }
 
-// Handlers
-const toggle = () => {
+function toggle() {
   isOpen.value = !isOpen.value
-  if (isOpen.value) {
-    nextTick(() => {
-      anchorRect.value = btnRef.value.$el.getBoundingClientRect()
-      search.value = ''
-      resetLoad()
-      loadOptions()
-    })
-  }
+  if (!isOpen.value) return
+  localValue.value = props.modelValue
+  nextTick(() => {
+    anchorRect.value = btnRef.value.$el.getBoundingClientRect()
+    resetLoad()
+    loadOptions()
+  })
 }
 
-const apply = () => {
-  emit('update:modelValue', [...localValue.value])
+function apply() {
+  emit('update:modelValue', localValue.value)
   close()
 }
 
-const close = () => {
+function close() {
   isOpen.value = false
   search.value = ''
-  resetLoad()
-  localValue.value = [...props.modelValue]
 }
 
 const onSearchInput = debounce(() => {
@@ -210,50 +193,21 @@ const onSearchInput = debounce(() => {
   loadOptions()
 }, debounceMs)
 
-const onScroll = () => {
+function onScroll() {
   const c = listContainer.value
-  if (
-      !isStatic.value && hasMore.value && !loading.value &&
-      c.scrollHeight - c.scrollTop <= c.clientHeight + 50
-  ) {
+  if (!isStatic.value && hasMore.value && !loading.value
+      && c.scrollHeight - c.scrollTop <= c.clientHeight + 50) {
     loadOptions()
   }
 }
 
-// Lifecycle
-onMounted(() => {
-  if (isStatic.value) {
-    loadOptions()
-  } else {
-    resetLoad()
-    loadOptions()
-  }
-})
-
-// Sync
-watch(
-    () => props.modelValue,
-    v => { localValue.value = [...v] }
-)
-
-watch(
-    () => props.activeFilters,
-    (newVal, oldVal) => {
-      if (!props.filter.dependentParams) return
-      const keys = Object.keys(props.filter.dependentParams)
-      const changed = keys.some(k =>
-          JSON.stringify(newVal[k]) !== JSON.stringify(oldVal[k])
-      )
-      if (changed && isOpen.value && !isStatic.value) {
-        resetLoad()
-        loadOptions()
-      }
-    },
-    { deep: true }
-)
+// init
+resetLoad()
+loadOptions()
 </script>
 
 <style scoped>
+/* оставляем ваши стили из FilterItem.vue и FilterModal.vue */
 .filter-modal-content {
   max-height: 400px;
   overflow-y: auto;
@@ -266,7 +220,7 @@ watch(
   margin-bottom: 12px;
   border: 1px solid var(--secondary-background-color);
   border-radius: var(--border-radius);
-  transition: border-color var(--transition-duration) var(--transition-timing);
+  transition: border-color 0.2s;
 }
 
 .filter-input:focus {
@@ -287,23 +241,24 @@ watch(
 }
 
 .options-list__item {
-  padding: 8px 12px;
-  transition: background-color var(--transition-duration) var(--transition-timing);
-  border-radius: var(--border-radius);
+  padding: 4px 0;
 }
 
-.options-list__item:hover {
-  background-color: var(--hover-color);
-}
-
-.options-list__item label {
+.radio-option {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 8px;
+  border-radius: var(--border-radius);
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.options-list__item input[type="checkbox"] {
+.radio-option:hover {
+  background-color: var(--hover-color);
+}
+
+input[type="radio"] {
   width: 16px;
   height: 16px;
   accent-color: var(--primary-color);
@@ -340,6 +295,4 @@ watch(
     transform: rotate(360deg);
   }
 }
-
-
 </style>

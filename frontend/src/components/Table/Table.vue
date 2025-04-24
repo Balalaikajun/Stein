@@ -33,7 +33,12 @@
       </thead>
 
       <tbody ref="bodyRef">
-      <tr v-for="item in items" :key="item.id">
+      <tr
+          v-for="item in items"
+          :key="item.id"
+          @dblclick="onRowClick(item)"
+          class="hover:cursor-pointer"
+      >
         <td
             v-for="col in columns"
             :key="col.key"
@@ -84,7 +89,7 @@ const props = defineProps({
   sortDescending: Boolean,
   editable: Boolean
 })
-const emit = defineEmits(['sort', 'load-more'])
+const emit = defineEmits(['sort', 'load-more','row-click'])
 
 const { loading, hasMore, items } = toRefs(props)
 const containerRef = ref(null)
@@ -126,6 +131,10 @@ onMounted(() => {
   })
   console.log(items)
 })
+
+function onRowClick(item) {
+  emit('row-click', item)
+}
 </script>
 
 <style scoped>
@@ -181,9 +190,19 @@ onMounted(() => {
 .data-table tbody tr:hover td {
   background-color: var(--hover-color);
 }
-.sortable { cursor: pointer; transition: background var(--transition-duration) var(--transition-timing); }
-.sortable:hover { background-color: var(--hover-color); }
-.sorted { background-color: var(--active-bg-color); }
+
+.sortable {
+  cursor: pointer;
+  transition: background var(--transition-duration) var(--transition-timing);
+}
+
+.sortable:hover {
+  background-color: var(--hover-color);
+}
+
+.sorted {
+  background-color: var(--active-bg-color);
+}
 
 .th-content {
   display: flex;

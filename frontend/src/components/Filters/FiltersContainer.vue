@@ -46,9 +46,9 @@
 import { ref, toRaw, watch } from 'vue'
 import BooleanFilter from './Filters/BooleanFilter.vue'
 import LookupFilter from './Filters/LookupFilter.vue'
-import DateRangeFilter from '@/components/Selectors/Filters/DateRangeFilter.vue'
+import DateRangeFilter from '@/components/Filters/Filters/DateRangeFilter.vue'
 import { debounce } from 'lodash-es'
-import RadioFilter from '@/components/Selectors/Filters/RadioFilter.vue'
+import RadioFilter from '@/components/Filters/Filters/RadioFilter.vue'
 
 const props = defineProps({
   filters: {

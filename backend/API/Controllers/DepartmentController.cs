@@ -18,7 +18,7 @@ public class DepartmentController: ControllerBase
         _departmentService = departmentService;
     }
 
-    [HttpPost]
+    [HttpPost("filter")]
     [Authorize]
     public async Task<ActionResult> GetDepartments(DepartmentPaginatedRequest request)
     {
@@ -26,5 +26,23 @@ public class DepartmentController: ControllerBase
         
         return Ok(result);
     }
+
+    [HttpPost]
+    public async Task<ActionResult> Create(DepartmentPostDto dto)
+    {
+        try
+        {
+            await _departmentService.Create(dto);
+            return Created();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest("Неизвестная ошибка");
+        }
+        
+        
+    }
+    
     
 }

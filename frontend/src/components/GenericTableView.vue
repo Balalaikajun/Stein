@@ -2,11 +2,12 @@
 import { ref, watch } from 'vue'
 import axios from 'axios'
 import StatusBadge from '@/components/Table/StatusBadge.vue'
-import FiltersContainer from '@/components/Selectors/FiltersContainer.vue'
+import FiltersContainer from '@/components/Filters/FiltersContainer.vue'
 import Table from '@/components/Table/Table.vue'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import menuItems from '@/router/menuData.js'
-import {BACKEND_API_HOST} from '@/configs/apiConfig.js'
+import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
+import FormModal from '@/components/Form/FormModal.vue'
 
 const props = defineProps({
   config: {
@@ -23,7 +24,9 @@ const {
   tableConfig,
   filters,
   apiConfig,
-  initialSort
+  initialSort,
+  createFormConfig,
+  editFormConfig = createFormConfig
 } = props.config
 
 // Реактивные переменные
@@ -36,18 +39,22 @@ const hasMore = ref(false)
 const skip = ref(0)
 const isOpen = ref(false)
 const total = ref(0)
+const isCreateModalVisible = ref(false)
+
+// Модалки
+const isEditModalVisible = ref(false)
+const isEditing = ref(false)
+const editingData = ref({})
 
 // Методы
-const handleFilterChange = (filters) => {
-  currentFilters.value = filters
+function handleFilterChange (f) {
+  currentFilters.value = f
   loadData(true)
 }
 
-const handleSort = (key) => {
-  currentSort.value = {
-    key,
-    descending: currentSort.value.key === key ? !currentSort.value.descending : false
-  }
+function handleSort (key) {
+  const desc = currentSort.value.key === key && !currentSort.value.descending
+  currentSort.value = { key, descending: desc }
   loadData(true)
 }
 
@@ -82,10 +89,8 @@ const loadData = async (reset = false) => {
         params
     )
 
-
     tableItems.value = reset ? data.items : [...tableItems.value, ...data.items]
-    if(params.Skip===0)
-    {
+    if (params.Skip === 0) {
       total.value = data.total
     }
     hasMore.value = data.hasMore
@@ -102,6 +107,20 @@ const toggleVisibility = () => {
   isOpen.value = !isOpen.value
 }
 
+function openCreateModal () {
+  editingData.value = {}
+  isCreateModalVisible.value = true
+}
+
+function openEditModal (item) {
+  editingData.value = { ...item }
+  isEditModalVisible.value = true
+}
+
+function onFormSubmit () {
+  loadData(true)
+}
+
 // Инициализация
 loadData(true)
 watch(searchQuery, () => loadData(true))
@@ -112,7 +131,18 @@ watch(searchQuery, () => loadData(true))
     <Sidebar :items="menuItems"/>
 
     <div class="content-area">
-      <h1>{{ pageTitle }}</h1>
+
+      <div class="selection">
+        <div class="selection-left">
+          <div class="search-block">
+            <h1>{{ pageTitle }}</h1>
+          </div>
+          <slot name="options"/>
+        </div>
+        <div class="selection-right">
+          <button @click="openCreateModal" class="button">Создать</button>
+        </div>
+      </div>
 
       <div class="selection">
         <div class="selection-left">
@@ -153,6 +183,7 @@ watch(searchQuery, () => loadData(true))
             editable
             @sort="handleSort"
             @load-more="loadMore"
+            @row-click="openEditModal"
         >
           <template #cell-isActive="{ item }">
             <StatusBadge :status="item.isActive"/>
@@ -162,6 +193,21 @@ watch(searchQuery, () => loadData(true))
       </div>
     </div>
   </div>
+
+  <FormModal
+      :config="{ ...createFormConfig}"
+      :isVisible="isCreateModalVisible"
+      :isEditing="false"
+      @update:isVisible="isCreateModalVisible = $event"
+      @submit="onFormSubmit"
+  />
+  <FormModal
+      :config="{ ...editFormConfig, initialData: editingData }"
+      :isVisible="isEditModalVisible"
+      :isEditing="isEditing"
+      @update:isVisible="isEditModalVisible = $event"
+      @submit="onFormSubmit"
+  />
 </template>
 
 <style scoped>

@@ -48,8 +48,8 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
-import FilterButton from '@/components/Selectors/FilterButton.vue'
-import FilterModal from '@/components/Selectors/FilterModal.vue'
+import FilterButton from '@/components/Filters/FilterButton.vue'
+import FilterModal from '@/components/Filters/FilterModal.vue'
 
 const props = defineProps({
   filter: {

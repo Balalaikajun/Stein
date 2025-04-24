@@ -42,7 +42,7 @@
 import { ref, watch, onMounted } from 'vue'
 import axios from 'axios'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
-import FiltersContainer from '@/components/Selectors/FiltersContainer.vue'
+import FiltersContainer from '@/components/Filters/FiltersContainer.vue'
 import PerformanceTable from '@/components/Table/PerformanceTable.vue'
 import StatusBadge from '@/components/Table/StatusBadge.vue'
 import menuItems from '@/router/menuData.js'
