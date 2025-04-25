@@ -19,17 +19,25 @@ export default {
     {
       id: 'ActiveFilter',
       title: 'Статус',
-      dataType: 'boolean'
+      dataType: 'radio',
+      staticOptions: [
+        { label: 'Да', value: true },
+        { label: 'Нет', value: false },
+        { label: 'Все', value: null }
+      ],
+      allowDeselect: true
     }
   ],
   apiConfig: {
-    endpoint: '/api/Department',
+    endpoint: '/api/Department/filter',
+    deleteEndpoint:'/api/Department',
     paramsMapping: {
+      id: "id",
       search: 'SearchText',
       sortKey: 'SortBy',
       sortOrder: 'Descending',
       take: 'Take',
-      skip: 'Skip',
+      skip: 'Skip'
     }
   },
   initialSort: {
@@ -40,90 +48,59 @@ export default {
     title: 'пользователя',
     fields: [
       {
-        name: 'name',
-        label: 'Имя',
-        type: 'date',
+        name: 'title',
+        label: 'Наименование',
+        type: 'text',
         required: true,
-        validate: (value) => value.length >= 3,
-        errorMessage: 'Минимум 3 символа'
+        validate: (v) => v.length <= 125,
+        errorMessage: 'Максимум 125 символов'
       },
       {
-        name: 'email',
-        label: 'Email',
+        name: 'isActive',
+        label: 'Статус',
         type: 'select',
         required: true,
-        errorMessage: 'Неверный формат email',
+        errorMessage: 'Необходимо выбрать статус',
         filter: {
-          id: 'SpecializationIds',
-          title: 'Специализации',
-          dataType: 'lookup',
-          apiEndpoint: '/api/Specialization',
-          dependsOn: ['DepartmentIds'],
-          dependentParams: {
-            DepartmentIds: 'departmentIds'
-          },
-          params: {
-            take: 15,
-          },
-          paramKeys: {
-            skip: 'skip',
-            take: 'take',
-            search: 'searchText',
-            sortKey: 'sortBy',
-            sortOrder: 'descending'
-          },
-          mapOption: opt => ({ label: opt.title, value: opt.id })
+          id: 'statusFilter', // Уникальный идентификатор фильтра
+          title: 'Статус',
+          staticOptions: [     // Статические данные
+            { label: 'Активен', value: true },
+            { label: 'Неактивен', value: false }
+          ],
+          allowDeselect: false  // Разрешить снятие выбора
         }
       }
     ],
-    submitHandler: async (data) => {
-      // API запрос для сохранения данных
-      console.log('Saving data:', data)
-    }
   },
   editFormConfig: {
     title: 'пользователя',
+    apiEndpoint: '/api/Department',
     fields: [
       {
-        name: 'name',
-        label: 'Имя',
+        name: 'title',
+        label: 'Наименование',
         type: 'text',
         required: true,
-        validate: (value) => value.length >= 3,
-        errorMessage: 'Минимум 3 символа'
+        validate: (v) => v.length <= 125,
+        errorMessage: 'Максимум 125 символов'
       },
       {
-        name: 'email',
-        label: 'Email',
+        name: 'isActive',
+        label: 'Статус',
         type: 'select',
         required: true,
-        errorMessage: 'Неверный формат email',
+        errorMessage: 'Необходимо выбрать статус',
         filter: {
-          id: 'SpecializationIds',
-          title: 'Специализации',
-          dataType: 'lookup',
-          apiEndpoint: '/api/Specialization',
-          dependsOn: ['DepartmentIds'],
-          dependentParams: {
-            DepartmentIds: 'departmentIds'
-          },
-          params: {
-            take: 15,
-          },
-          paramKeys: {
-            skip: 'skip',
-            take: 'take',
-            search: 'searchText',
-            sortKey: 'sortBy',
-            sortOrder: 'descending'
-          },
-          mapOption: opt => ({ label: opt.title, value: opt.id })
+          id: 'statusFilter', // Уникальный идентификатор фильтра
+          title: 'Статус',
+          staticOptions: [     // Статические данные
+            { label: 'Активен', value: true },
+            { label: 'Неактивен', value: false }
+          ],
+          allowDeselect: false  // Разрешить снятие выбора
         }
       }
     ],
-    submitHandler: async (data) => {
-      // API запрос для сохранения данных
-      console.log('Saving data:', data)
-    }
   }
 }

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Application.DTOs.Department;
 using Application.Interfaces;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +29,7 @@ public class DepartmentController: ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult> Create(DepartmentPostDto dto)
     {
         try
@@ -44,5 +46,46 @@ public class DepartmentController: ControllerBase
         
     }
     
+    [HttpPatch]
+    [Authorize]
+    public async Task<ActionResult> Patch(DepartmentPatchDto dto)
+    {
+        try
+        {
+            await _departmentService.Update(dto);
+            return Ok();
+        }
+        catch (NotFoundException e)
+        {
+         return NotFound(e.Message);   
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest("Неизвестная ошибка");
+        }
+    }
+    
+    [HttpDelete]
+    [Authorize]
+    public async Task<ActionResult> Delete(int id)
+    {
+        try
+        {
+            await _departmentService.Delete(id);
+            return NoContent();
+        }
+        catch (NotFoundException e)
+        {
+            return NoContent();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest("Неизвестная ошибка");
+        }
+        
+        
+    }
     
 }

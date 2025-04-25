@@ -89,14 +89,15 @@ watch(
     { immediate: true }
 )
 
-function validate () {
+function validate() {
   let isValid = true
   props.config.fields.forEach(f => {
     errors[f.name] = ''
     const val = formData[f.name]
 
-    if (f.required && !val) {
-      errors[f.name] = 'Обязательное поле'
+    // Обновленная проверка
+    if (f.required && (val === undefined || val === null)) {
+      errors[f.name] = f.errorMessage || 'Обязательное поле'
       isValid = false
     }
 
@@ -108,15 +109,14 @@ function validate () {
   return isValid
 }
 
-async function handleSubmit () {
+async function handleSubmit (data) {
   if (!validate()) return
 
   const payload = props.isEditing
       ? { ...formData, id: props.initialData.id }
       : { ...formData }
 
-  await props.config.submitHandler(payload)
-  emit('submit')
+  emit('submit', payload)
   close()
 }
 

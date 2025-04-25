@@ -73,8 +73,7 @@ import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 
 const props = defineProps({
   filter:  { type: Object, required: true },
-  modelValue: { required: false },
-  activeFilters: { type: Object, default: () => ({}) }
+  modelValue: { required: false }
 })
 const emit = defineEmits(['update:modelValue'])
 
@@ -98,8 +97,12 @@ const debounceMs  = props.filter.debounceMs ?? 300
 // computed
 const hasValue      = computed(() => localValue.value !== null)
 const selectedLabel = computed(() => {
+  if (localValue.value === null && props.filter.allowDeselect) {
+    return props.filter.staticOptions.find(o => o.value === null)?.label || 'Все'
+  }
+
   const found = options.value.find(o => isEqual(o.value, localValue.value))
-  return found ? found.label : ''
+  return found?.label || props.filter.title
 })
 
 // helpers
@@ -129,11 +132,14 @@ async function loadOptions() {
   loading.value = true
 
   if (isStatic.value) {
-    // локальный фильтр
-    const all = props.filter.staticOptions
-    options.value = search.value
-        ? all.filter(o => o.label.toLowerCase().includes(search.value.toLowerCase()))
-        : [...all]
+    // Фильтрация статических данных
+    const allOptions = props.filter.staticOptions
+    const searchText = search.value.toLowerCase()
+
+    options.value = allOptions.filter(opt =>
+        !searchText || opt.label.toLowerCase().includes(searchText)
+    )
+
     hasMore.value = false
     loading.value = false
     return
@@ -162,15 +168,21 @@ async function loadOptions() {
 }
 
 function resetLoad() {
-  options.value = []
-  skip.value = 0
-  hasMore.value = true
+  // Сбрасываем только для динамических фильтров
+  if (!isStatic.value) {
+    options.value = []
+    skip.value = 0
+    hasMore.value = true
+  }
 }
 
 function toggle() {
   isOpen.value = !isOpen.value
   if (!isOpen.value) return
+
+  search.value = '' // Очищаем поиск при открытии
   localValue.value = props.modelValue
+
   nextTick(() => {
     anchorRect.value = btnRef.value.$el.getBoundingClientRect()
     resetLoad()
@@ -179,13 +191,17 @@ function toggle() {
 }
 
 function apply() {
-  emit('update:modelValue', localValue.value)
+  const finalValue = typeof localValue.value === 'string'
+      ? localValue.value === 'true'
+      : localValue.value
+
+  emit('update:modelValue', finalValue)
   close()
 }
 
 function close() {
   isOpen.value = false
-  search.value = ''
+  search.value = '' // Сбрасываем поиск при закрытии
 }
 
 const onSearchInput = debounce(() => {

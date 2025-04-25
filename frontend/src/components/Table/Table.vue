@@ -1,5 +1,9 @@
 <template>
-  <div class="table-container" ref="containerRef" @scroll="onScroll">
+  <div
+      class="table-container"
+      ref="containerRef"
+      @scroll="onScroll"
+      @keydown="handleKeydown">
     <table class="data-table" ref="tableRef">
       <thead>
       <tr>
@@ -37,7 +41,13 @@
           v-for="item in items"
           :key="item.id"
           @dblclick="onRowClick(item)"
-          class="hover:cursor-pointer"
+          @click="selectItem(item)"
+          :class="{
+            'selected-row': selectedItem?.id === item.id,
+            'hover:cursor-pointer': true
+          }"
+          tabindex="0"
+          @focus="selectItem(item)"
       >
         <td
             v-for="col in columns"
@@ -73,11 +83,19 @@
       </tr>
       </tfoot>
     </table>
+    <ConfirmModal
+        :visible="confirmationModalVisible"
+        message="Вы уверены, что хотите удалить выбранный элемент?"
+        confirm-text="Удалить"
+        @confirm="confirmDelete"
+        @cancel="cancelDelete"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, toRefs, watch, nextTick, onMounted } from 'vue'
+import { ref, toRefs, watch, nextTick, onMounted, createCommentVNode } from 'vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 
 const props = defineProps({
   columns: Array,
@@ -89,12 +107,14 @@ const props = defineProps({
   sortDescending: Boolean,
   editable: Boolean
 })
-const emit = defineEmits(['sort', 'load-more','row-click'])
+const emit = defineEmits(['sort', 'load-more', 'row-click', 'delete'])
 
 const { loading, hasMore, items } = toRefs(props)
 const containerRef = ref(null)
 const bodyRef = ref(null)
 const tableRef = ref(null)
+const selectedItem = ref(null)
+const confirmationModalVisible = ref(false)
 
 // Обработчик скролла: подгрузка при приближении к низу
 const onScroll = () => {
@@ -129,10 +149,39 @@ onMounted(() => {
       emit('load-more')
     }
   })
-  console.log(items)
 })
 
-function onRowClick(item) {
+function selectItem (item) {
+  selectedItem.value = item
+}
+
+function handleKeydown(event) {
+  if (confirmationModalVisible.value) {
+    if (event.key === 'Escape') {
+      cancelDelete()
+    }
+  } else {
+    if (event.key === 'Delete' && selectedItem.value) {
+      event.preventDefault()
+      confirmationModalVisible.value = true
+    }
+  }
+}
+
+function confirmDelete () {
+  if (selectedItem.value) {
+    emit('delete', selectedItem.value)
+  }
+  confirmationModalVisible.value = false
+  selectedItem.value = null
+}
+
+function cancelDelete () {
+  confirmationModalVisible.value = false
+  selectedItem.value = null
+}
+
+function onRowClick (item) {
   emit('row-click', item)
 }
 </script>
@@ -145,6 +194,8 @@ function onRowClick(item) {
   border-radius: var(--border-radius);
   border: 1px solid var(--secondary-background-color);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  outline: 2px solid var(--primary-color); /* Стильный индикатор фокуса */
+  outline-offset: 2px;
 }
 
 .data-table {
@@ -204,6 +255,20 @@ function onRowClick(item) {
   background-color: var(--active-bg-color);
 }
 
+.selected-row td {
+  background-color: var(--secondary-background-color) !important;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.selected-row td::after {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background-color: var(--primary-color);
+}
 .th-content {
   display: flex;
   justify-content: space-between;

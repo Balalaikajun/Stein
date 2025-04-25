@@ -9,5 +9,7 @@ public class DepartmentProfile: Profile
     public DepartmentProfile()
     {
         CreateMap<Department, DepartmentGetDto>();
+        
+        CreateMap<DepartmentPostDto, Department>();
     }
 }

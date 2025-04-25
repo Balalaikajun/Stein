@@ -83,7 +83,6 @@ const loadData = async (reset = false) => {
   try {
     loading.value = true
     const params = buildRequestParams(reset)
-    console.log(params)
     const { data } = await axios.post(
         `${BACKEND_API_HOST}${apiConfig.endpoint}`,
         params
@@ -107,6 +106,21 @@ const toggleVisibility = () => {
   isOpen.value = !isOpen.value
 }
 
+async function handleDelete(item) {
+  const paramName = apiConfig.paramsMapping.id
+  const data = `${paramName}=${item[paramName]}`
+  const url = `${BACKEND_API_HOST}${apiConfig.deleteEndpoint}?${data}`
+  console.log(url)
+
+  try {
+    await axios.delete(url)
+    await loadData(true)
+  }
+  catch (error) {
+    console.error(error)
+  }
+}
+
 function openCreateModal () {
   editingData.value = {}
   isCreateModalVisible.value = true
@@ -117,8 +131,31 @@ function openEditModal (item) {
   isEditModalVisible.value = true
 }
 
-function onFormSubmit () {
-  loadData(true)
+async function onCreateFormSubmit (data) {
+  try {
+      await axios.post(
+          `${BACKEND_API_HOST}${createFormConfig.apiEndpoint}`,
+          data)
+
+    await loadData(true)
+  }
+  catch(error) {
+    console.log(error)
+  }
+}
+
+async function onEditFormSubmit (data) {
+  let success = false
+
+  try {
+      await axios.patch(
+          `${BACKEND_API_HOST}${editFormConfig.apiEndpoint}`,
+          data)
+    await loadData(true)
+  }
+  catch(error) {
+    console.log(error)
+  }
 }
 
 // Инициализация
@@ -184,6 +221,7 @@ watch(searchQuery, () => loadData(true))
             @sort="handleSort"
             @load-more="loadMore"
             @row-click="openEditModal"
+            @delete="handleDelete"
         >
           <template #cell-isActive="{ item }">
             <StatusBadge :status="item.isActive"/>
@@ -195,18 +233,20 @@ watch(searchQuery, () => loadData(true))
   </div>
 
   <FormModal
-      :config="{ ...createFormConfig}"
+      :config="createFormConfig"
+      :initial-data="{}"
       :isVisible="isCreateModalVisible"
       :isEditing="false"
       @update:isVisible="isCreateModalVisible = $event"
-      @submit="onFormSubmit"
+      @submit="onCreateFormSubmit"
   />
   <FormModal
-      :config="{ ...editFormConfig, initialData: editingData }"
+      :config="editFormConfig"
+      :initial-data="editingData"
       :isVisible="isEditModalVisible"
-      :isEditing="isEditing"
+      :isEditing="true"
       @update:isVisible="isEditModalVisible = $event"
-      @submit="onFormSubmit"
+      @submit="onEditFormSubmit"
   />
 </template>
 

@@ -6,6 +6,7 @@ using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using Domain.Exceptions;
 
 namespace Application.Services;
 
@@ -68,4 +69,41 @@ public class DepartmentService : IDepartmentService
             HasMore: hasMore,
             Total: total);
     }
+
+    public async Task Create(DepartmentPostDto dto)
+    {
+        var department = _mapper.Map<Department>(dto);
+        
+        _context.Departments.Add(department);
+
+        await _context.SaveChangesAsync();
+    }
+    
+    
+    public async Task Update(DepartmentPatchDto dto)
+    {
+        var department = await _context.Departments.FirstOrDefaultAsync(x => x.Id == dto.Id) ??
+                         throw new NotFoundException($"Department with id - {dto.Id} was not found");
+        
+        if (!string.IsNullOrWhiteSpace(dto.Title) && department.Title != dto.Title)
+            department.Title = dto.Title;
+        
+        if(dto.IsActive.HasValue && dto.IsActive != department.IsActive)
+            department.IsActive = dto.IsActive.Value;
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task Delete(int id)
+    {
+        var department = await _context.Departments.FirstOrDefaultAsync(x => x.Id == id);
+        
+        if (department == null)
+            throw new NotFoundException($"Department with id - {id} was not found");
+        
+        _context.Departments.Remove(department);
+        
+        await _context.SaveChangesAsync();
+    }
+    
 }
