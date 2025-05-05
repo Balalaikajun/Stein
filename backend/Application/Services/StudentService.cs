@@ -61,7 +61,7 @@ public class StudentService: IStudentService
             groupPredicate = groupPredicate.Or(s => 
                 s.GroupSpecializationId == k.SpecializationId &&
                 s.GroupYear== k.Year &&
-                s.GroupId == k.Id);
+                s.GroupId == k.Index);
         }
         query = query.Where(groupPredicate);
     }

@@ -65,8 +65,8 @@ public class GroupService: IGroupService
         var sortSelector = _sortSelectors[sortBy];
 
         query = request.Descending
-            ? query.OrderByDescending(sortSelector).ThenByDescending(d => d.Id)
-            : query.OrderBy(sortSelector).ThenBy(d => d.Id);
+            ? query.OrderByDescending(sortSelector).ThenByDescending(d => d.Index)
+            : query.OrderBy(sortSelector).ThenBy(d => d.Index);
 
         int? total = null;
         if (request.Skip == 0)
@@ -97,9 +97,9 @@ public class GroupService: IGroupService
         if(!await _context.Specializations.AnyAsync(x => x.Id == dto.SpecializationId))
             throw new NotFoundException($"Specialization with id - {dto.SpecializationId} was not found");
         
-        var department = _mapper.Map<Department>(dto);
+        var group = _mapper.Map<Group>(dto);
         
-        _context.Departments.Add(department);
+        _context.Groups.Add(group);
 
         await _context.SaveChangesAsync();
     }
@@ -108,37 +108,37 @@ public class GroupService: IGroupService
     public async Task Update(GroupPatchDto dto)
     {
         var group = await _context.Groups.FirstOrDefaultAsync(x => 
-                             x.SpecializationId == dto.Key.SpecializationId &&
-                             x.Year == dto.Key.Year &&
-                             x.Id == dto.Key.Id) ??
+                             x.SpecializationId == dto.Id.SpecializationId &&
+                             x.Year == dto.Id.Year &&
+                             x.Index == dto.Id.Index) ??
                          throw new NotFoundException($"Department with id - {dto.Id} was not found");
         
-        if (dto.SpecializationId.HasValue && dto.SpecializationId != group.SpecializationId)
+        if (dto.NewSpecializationId.HasValue && dto.NewSpecializationId != group.SpecializationId)
         {
-            if(!await _context.Specializations.AnyAsync(x => x.Id == dto.SpecializationId))
-                throw new NotFoundException($"Specialization with id - {dto.SpecializationId} was not found");
+            if(!await _context.Specializations.AnyAsync(x => x.Id == dto.NewSpecializationId))
+                throw new NotFoundException($"Specialization with id - {dto.NewSpecializationId} was not found");
             
-            group.SpecializationId = dto.SpecializationId.Value;
+            group.SpecializationId = dto.NewSpecializationId.Value;
         }
         
-        if(dto.Year.HasValue && dto.Year != group.Year)
-            group.Year = dto.Year.Value;
+        if(dto.NewYear.HasValue && dto.NewYear != group.Year)
+            group.Year = dto.NewYear.Value;
         
-        if(!string.IsNullOrWhiteSpace(dto.Id) && dto.Id != group.Id)
-            group.Id = dto.Id;
+        if(!string.IsNullOrWhiteSpace(dto.NewIndex) && dto.NewIndex != group.Index)
+            group.Index = dto.NewIndex;
         
-        if(!string.IsNullOrWhiteSpace(dto.Acronym) && dto.Acronym != group.Acronym)
-            group.Acronym = dto.Acronym;
+        if(!string.IsNullOrWhiteSpace(dto.NewAcronym) && dto.NewAcronym != group.Acronym)
+            group.Acronym = dto.NewAcronym;
         
-        if(dto.IsActive.HasValue && dto.IsActive != group.IsActive)
-            group.IsActive = dto.IsActive.Value;
+        if(dto.NewIsActive.HasValue && dto.NewIsActive != group.IsActive)
+            group.IsActive = dto.NewIsActive.Value;
         
-        if (dto.TeacherId.HasValue && dto.TeacherId != group.TeacherId)
+        if (dto.NewTeacherId.HasValue && dto.NewTeacherId != group.TeacherId)
         {
-            if(!await _context.Teachers.AnyAsync(x => x.Id == dto.TeacherId))
-                throw new NotFoundException($"Teacher with id - {dto.TeacherId} was not found");
+            if(!await _context.Teachers.AnyAsync(x => x.Id == dto.NewTeacherId))
+                throw new NotFoundException($"Teacher with id - {dto.NewTeacherId} was not found");
             
-            group.TeacherId = dto.TeacherId.Value;
+            group.TeacherId = dto.NewTeacherId.Value;
         }
 
         await _context.SaveChangesAsync();
@@ -149,7 +149,7 @@ public class GroupService: IGroupService
         var group = await _context.Groups.FirstOrDefaultAsync(x => 
             x.SpecializationId == id.SpecializationId &&
             x.Year == id.Year &&
-            x.Id == id.Id);
+            x.Index == id.Index);
         
         if (group == null)
             throw new NotFoundException($"Group with id - {id} was not found");

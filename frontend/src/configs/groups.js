@@ -95,7 +95,7 @@ export const apiConfig = {
   endpoint: '/api/Group/filter',
   deleteEndpoint: '/api/Group',
   paramsMapping: {
-    id: 'key',
+    id: ['specializationId', 'year', 'index'],
     search: 'searchText',
     sortKey: 'sortBy',
     sortOrder: 'descending',
@@ -110,9 +110,9 @@ export const initialSort = {
 }
 
 export const createFormConfig = {
-title:'группу',
-  apiEndpoint:'/api/Group',
-  fields:[
+  title: 'группу',
+  apiEndpoint: '/api/Group',
+  fields: [
     {
       name: 'specializationId',
       label: 'Специальность',
@@ -152,7 +152,7 @@ title:'группу',
       }
     },
     {
-      name: 'id',
+      name: 'index',
       label: 'Идентификатор',
       type: 'text',
       required: true,
@@ -174,16 +174,91 @@ title:'группу',
         ],
         allowDeselect: false
       }
+    },
+    {
+      name: 'acronym',
+      label: 'Сокращение',
+      type: 'text',
+      required: true,
+      validate: (v) => v.length <= 10,
+      errorMessage: 'Максимум 10 символов'
+    },
+    {
+      name: 'teacherId',
+      label: 'Классный руководитель',
+      type: 'select',
+      required: true,
+      filter: {
+        id: 'TeacherId',
+        title: 'Классный руководитель',
+        dataType: 'lookup',
+        apiEndpoint: '/api/Teacher/filter',
+        params: {
+          take: 15,
+        },
+        paramKeys: {
+          skip: 'skip',
+          take: 'take',
+          search: 'searchText',
+          sortKey: 'sortBy',
+          sortOrder: 'descending'
+        },
+        mapOption: opt => ({
+          label: `${opt.surname} ${opt.name[0]}.${opt.patronymic[0]}`,
+          value: opt.id })
+      }
     }
   ]
 }
+
+export const editFormConfig = {
+  title: 'группу',
+  apiEndpoint: '/api/Group',
+  fields: [
+    {
+      name: 'newIsActive',
+      label: 'Статус',
+      type: 'select',
+      required: true,
+      errorMessage: 'Необходимо выбрать статус',
+      filter: {
+        staticOptions: [
+          { label: 'Активна', value: true },
+          { label: 'Неактивна', value: false }
+        ]
+      }
+    },
+    {
+      name: 'newAcronym',
+      label: 'Сокращение',
+      type: 'text',
+      required: true,
+      validate: (v) => v.length <= 10,
+      errorMessage: 'Максимум 10 символов'
+    },
+    {
+      name: 'newTeacherId',
+      label: 'Классный руководитель',
+      type: 'select',
+      required: true,
+      filter: {
+        apiEndpoint: '/api/Teacher/filter',
+        mapOption: opt => ({
+          label: `${opt.surname} ${opt.name[0]}.${opt.patronymic[0]}.`,
+          value: opt.id
+        })
+      }
+    }
+  ]
+};
 
 export default {
   tableConfig,
   filters,
   apiConfig,
   initialSort,
-  createFormConfig
+  createFormConfig,
+  editFormConfig,
 }
 
 

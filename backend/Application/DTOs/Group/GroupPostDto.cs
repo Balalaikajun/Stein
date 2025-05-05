@@ -9,7 +9,7 @@ public record GroupPostDto(
     int Year,
     [Required(ErrorMessage = "Id is required")]
     [MaxLength(3, ErrorMessage = "Id cannot be more than 3 characters")]
-    string Id,
+    string Index,
     [Required(ErrorMessage = "Acronym is required")]
     [MaxLength(10, ErrorMessage = "Acronym cannot be more than 10 characters")]
     string Acronym,

@@ -2,33 +2,32 @@
   <div class="filter-item">
     <FilterButton
         ref="btnRef"
-        :title="selectedLabel || filter.title"
+        :title="selectedLabel"
         @toggle="toggle"
         :isOpen="isOpen"
         :hasValue="hasValue"
         :loading="loading"
     />
 
-    <FilterModal
-        v-if="isOpen"
-        :visible="isOpen"
-        :anchorRect="anchorRect"
-        @apply="apply"
-        @cancel="close"
-    >
-      <template #header>
-        <input
-            v-model.lazy="search"
-            @change="onSearchInput"
-            placeholder="Поиск..."
-            class="filter-input"
-            :disabled="loading"
-        />
-      </template>
+    <Teleport to="body">
+      <div
+          v-if="isOpen"
+          class="filter-dropdown"
+          :style="dropdownStyle"
+          ref="dropdownRef"
+      >
+        <div class="filter-dropdown__header">
+          <input
+              v-model="search"
+              @input="onSearch"
+              placeholder="Поиск..."
+              class="filter-input"
+              :disabled="loading"
+          />
+        </div>
 
-      <template #body>
-        <div class="filter-modal-content" ref="listContainer" @scroll="onScroll">
-          <div v-if="loading && !options.length" class="loading-state">
+        <div class="filter-dropdown__body" ref="listContainer" @scroll="onScroll">
+          <div v-if="isEmpty && loading" class="loading-state">
             <span class="loader"></span>
             <span>Загрузка...</span>
           </div>
@@ -36,7 +35,7 @@
           <ul v-else class="options-list">
             <li
                 v-for="opt in options"
-                :key="uniqueKey(opt)"
+                :key="optKey(opt)"
                 class="options-list__item"
             >
               <label class="radio-option">
@@ -58,206 +57,228 @@
             </li>
           </ul>
         </div>
-      </template>
-    </FilterModal>
+
+        <div class="filter-dropdown__footer">
+          <button class="btn btn--cancel" @click="close">Отмена</button>
+          <button class="btn btn--apply" @click="apply">Применить</button>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
-import { debounce, isEqual } from 'lodash-es'
+import { debounce } from 'lodash-es'
 import FilterButton from '@/components/Filters/FilterButton.vue'
-import FilterModal from '@/components/Filters/FilterModal.vue'
 import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 
+// Props & Emits
 const props = defineProps({
-  filter:  { type: Object, required: true },
-  modelValue: { required: false }
+  filter: { type: Object, required: true },
+  modelValue: {},
+  activeFilters: { type: Object, default: () => ({}) }
 })
 const emit = defineEmits(['update:modelValue'])
 
-// state
-const isOpen      = ref(false)
-const search      = ref('')
-const options     = ref([])
-const localValue  = ref(props.modelValue)
-const loading     = ref(false)
-const skip        = ref(0)
-const hasMore     = ref(true)
-const btnRef      = ref(null)
-const anchorRect  = ref(null)
+// State
+const isOpen = ref(false)
+const search = ref('')
+const options = ref([])
+const localValue = ref(props.modelValue)
+const loading = ref(false)
+const skip = ref(0)
+const hasMore = ref(true)
+
+const btnRef = ref(null)
+const dropdownRef = ref(null)
 const listContainer = ref(null)
+const modalPosition = ref({ top: 0, left: 0 })
 
-// config
-const isStatic    = computed(() => Array.isArray(props.filter.staticOptions))
-const take        = props.filter.params?.take || props.filter.take || 50
-const debounceMs  = props.filter.debounceMs ?? 300
+// Config
+const isStatic = computed(() => Array.isArray(props.filter.staticOptions))
+const pageSize = props.filter.params?.take || props.filter.take || 50
+const debouncedSearch = debounce(loadOptions, props.filter.debounceMs || 300)
 
-// computed
-const hasValue      = computed(() => localValue.value !== null)
+// Computed
+const hasValue = computed(() => localValue.value != null)
 const selectedLabel = computed(() => {
-  if (localValue.value === null && props.filter.allowDeselect) {
+  if (localValue.value == null && props.filter.allowDeselect) {
     return props.filter.staticOptions.find(o => o.value === null)?.label || 'Все'
   }
-
-  const found = options.value.find(o => isEqual(o.value, localValue.value))
+  const found = options.value.find(o => JSON.stringify(o.value) === JSON.stringify(localValue.value))
   return found?.label || props.filter.title
 })
+const isEmpty = computed(() => options.value.length === 0)
+const dropdownStyle = computed(() => ({
+  top: modalPosition.value.top + 'px',
+  left: modalPosition.value.left + 'px'
+}))
 
-// helpers
-function uniqueKey(opt) {
-  return typeof opt.value === 'object'
-      ? JSON.stringify(opt.value)
-      : opt.value
-}
+// Helpers
+const optKey = opt => typeof opt.value === 'object' ? JSON.stringify(opt.value) : opt.value
 
-function buildRequestBody() {
-  const { params = {}, paramKeys = {}, dependentParams = {} } = props.filter
-  const body = {
-    [paramKeys.skip  || 'skip']:  skip.value,
-    [paramKeys.take  || 'take']:  take,
-    [paramKeys.search|| 'searchText']: search.value,
-    ...params
-  }
-  Object.entries(dependentParams).forEach(([fid, apiParam]) => {
-    const val = props.activeFilters[fid]
-    if (val?.length > 0) body[apiParam] = val
+function buildBody () {
+  const body = { skip: skip.value, take: pageSize, searchText: search.value, ...(props.filter.params || {}) }
+  Object.entries(props.filter.dependentParams || {}).forEach(([fid, key]) => {
+    const v = props.activeFilters[fid]
+    if (v?.length) body[key] = v
   })
   return body
 }
 
-async function loadOptions() {
+// Load
+async function loadOptions () {
   if (loading.value) return
   loading.value = true
-
   if (isStatic.value) {
-    // Фильтрация статических данных
-    const allOptions = props.filter.staticOptions
-    const searchText = search.value.toLowerCase()
-
-    options.value = allOptions.filter(opt =>
-        !searchText || opt.label.toLowerCase().includes(searchText)
-    )
-
+    const all = props.filter.staticOptions
+    options.value = all.filter(o => !search.value || o.label.toLowerCase().includes(search.value.toLowerCase()))
     hasMore.value = false
-    loading.value = false
-    return
+  } else {
+    if (!hasMore.value) {
+      loading.value = false
+      return
+    }
+    try {
+      const { data } = await axios.post(`${BACKEND_API_HOST}${props.filter.apiEndpoint}`, buildBody())
+      const items = data.items || []
+      options.value.push(...items.map(props.filter.mapOption))
+      hasMore.value = data.hasMore
+      skip.value += items.length
+    } catch {}
   }
+  loading.value = false
+}
 
-  if (!hasMore.value) {
-    loading.value = false
-    return
-  }
+// Reset & events
+function reset () {
+  options.value = []
+  skip.value = 0
+  hasMore.value = true
+}
 
-  try {
-    const body = buildRequestBody()
-    const { data } = await axios.post(
-        `${BACKEND_API_HOST}${props.filter.apiEndpoint}`,
-        body
-    )
-    const items = data.items || []
-    options.value.push(...items.map(props.filter.mapOption))
-    hasMore.value = data.hasMore
-    skip.value += items.length
-  } catch (e) {
-    console.error(e)
-  } finally {
-    loading.value = false
+function onSearch () {
+  reset()
+  debouncedSearch()
+}
+
+function onScroll () {
+  const el = listContainer.value
+  if (!isStatic.value && hasMore.value && !loading.value && el.scrollTop + el.clientHeight >= el.scrollHeight - 50) {
+    loadOptions()
   }
 }
 
-function resetLoad() {
-  // Сбрасываем только для динамических фильтров
-  if (!isStatic.value) {
-    options.value = []
-    skip.value = 0
-    hasMore.value = true
-  }
-}
-
-function toggle() {
+function toggle () {
   isOpen.value = !isOpen.value
   if (!isOpen.value) return
-
-  search.value = '' // Очищаем поиск при открытии
+  search.value = ''
   localValue.value = props.modelValue
-
   nextTick(() => {
-    anchorRect.value = btnRef.value.$el.getBoundingClientRect()
-    resetLoad()
+    const btn = btnRef.value.$el.getBoundingClientRect()
+    const height = isStatic.value ? Math.min(400, 48 + 48 + 32 * options.value.length) : 400
+    const below = window.innerHeight - btn.bottom
+    const top = below >= height + 8 ? btn.bottom + 8 : btn.top - height - 8
+    modalPosition.value = { top, left: btn.left }
+    reset()
     loadOptions()
   })
 }
 
-function apply() {
-  const finalValue = typeof localValue.value === 'string'
-      ? localValue.value === 'true'
-      : localValue.value
-
-  emit('update:modelValue', finalValue)
+function apply () {
+  emit('update:modelValue', typeof localValue.value === 'string' ? localValue.value === 'true' : localValue.value)
   close()
 }
 
-function close() {
+function close () {
   isOpen.value = false
-  search.value = '' // Сбрасываем поиск при закрытии
+  search.value = ''
 }
 
-const onSearchInput = debounce(() => {
-  resetLoad()
-  loadOptions()
-}, debounceMs)
-
-function onScroll() {
-  const c = listContainer.value
-  if (!isStatic.value && hasMore.value && !loading.value
-      && c.scrollHeight - c.scrollTop <= c.clientHeight + 50) {
-    loadOptions()
+function handleClickOutside (e) {
+  if (isOpen.value && dropdownRef.value && !dropdownRef.value.contains(e.target) && !btnRef.value.$el.contains(e.target)) {
+    close()
   }
 }
 
+onMounted(() => document.addEventListener('click', handleClickOutside))
+onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
+
 // init
-resetLoad()
+reset()
 loadOptions()
 </script>
 
 <style scoped>
-/* оставляем ваши стили из FilterItem.vue и FilterModal.vue */
-.filter-modal-content {
+.filter-item {
+  width: 100%;
+}
+
+.filter-dropdown {
+  position: fixed;
+  z-index: 2000;
+  min-width: 240px;
   max-height: 400px;
-  overflow-y: auto;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column
+}
+
+.filter-dropdown__header {
   padding: 8px;
+  border-bottom: 1px solid var(--secondary-background-color)
+}
+
+.filter-dropdown__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px
+}
+
+.filter-dropdown__footer {
+  padding: 8px;
+  border-top: 1px solid var(--secondary-background-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px
+}
+
+.btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer
+}
+
+.btn--cancel {
+  background: var(--secondary-background-color);
+  color: var(--secondary-text-color)
+}
+
+.btn--apply {
+  background: var(--primary-color);
+  color: #fff
 }
 
 .filter-input {
   width: 100%;
   padding: 8px 12px;
-  margin-bottom: 12px;
   border: 1px solid var(--secondary-background-color);
-  border-radius: var(--border-radius);
-  transition: border-color 0.2s;
-}
-
-.filter-input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(91, 0, 225, 0.1);
-}
-
-.filter-input:disabled {
-  background-color: var(--secondary-background-color);
-  cursor: not-allowed;
+  border-radius: var(--border-radius)
 }
 
 .options-list {
   list-style: none;
-  padding: 0;
   margin: 0;
+  padding: 0
 }
 
 .options-list__item {
-  padding: 4px 0;
+  padding: 4px 0
 }
 
 .radio-option {
@@ -267,24 +288,17 @@ loadOptions()
   padding: 8px;
   border-radius: var(--border-radius);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color .2s
 }
 
 .radio-option:hover {
-  background-color: var(--hover-color);
+  background-color: var(--hover-color)
 }
 
-input[type="radio"] {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--primary-color);
-}
-
-.empty-state,
-.loading-more {
+.empty-state, .loading-more {
   padding: 12px;
   text-align: center;
-  color: var(--secondary-text-color);
+  color: var(--secondary-text-color)
 }
 
 .loading-state {
@@ -293,22 +307,21 @@ input[type="radio"] {
   justify-content: center;
   gap: 8px;
   padding: 16px;
-  color: var(--secondary-text-color);
+  color: var(--secondary-text-color)
 }
 
 .loader {
-  display: inline-block;
   width: 18px;
   height: 18px;
   border: 2px solid var(--secondary-background-color);
   border-top-color: var(--primary-color);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite
 }
 
 @keyframes spin {
   to {
-    transform: rotate(360deg);
+    transform: rotate(360deg)
   }
 }
 </style>

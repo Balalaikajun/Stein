@@ -66,7 +66,7 @@ public class GroupController: ControllerBase
     
     [HttpDelete]
     [Authorize]
-    public async Task<ActionResult> Delete(GroupKeyDto id)
+    public async Task<ActionResult> Delete([FromQuery]GroupKeyDto id)
     {
         try
         {

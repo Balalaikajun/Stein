@@ -112,12 +112,25 @@ function validate() {
 async function handleSubmit (data) {
   if (!validate()) return
 
+  const filteredData = filterNonEmptyFields(formData)
+
   const payload = props.isEditing
-      ? { ...formData, id: props.initialData.id }
-      : { ...formData }
+      ? { ...filteredData, id: props.initialData.id }
+      : { ...filteredData }
 
   emit('submit', payload)
   close()
+}
+
+function filterNonEmptyFields(obj) {
+  const filtered = {}
+  for (const key in obj) {
+    const value = obj[key]
+    if (value !== null && value !== undefined && value !== '') {
+      filtered[key] = value
+    }
+  }
+  return filtered
 }
 
 function close () {

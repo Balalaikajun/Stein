@@ -107,17 +107,35 @@ const toggleVisibility = () => {
 }
 
 async function handleDelete(item) {
-  const paramName = apiConfig.paramsMapping.id
-  const data = `${paramName}=${item[paramName]}`
-  const url = `${BACKEND_API_HOST}${apiConfig.deleteEndpoint}?${data}`
-  console.log(url)
+  const idField = apiConfig.paramsMapping.id;
+  let deleteUrl = `${BACKEND_API_HOST}${apiConfig.deleteEndpoint}`;
+
+  // Валидация
+  if (Array.isArray(idField)) {
+    const missing = idField.filter(f => !item.id[f]);
+    if (missing.length) {
+      alert(`Ошибка: нет полей ${missing.join(', ')}`);
+      return;
+    }
+    const params = idField
+        .map(f => `${f}=${encodeURIComponent(item.id[f])}`)
+        .join('&');
+    deleteUrl += `?${params}`;
+  } else {
+    if (!item[idField]) {
+      alert('Не найден идентификатор');
+      return;
+    }
+    deleteUrl += `?${idField}=${encodeURIComponent(item[idField])}`;
+  }
 
   try {
-    await axios.delete(url)
-    await loadData(true)
-  }
-  catch (error) {
-    console.error(error)
+    console.log(deleteUrl)
+    await axios.delete(deleteUrl);
+    await loadData(true);
+  } catch (error) {
+    console.error('Ошибка:', error);
+    alert(error.response?.data?.message || 'Ошибка сервера');
   }
 }
 
@@ -127,11 +145,13 @@ function openCreateModal () {
 }
 
 function openEditModal (item) {
+  console.log(item)
   editingData.value = { ...item }
   isEditModalVisible.value = true
 }
 
 async function onCreateFormSubmit (data) {
+  console.log(data)
   try {
       await axios.post(
           `${BACKEND_API_HOST}${createFormConfig.apiEndpoint}`,

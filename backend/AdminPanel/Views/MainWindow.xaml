@@ -20,7 +20,7 @@
         <DataGrid x:Name="UsersGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True"
                   SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"/>
+                <DataGridTextColumn Header="ID" Binding="{Binding Index}" Width="Auto"/>
                 <DataGridTextColumn Header="Username" Binding="{Binding Login}" Width="*"/>
             </DataGrid.Columns>
         </DataGrid>

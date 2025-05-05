@@ -34,7 +34,7 @@ public class AcademicPerformanceService : IAcademicPerformanceService
         .Where(ap => 
             ap.Student.GroupSpecializationId == groupKey.SpecializationId &&
             ap.Student.GroupYear == groupKey.Year &&
-            ap.Student.GroupId == groupKey.Id);
+            ap.Student.GroupId == groupKey.Index);
 
     // Запрос для уникальных месяцев с сортировкой
     var monthQuery = baseQuery

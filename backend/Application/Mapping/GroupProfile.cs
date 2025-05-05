@@ -17,9 +17,9 @@ public class GroupProfile: Profile
                         src.Teacher.Patronymic.Substring(0, 1) + "."))
             .ForMember(dest => dest.StudentCount,
                 opt => opt.MapFrom(src => src.Students.Count))
-            .ForMember(d => d.Key,
+            .ForMember(d => d.Id,
                 o => o.MapFrom(
-                    src => new GroupKeyDto(src.SpecializationId, src.Year, src.Id)));
+                    src => new GroupKeyDto(src.SpecializationId, src.Year, src.Index)));
         
         CreateMap<GroupPostDto, Group>();
     }

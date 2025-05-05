@@ -12,7 +12,7 @@ public class GroupConfiguration: IEntityTypeConfiguration<Group>
         {
             g.SpecializationId,
             g.Year,
-            g.Id
+            g.Index
         });
 
         builder.HasOne<Specialization>(g => g.Specialization)
@@ -23,7 +23,7 @@ public class GroupConfiguration: IEntityTypeConfiguration<Group>
         builder.Property(g => g.Year)
             .IsRequired();
             
-        builder.Property(g => g.Id)
+        builder.Property(g => g.Index)
             .IsRequired()
             .HasMaxLength(3);
         
