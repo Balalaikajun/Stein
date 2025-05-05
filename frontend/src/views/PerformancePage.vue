@@ -49,13 +49,11 @@ import menuItems from '@/router/menuData.js'
 import academicConfig from '@/configs/performance.js'
 import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 
-// Props
-defineProps({
-  pageTitle: { type: String, required: true }
-})
 
 // Configs
 const { tableConfig, filters, apiConfig, initialSort } = academicConfig
+const pageTitle = 'Успеваемость'
+
 
 // Students state
 const students = ref([])

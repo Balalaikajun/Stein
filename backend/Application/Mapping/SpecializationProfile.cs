@@ -11,6 +11,8 @@ public class SpecializationProfile:Profile
         CreateMap<Specialization, SpecializationGetDto>()
             .ForMember(dest => dest.DepartmentTitle,
                 opt => opt.MapFrom(src => src.Department.Title));
+        
+        CreateMap<SpecializationPostDto, Specialization>();
     }
     
 }

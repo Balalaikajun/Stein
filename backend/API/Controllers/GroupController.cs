@@ -2,6 +2,8 @@ using Application.DTOs.Department;
 using Application.DTOs.Group;
 using Application.Interfaces;
 using Application.Services;
+using Domain.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -17,12 +19,71 @@ public class GroupController: ControllerBase
         _groupService = groupService;
     }
 
-    [HttpPost]
+    [HttpPost("filter")]
+    [Authorize]
     public async Task<IActionResult> GetPaginated(GroupPaginatedRequest request)
     {
         var result = await _groupService.GetPaginated(request);
         
         return Ok(result);
+    }
+    
+    [HttpPost]
+    [Authorize]
+    public async Task<ActionResult> Create(GroupPostDto dto)
+    {
+        try
+        {
+            await _groupService.Create(dto);
+            return Created();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest("Неизвестная ошибка");
+        }
+    }
+    
+    [HttpPatch]
+    [Authorize]
+    public async Task<ActionResult> Patch(GroupPatchDto dto)
+    {
+        try
+        {
+            await _groupService.Update(dto);
+            return Ok();
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(e.Message);   
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest("Неизвестная ошибка");
+        }
+    }
+    
+    [HttpDelete]
+    [Authorize]
+    public async Task<ActionResult> Delete(GroupKeyDto id)
+    {
+        try
+        {
+            await _groupService.Delete(id);
+            return NoContent();
+        }
+        catch (NotFoundException e)
+        {
+            return NoContent();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest("Неизвестная ошибка");
+        }
+        
+        
     }
     
 }

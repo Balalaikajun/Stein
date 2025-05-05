@@ -6,6 +6,7 @@ using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Domain.Entities;
+using Domain.Exceptions;
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -75,5 +76,45 @@ public class TeacherService: ITeacherService
             Items: resultItems,
             HasMore: hasMore,
             Total: total);
+    }
+    
+    public async Task Create(TeacherPostDto dto)
+    {
+        var teacher = _mapper.Map<Teacher>(dto);
+        
+        _context.Teachers.Add(teacher);
+
+        await _context.SaveChangesAsync();
+    }
+    
+    
+    public async Task Update(TeacherPatchDto dto)
+    {
+        var teacher = await _context.Teachers.FirstOrDefaultAsync(x => x.Id == dto.Id) ??
+                         throw new NotFoundException($"Teacher with id - {dto.Id} was not found");
+        
+        if (!string.IsNullOrWhiteSpace(dto.Surname) && teacher.Surname != dto.Surname)
+            teacher.Surname = dto.Surname;
+        
+        if (!string.IsNullOrWhiteSpace(dto.Name) && teacher.Name != dto.Name)
+            teacher.Name = dto.Name;
+        
+        if (!string.IsNullOrWhiteSpace(dto.Patronymic) && teacher.Patronymic != dto.Patronymic)
+            teacher.Patronymic = dto.Patronymic;
+        
+        if(dto.IsActive.HasValue && dto.IsActive != teacher.IsActive)
+            teacher.IsActive = dto.IsActive.Value;
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task Delete(int id)
+    {
+        var teacher = await _context.Teachers.FirstOrDefaultAsync(x => x.Id == id) ??
+                      throw new NotFoundException($"Teacher with id - {id} was not found");
+        
+        _context.Teachers.Remove(teacher);
+        
+        await _context.SaveChangesAsync();
     }
 }

@@ -33,7 +33,7 @@ async function handleSubmit(e) {
     localStorage.setItem('token', res.data)
     axios.defaults.headers.common['Authorization'] = `Bearer ${res.data}`
 
-    router.push('/')
+    router.push('/departments')
   } catch (err) {
     if (err.response && err.response.status === 400)
       errorsMessage.value = err.response.data

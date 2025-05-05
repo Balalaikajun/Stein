@@ -15,7 +15,7 @@ export const tableConfig = {
 
 export const filters = [
   {
-    id: 'groupFilter',
+    id: 'groupKeys',
     title: 'Группа',
     dataType: 'radio',
     apiEndpoint: '/api/Group',

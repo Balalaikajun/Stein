@@ -45,7 +45,8 @@ export default {
     descending: false
   },
   createFormConfig: {
-    title: 'пользователя',
+    title: 'отделение',
+    apiEndpoint: '/api/Department',
     fields: [
       {
         name: 'title',
@@ -74,12 +75,12 @@ export default {
     ],
   },
   editFormConfig: {
-    title: 'пользователя',
+    title: 'отделение',
     apiEndpoint: '/api/Department',
     fields: [
       {
         name: 'title',
-        label: 'Наименование',
+        label: 'Название',
         type: 'text',
         required: true,
         validate: (v) => v.length <= 125,

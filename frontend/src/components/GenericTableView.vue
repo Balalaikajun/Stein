@@ -25,7 +25,7 @@ const {
   filters,
   apiConfig,
   initialSort,
-  createFormConfig,
+  createFormConfig = {},
   editFormConfig = createFormConfig
 } = props.config
 
@@ -146,7 +146,7 @@ async function onCreateFormSubmit (data) {
 
 async function onEditFormSubmit (data) {
   let success = false
-
+console.log(data)
   try {
       await axios.patch(
           `${BACKEND_API_HOST}${editFormConfig.apiEndpoint}`,
@@ -177,7 +177,10 @@ watch(searchQuery, () => loadData(true))
           <slot name="options"/>
         </div>
         <div class="selection-right">
-          <button @click="openCreateModal" class="button">Создать</button>
+          <button
+              @click="openCreateModal"
+              class="button"
+          v-if="createFormConfig.apiEndpoint">Создать</button>
         </div>
       </div>
 
@@ -217,7 +220,7 @@ watch(searchQuery, () => loadData(true))
             :sort-by="currentSort.key"
             :sort-descending="currentSort.descending"
             :total="total"
-            editable
+            :editable="!!editFormConfig.apiEndpoint"
             @sort="handleSort"
             @load-more="loadMore"
             @row-click="openEditModal"
@@ -233,6 +236,7 @@ watch(searchQuery, () => loadData(true))
   </div>
 
   <FormModal
+      v-if="createFormConfig.apiEndpoint"
       :config="createFormConfig"
       :initial-data="{}"
       :isVisible="isCreateModalVisible"
@@ -241,6 +245,7 @@ watch(searchQuery, () => loadData(true))
       @submit="onCreateFormSubmit"
   />
   <FormModal
+      v-if="editFormConfig.apiEndpoint"
       :config="editFormConfig"
       :initial-data="editingData"
       :isVisible="isEditModalVisible"

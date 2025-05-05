@@ -26,7 +26,7 @@ public class AcademicPerformanceService : IAcademicPerformanceService
    public async Task<BasePaginatedResult<AcademicPerformanceGetDto?>> GetPaginated(
     AcademicPerformancePaginatedRequest request)
 {
-    var groupKey = request.GroupFilter.FirstOrDefault() 
+    var groupKey = request.GroupKeys.FirstOrDefault() 
         ?? throw new ArgumentException("GroupFilter must contain at least one item.");
 
     // Базовый запрос с условиями группы и сортировкой

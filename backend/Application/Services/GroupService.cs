@@ -6,6 +6,7 @@ using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Domain.Entities;
+using Domain.Exceptions;
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -89,6 +90,73 @@ public class GroupService: IGroupService
             Items: resultItems,
             HasMore: hasMore,
             Total: total);
+    }
+    
+    public async Task Create(GroupPostDto dto)
+    {
+        if(!await _context.Specializations.AnyAsync(x => x.Id == dto.SpecializationId))
+            throw new NotFoundException($"Specialization with id - {dto.SpecializationId} was not found");
+        
+        var department = _mapper.Map<Department>(dto);
+        
+        _context.Departments.Add(department);
+
+        await _context.SaveChangesAsync();
+    }
+    
+    
+    public async Task Update(GroupPatchDto dto)
+    {
+        var group = await _context.Groups.FirstOrDefaultAsync(x => 
+                             x.SpecializationId == dto.Key.SpecializationId &&
+                             x.Year == dto.Key.Year &&
+                             x.Id == dto.Key.Id) ??
+                         throw new NotFoundException($"Department with id - {dto.Id} was not found");
+        
+        if (dto.SpecializationId.HasValue && dto.SpecializationId != group.SpecializationId)
+        {
+            if(!await _context.Specializations.AnyAsync(x => x.Id == dto.SpecializationId))
+                throw new NotFoundException($"Specialization with id - {dto.SpecializationId} was not found");
+            
+            group.SpecializationId = dto.SpecializationId.Value;
+        }
+        
+        if(dto.Year.HasValue && dto.Year != group.Year)
+            group.Year = dto.Year.Value;
+        
+        if(!string.IsNullOrWhiteSpace(dto.Id) && dto.Id != group.Id)
+            group.Id = dto.Id;
+        
+        if(!string.IsNullOrWhiteSpace(dto.Acronym) && dto.Acronym != group.Acronym)
+            group.Acronym = dto.Acronym;
+        
+        if(dto.IsActive.HasValue && dto.IsActive != group.IsActive)
+            group.IsActive = dto.IsActive.Value;
+        
+        if (dto.TeacherId.HasValue && dto.TeacherId != group.TeacherId)
+        {
+            if(!await _context.Teachers.AnyAsync(x => x.Id == dto.TeacherId))
+                throw new NotFoundException($"Teacher with id - {dto.TeacherId} was not found");
+            
+            group.TeacherId = dto.TeacherId.Value;
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task Delete(GroupKeyDto id)
+    {
+        var group = await _context.Groups.FirstOrDefaultAsync(x => 
+            x.SpecializationId == id.SpecializationId &&
+            x.Year == id.Year &&
+            x.Id == id.Id);
+        
+        if (group == null)
+            throw new NotFoundException($"Group with id - {id} was not found");
+        
+        _context.Groups.Remove(group);
+        
+        await _context.SaveChangesAsync();
     }
     
 }

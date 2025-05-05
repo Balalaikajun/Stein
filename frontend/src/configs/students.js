@@ -83,7 +83,7 @@ export const filters = [
     id: 'DepartmentIds',
     title: 'Кафедры',
     dataType: 'lookup',
-    apiEndpoint: '/api/Department',
+    apiEndpoint: '/api/Department/filter',
     params: {
       take: 15,
       activeFilter: true,
@@ -104,7 +104,7 @@ export const filters = [
     id: 'SpecializationIds',
     title: 'Специализации',
     dataType: 'lookup',
-    apiEndpoint: '/api/Specialization',
+    apiEndpoint: '/api/Specialization/filter',
     dependsOn: ['DepartmentIds'],
     dependentParams: {
       DepartmentIds: 'departmentIds'

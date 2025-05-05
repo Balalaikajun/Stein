@@ -20,6 +20,8 @@ public class GroupProfile: Profile
             .ForMember(d => d.Key,
                 o => o.MapFrom(
                     src => new GroupKeyDto(src.SpecializationId, src.Year, src.Id)));
+        
+        CreateMap<GroupPostDto, Group>();
     }
     
 }
