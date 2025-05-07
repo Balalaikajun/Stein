@@ -21,7 +21,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.HasOne<Student>(o => o.Student)
             .WithMany()
-            .HasForeignKey(o => o.StudentID)
+            .HasForeignKey(o => o.StudentId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasDiscriminator(o => o.Discriminator)

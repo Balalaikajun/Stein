@@ -6,4 +6,7 @@ namespace Application.Interfaces;
 public interface IStudentService
 {
     Task<BasePaginatedResult<StudentGetDto>> GetPaginated(StudentPaginatedRequest request);
+    Task Create(StudentPostDto dto);
+    Task Update(StudentPatchDto dto);
+    Task Delete(int id);
 }

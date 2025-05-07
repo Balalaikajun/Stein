@@ -8,7 +8,7 @@ public abstract class Order
     public string Discriminator { get; set; }
     public OrderTypes OrderType { get;  set; }
     public string OrderNumber { get; set; }
-    public int StudentID { get; set; }
+    public int StudentId { get; set; }
     public DateOnly Date { get; set; }
     
     public Student Student { get; set; }

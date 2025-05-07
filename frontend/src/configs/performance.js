@@ -18,7 +18,7 @@ export const filters = [
     id: 'groupKeys',
     title: 'Группа',
     dataType: 'radio',
-    apiEndpoint: '/api/Group',
+    apiEndpoint: '/api/Group/filter',
     params: {
       take: 15,
       sortBy: 'acronym',

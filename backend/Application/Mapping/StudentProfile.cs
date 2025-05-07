@@ -11,6 +11,7 @@ public class StudentProfile:Profile
         CreateMap<Student, StudentGetDto>()
             .ForMember(d => d.GroupAcronym,
                 o => o.MapFrom(s => s.Group.Acronym));
+        CreateMap<StudentPostDto, Student>();
     }
     
 }

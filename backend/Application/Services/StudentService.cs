@@ -7,6 +7,7 @@ using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Domain.Entities;
+using Domain.Exceptions;
 using Domain.Interfaces;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
@@ -123,6 +124,52 @@ public class StudentService: IStudentService
         HasMore: hasMore,
         Total: total
     );
+}
+  
+public async Task Create(StudentPostDto dto)
+{
+    var student = _mapper.Map<Student>(dto);
+        
+    _context.Students.Add(student);
+
+    await _context.SaveChangesAsync();
+}
+    
+    
+public async Task Update(StudentPatchDto dto)
+{
+    var student = await _context.Students.FirstOrDefaultAsync(x => x.Id == dto.Id) ??
+                  throw new NotFoundException($"Teacher with id - {dto.Id} was not found");
+        
+    if (!string.IsNullOrWhiteSpace(dto.Surname) && student.Surname != dto.Surname)
+        student.Surname = dto.Surname;
+        
+    if (!string.IsNullOrWhiteSpace(dto.Name) && student.Name != dto.Name)
+        student.Name = dto.Name;
+        
+    if (!string.IsNullOrWhiteSpace(dto.Patronymic) && student.Patronymic != dto.Patronymic)
+        student.Patronymic = dto.Patronymic;
+    
+    if(dto.IsCitizen.HasValue && dto.IsCitizen != student.IsCitizen)
+        student.IsCitizen= dto.IsCitizen.Value;
+        
+    if(dto.Gender.HasValue && dto.Gender != student.Gender)
+        student.Gender= dto.Gender.Value;
+    
+    if(dto.DateOfBirth.HasValue && dto.DateOfBirth != student.DateOfBirth)
+        student.DateOfBirth= dto.DateOfBirth.Value;
+
+    await _context.SaveChangesAsync();
+}
+
+public async Task Delete(int id)
+{
+    var student = await _context.Students.FirstOrDefaultAsync(x => x.Id == id) ??
+                  throw new NotFoundException($"Student with id - {id} was not found");
+        
+    _context.Students.Remove(student);
+        
+    await _context.SaveChangesAsync();
 }
 
     

@@ -1,5 +1,8 @@
 using Application.DTOs.Student;
+using Application.DTOs.Teacher;
 using Application.Interfaces;
+using Domain.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -15,12 +18,70 @@ public class StudentController:ControllerBase
         _studentService = studentService;
     }
 
-    [HttpPost]
+    [HttpPost("filter")]
     public async Task<IActionResult> GetStudents(StudentPaginatedRequest request)
     {
         var result = await _studentService.GetPaginated(request);
         
         return Ok(result);
     }
+    [HttpPost]
+    [Authorize]
+    public async Task<ActionResult> Create(StudentPostDto dto)
+    {
+        try
+        {
+            await _studentService.Create(dto);
+            return Created();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest("Неизвестная ошибка");
+        }
+        
+        
+    }
     
+    [HttpPatch]
+    [Authorize]
+    public async Task<ActionResult> Patch(StudentPatchDto dto)
+    {
+        try
+        {
+            await _studentService.Update(dto);
+            return Ok();
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(e.Message);   
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest("Неизвестная ошибка");
+        }
+    }
+    
+    [HttpDelete]
+    [Authorize]
+    public async Task<ActionResult> Delete(int id)
+    {
+        try
+        {
+            await _studentService.Delete(id);
+            return NoContent();
+        }
+        catch (NotFoundException e)
+        {
+            return NoContent();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest("Неизвестная ошибка");
+        }
+        
+        
+    }
 }

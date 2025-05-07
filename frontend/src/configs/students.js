@@ -1,4 +1,4 @@
-// group.config.js
+// student.config.js
 import { generateYearOptions } from '@/utils/dateUtils.js'
 import {formatStudentStatus, STUDENT_STATUS_OPTIONS} from '@/utils/studentStatusUtils.js'
 
@@ -21,7 +21,7 @@ export const tableConfig = {
       title: 'Гражданство',
       key: 'isCitizen',
       sortKey: 'IsCitizen',
-      formatter: (row) => row.isCitizen ? 'Да' : 'Нет',
+      formatter: (row) => row.isCitizen ? 'РФ' : 'Иное',
       width: '130px'
     },
     {
@@ -125,7 +125,7 @@ export const filters = [
     id: 'GroupKeys',
     title: 'Группы',
     dataType: 'lookup',
-    apiEndpoint: '/api/Group',
+    apiEndpoint: '/api/Group/filter',
     dependsOn: ['DepartmentIds','SpecializationIds'],
     dependentParams: {
       DepartmentIds: 'departmentIds',
@@ -156,8 +156,10 @@ export const filters = [
 ]
 
 export const apiConfig = {
-  endpoint: '/api/Student',
+  endpoint: '/api/Student/filter',
+  deleteEndpoint: '/api/Student',
   paramsMapping: {
+    id: 'id',
     search: 'searchText',
     sortKey: 'sortBy',
     sortOrder: 'descending',
@@ -179,9 +181,137 @@ export const initialSort = {
   descending: false
 }
 
+export const createFormConfig = {
+  title: 'студента',
+  apiEndpoint: '/api/Student',
+  fields: [
+    {
+      name: 'surname',
+      label: 'Фамилия',
+      type: 'text',
+      required: true,
+      validate: v => v.length <= 32,
+      errorMessage: 'Максимум 32 символа'
+    },
+    {
+      name: 'name',
+      label: 'Имя',
+      type: 'text',
+      required: true,
+      validate: v => v.length <= 32,
+      errorMessage: 'Максимум 32 символа'
+    },
+    {
+      name: 'patronymic',
+      label: 'Отчество',
+      type: 'text',
+      required: true,
+      validate: v => v.length <= 32,
+      errorMessage: 'Максимум 32 символа'
+    },
+    {
+      name: 'gender',
+      label: 'Пол',
+      type: 'select',
+      required: true,
+      filter: {
+        staticOptions: [
+          { label: 'Мужской', value: 0 },
+          { label: 'Женский', value: 1 }
+        ],
+        allowDeselect: false
+      }
+    },
+    {
+      name: 'dateOfBirth',
+      label: 'Дата рождения',
+      type: 'date',
+      required: true
+    },
+    {
+      name: 'isCitizen',
+      label: 'Гражданство',
+      type: 'select',
+      required: true,
+      filter: {
+        staticOptions: [
+          { label: 'РФ', value: true },
+          { label: 'Иное', value: false }
+        ],
+        allowDeselect: false
+      }
+    }
+  ]
+}
+
+export const editFormConfig = {
+  title: 'студента',
+  apiEndpoint: '/api/Student',
+  fields: [
+    {
+      name: 'surname',
+      label: 'Фамилия',
+      type: 'text',
+      required: true,
+      validate: v => v.length <= 32,
+      errorMessage: 'Максимум 32 символа'
+    },
+    {
+      name: 'name',
+      label: 'Имя',
+      type: 'text',
+      required: true,
+      validate: v => v.length <= 32,
+      errorMessage: 'Максимум 32 символа'
+    },
+    {
+      name: 'patronymic',
+      label: 'Отчество',
+      type: 'text',
+      required: true,
+      validate: v => v.length <= 32,
+      errorMessage: 'Максимум 32 символа'
+    },
+    {
+      name: 'gender',
+      label: 'Пол',
+      type: 'select',
+      required: true,
+      filter: {
+        staticOptions: [
+          { label: 'Мужской', value: 0 },
+          { label: 'Женский', value: 1 }
+        ],
+        allowDeselect: false
+      }
+    },
+    {
+      name: 'dateOfBirth',
+      label: 'Дата рождения',
+      type: 'date',
+      required: true
+    },
+    {
+      name: 'isCitizen',
+      label: 'Гражданство',
+      type: 'select',
+      required: true,
+      filter: {
+        staticOptions: [
+          { label: 'РФ', value: true },
+          { label: 'Иное', value: false }
+        ],
+        allowDeselect: false
+      }
+    }
+  ]
+}
+
 export default {
   tableConfig,
   filters,
   apiConfig,
-  initialSort
+  initialSort,
+  createFormConfig,
+  editFormConfig
 }
