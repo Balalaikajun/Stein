@@ -1,5 +1,11 @@
 <template>
   <div class="specialty-chart-container">
+    <div class="chart-header">
+      <h3 class="chart-title">{{ title }}</h3>
+      <div class="chart-controls">
+        <slot name="controls"></slot>
+      </div>
+    </div>
     <div class="chart-scroll-wrapper">
       <div class="chart-wrapper">
         <canvas ref="chart"></canvas>
@@ -16,7 +22,6 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
-  Title,
   Tooltip,
   Legend
 } from 'chart.js'
@@ -26,7 +31,6 @@ Chart.register(
     CategoryScale,
     LinearScale,
     BarElement,
-    Title,
     Tooltip,
     Legend
 )
@@ -90,13 +94,6 @@ const initChart = () => {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        title: {
-          display: true,
-          text: props.title,
-          font: { size: 16, weight: '600' },
-          color: textColor,
-          padding: 20
-        },
         tooltip: {
           backgroundColor: bgColor,
           titleColor: textColor,
@@ -181,12 +178,29 @@ onMounted(() => {
 
 <style scoped>
 .specialty-chart-container {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   background: var(--background-color);
   border-radius: var(--border-radius);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
   height: 500px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.chart-title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.chart-controls {
+  flex: 0 0 auto;
 }
 
 .chart-scroll-wrapper {

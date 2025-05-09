@@ -1,6 +1,15 @@
 <template>
   <div class="orders-chart">
-    <canvas ref="chart"></canvas>
+    <div class="chart-header">
+      <h3 class="chart-title">{{ title }}</h3>
+      <!-- Слот справа -->
+      <div class="chart-controls">
+        <slot name="controls"></slot>
+      </div>
+    </div>
+    <div class="chart-body">
+      <canvas ref="chart"></canvas>
+    </div>
   </div>
 </template>
 
@@ -90,14 +99,35 @@ const initChart = () => {
       },
       scales: {
         x: {
-          grid: {
-            display: false
-          },
+          grid: { display: false },
           ticks: {
             color: ticksColor,
             autoSkip: false,
             maxRotation: 45,
-            minRotation: 45
+            minRotation: 45,
+            // функция-обёртка для переноса по словам
+            callback: function(value) {
+              const label = this.getLabelForValue(value) || '';
+              const maxCharsPerLine = 10;  // настраивайте по необходимости
+              const words = label.split(' ');
+              const lines = [];
+              let line = '';
+
+              words.forEach(word => {
+                // если добавление слова не превышает лимит — продолжаем в той же строке
+                if ((line + ' ' + word).trim().length <= maxCharsPerLine) {
+                  line = (line + ' ' + word).trim();
+                } else {
+                  // иначе сохраняем предыдущую строку и начинаем новую
+                  if (line) lines.push(line);
+                  line = word;
+                }
+              });
+              // не забываем последнюю
+              if (line) lines.push(line);
+
+              return lines;
+            }
           }
         },
         y: {
@@ -135,14 +165,39 @@ onMounted(() => {
 
 <style scoped>
 .orders-chart {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 400px;           /* или 300px для мобилки */
   background: var(--background-color);
   border-radius: var(--border-radius);
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  height: 400px;
+  overflow: hidden;
 }
 
+.chart-header {
+  display: flex;                  /* включаем flex */
+  justify-content: space-between; /* распределяем элементы по краям */
+  align-items: center;            /* центрируем по вертикали */
+  margin-bottom: 1rem;
+}
+
+.chart-body {
+  flex: 1 1 auto;          /* тело — занимает всё оставшееся место */
+  position: relative;
+}
+
+.chart-body canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+.chart-title {
+  margin: 0;
+  font-size: 1.25rem;
+}
 @media (max-width: 768px) {
   .orders-chart {
     height: 300px;

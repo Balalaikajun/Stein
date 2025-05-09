@@ -51,38 +51,37 @@
         </div>
 
 
-
         <div class="chart-row">
           <div class="chart-wrapper">
-            <div class="chart-header">
-              <h3>Распределение приказов</h3>
-              <div class="date-range-picker">
-                <div class="date-range">
-                  <label>С:</label>
-                  <input
-                      type="date"
-                      v-model="ordersFilters.startDate"
-                      :max="ordersFilters.endDate"
-                      @change="handleDateChange"
-                  >
-                </div>
-                <div class="date-range">
-                  <label>По:</label>
-                  <input
-                      type="date"
-                      v-model="ordersFilters.endDate"
-                      :min="ordersFilters.startDate"
-                      @change="handleDateChange"
-                  >
-                </div>
-              </div>
-            </div>
             <OrdersHistogram
                 v-if="orders.labels?.length"
                 :labels="orders.labels"
                 :values="orders.values"
                 title="Распределение приказов"
-            />
+            >
+              <template #controls>
+                <div class="date-range-picker">
+                  <div class="date-range">
+                    <label>С:</label>
+                    <input
+                        type="date"
+                        v-model="ordersFilters.startDate"
+                        :max="ordersFilters.endDate"
+                        @change="handleDateChange"
+                    >
+                  </div>
+                  <div class="date-range">
+                    <label>По:</label>
+                    <input
+                        type="date"
+                        v-model="ordersFilters.endDate"
+                        :min="ordersFilters.startDate"
+                        @change="handleDateChange"
+                    >
+                  </div>
+                </div>
+              </template>
+            </OrdersHistogram>
             <div v-else class="loading-placeholder">
               Загрузка данных приказов...
             </div>
@@ -368,7 +367,6 @@ const handleDateChange = async () => {
       end: ordersFilters.value.endDate
     })
 
-
   } catch (error) {
     console.error('Ошибка загрузки:', error)
   }
@@ -376,6 +374,7 @@ const handleDateChange = async () => {
 </script>
 
 <style scoped>
+
 .main-layout {
   display: flex;
   height: 100vh;
@@ -385,7 +384,7 @@ const handleDateChange = async () => {
   flex: 1;
   overflow-y: auto;
   max-height: 100vh;
-  padding-bottom: 2rem;
+  padding-bottom: 1rem;
 }
 
 .dashboard-header {
@@ -428,30 +427,14 @@ const handleDateChange = async () => {
 }
 
 .chart-wrapper {
-  background: var(--background-color);
-  border-radius: var(--border-radius);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
   min-height: 400px;
-}
-
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  gap: 1rem;
 }
 
 .date-range-picker {
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  background: var(--background-secondary);
   padding: 0.75rem 1rem;
-  border-radius: var(--border-radius);
-  border: 1px solid var(--border-color);
 }
 
 .date-range {
@@ -502,39 +485,5 @@ const handleDateChange = async () => {
   background: rgba(255, 68, 68, 0.05);
 }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-  .date-range-picker {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.8rem;
-    width: 100%;
-  }
 
-  .date-range {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .date-range input[type="date"] {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-@media (max-width: 768px) {
-  /* KPI-карточки */
-  .kpi-container {
-    grid-template-columns: 1fr;
-  }
-
-  /* Трендовая диаграмма */
-  .chart-row:not(.pie-row) {
-    grid-template-columns: 1fr;
-  }
-
-  .chart-wrapper {
-    min-height: 300px;
-  }
-}
 </style>
