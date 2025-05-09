@@ -1,5 +1,11 @@
 <template>
   <div class="trend-chart">
+    <div class="chart-header">
+      <h3 class="chart-title">{{ title }}</h3>
+      <div class="chart-controls">
+        <slot name="controls"></slot>
+      </div>
+    </div>
     <canvas ref="chart"></canvas>
   </div>
 </template>
@@ -13,7 +19,6 @@ import {
   LinearScale,
   PointElement,
   LineElement,
-  Title,
   Tooltip,
   Legend
 } from 'chart.js'
@@ -24,7 +29,6 @@ Chart.register(
     LinearScale,
     PointElement,
     LineElement,
-    Title,
     Tooltip,
     Legend
 )
@@ -44,6 +48,22 @@ const props = defineProps({
 
 const chart = ref(null)
 let chartInstance = null
+
+const wrapLabel = (label, maxChars = 10) => {
+  const words = label.split(' ')
+  const lines = []
+  let line = ''
+  words.forEach(word => {
+    if ((line + ' ' + word).trim().length <= maxChars) {
+      line = (line + ' ' + word).trim()
+    } else {
+      if (line) lines.push(line)
+      line = word
+    }
+  })
+  if (line) lines.push(line)
+  return lines
+}
 
 const initChart = () => {
   if (chartInstance) chartInstance.destroy()
@@ -76,13 +96,10 @@ const initChart = () => {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: { bottom: 40 }   // добавляем отступ снизу для место под подписи
+      },
       plugins: {
-        title: {
-          display: true,
-          text: props.title,
-          font: { size: 16, weight: '600' }
-        },
-        legend: { display: false },
         tooltip: {
           backgroundColor: bgColor,
           titleColor: textColor,
@@ -94,8 +111,7 @@ const initChart = () => {
           callbacks: {
             label: context => `Средний балл: ${context.parsed.y}`,
             afterBody: context => {
-              const dataItem = context[0]
-              const idx = dataItem.dataIndex
+              const idx = context[0].dataIndex
               const perf = props.performanceData[idx] || { Excellent: 0, Good: 0, Normal: 0, Falling: 0 }
               return [
                 `Отличники: ${perf.Excellent}`,
@@ -105,10 +121,24 @@ const initChart = () => {
               ]
             }
           }
-        }
+        },
+        legend: { display: false }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { color: ticksColor } },
+        x: {
+          grid: { display: false },
+          ticks: {
+            color: ticksColor,
+            autoSkip: false,
+            maxRotation: 45,
+            minRotation: 45,
+            padding: 10,           // немного отступа вокруг тиков
+            callback: function(val) {
+              const label = this.getLabelForValue(val) || ''
+              return wrapLabel(label, 12)
+            }
+          }
+        },
         y: {
           min: 0,
           max: 100,
@@ -133,12 +163,36 @@ onMounted(() => {
 
 <style scoped>
 .trend-chart {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   background: var(--background-color);
   border-radius: var(--border-radius);
-  padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
   height: 400px;
+  overflow: hidden;       /* предотвращаем выход canvas за пределы */
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.chart-title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.chart-controls {
+  flex: 0 0 auto;
+}
+
+.trend-chart canvas {
+  flex: 1;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 @media (max-width: 768px) {
