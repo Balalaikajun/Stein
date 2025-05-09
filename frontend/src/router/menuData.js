@@ -1,7 +1,7 @@
 export default [
   {
     title: 'Главная',
-    path: '/home',
+    path: '/',
     icon: '🏠'
   },
   {

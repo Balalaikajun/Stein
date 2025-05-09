@@ -135,7 +135,6 @@ async function handleDelete(item) {
     await loadData(true);
   } catch (error) {
     console.error('Ошибка:', error);
-    alert(error.response?.data?.message || 'Ошибка сервера');
   }
 }
 
