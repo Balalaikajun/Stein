@@ -86,6 +86,7 @@ builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IAcademicPerformanceService, AcademicPerformanceService>();
+builder.Services.AddScoped<IMetricsService, MetricsService>();
 
 builder.Services.AddAutoMapper(typeof(DepartmentProfile));
 builder.Services.AddAutoMapper(typeof(SpecializationProfile));

@@ -43,6 +43,9 @@
                 :labels="performance.labels"
                 :values="performance.values"
                 :performance-data="performance.performanceData"
+                :page="performanceFilter.page"
+                :total-pages="performanceFilter.totalPages"
+                @update:page="onPerformancePageChange"
             />
             <div v-else class="loading-placeholder">
               Загрузка данных...
@@ -67,7 +70,7 @@
                         type="date"
                         v-model="ordersFilters.startDate"
                         :max="ordersFilters.endDate"
-                        @change="handleDateChange"
+                        @change="fetchOrdersData"
                     >
                   </div>
                   <div class="date-range">
@@ -76,7 +79,7 @@
                         type="date"
                         v-model="ordersFilters.endDate"
                         :min="ordersFilters.startDate"
-                        @change="handleDateChange"
+                        @change="fetchOrdersData"
                     >
                   </div>
                 </div>
@@ -103,15 +106,16 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import KPICard from '@/components/Charts/KPICard.vue'
 import menuItems from '@/router/menuData.js'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import Pie from '@/components/Charts/Pie.vue'
 import Trend from '@/components/Charts/Trend.vue'
 import OrdersHistogram from '@/components/Charts/OrdersHistogram.vue'
-import { OrderTypes } from '@/utils/OrderTypes.js'
 import SpecializationHistogram from '@/components/Charts/SpecializationHistogram.vue'
+import axios from 'axios'
+import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 
 const kpis = ref({
   students: {
@@ -149,13 +153,15 @@ const pies = ref([
   }
 ])
 
+const performanceFilter = ref({
+  page: 1,
+  pageSize: 6,
+  totalPages: 1
+})
 const performance = ref({
-  labels: ['Сентябрь', 'Октябрь'],
-  values: [82.5, 78.3],
-  performanceData: [
-    { Excellent: 12, Good: 18, Normal: 5, Falling: 2 },
-    { Excellent: 10, Good: 20, Normal: 7, Falling: 3 }
-  ]
+  labels: [],
+  values: [],
+  performanceData: []
 })
 
 const ordersFilters = ref({
@@ -360,7 +366,7 @@ const specialtiesData = ref([
   }
 ])
 
-const handleDateChange = async () => {
+const fetchOrdersData = async () => {
   try {
     const params = new URLSearchParams({
       start: ordersFilters.value.startDate,
@@ -371,6 +377,74 @@ const handleDateChange = async () => {
     console.error('Ошибка загрузки:', error)
   }
 }
+
+async function fetchKPIs () {
+  try {
+    const [
+      studentsRes,
+      ordersRes,
+      foreignRes] = await Promise.all([
+      axios.get(`${BACKEND_API_HOST}/api/Metrics/StudentsCount`),
+      axios.get(`${BACKEND_API_HOST}/api/Metrics/OrdersCount`),
+      axios.get(`${BACKEND_API_HOST}/api/Metrics/ForeignersCount`),
+    ])
+console.log('${BACKEND_API_HOST}/api/Metrics/StudentsCount')
+    // Извлекаем реальные данные из .data
+    const studentsCount = studentsRes.data;
+    const ordersCount   = ordersRes.data;
+    const foreignCount  = foreignRes.data;
+
+    // Допустим, у вас есть реактивный объект kpis.value
+    kpis.value.students.value = studentsCount;
+    kpis.value.orders.value   = ordersCount;
+    kpis.value.foreign.value  = foreignCount;
+
+    // Возвращаем то, что ожидаем — например, весь объект KPI
+    return {
+      students: studentsCount,
+      orders: ordersCount,
+      foreign: foreignCount
+    };
+  }
+  catch (error) {
+    console.log(error)
+  }
+
+
+  return data // ожидаем массив или объект с KPI
+}
+
+async function fetchPerformance (p) {
+  const allLabels = ['Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь', 'Январь', 'Февраль']
+  const allValues = [82.5, 78.3, 75, 88.2, 90.1, 85.5]
+  const allPerf = [
+    { Excellent: 12, Good: 18, Normal: 5, Falling: 2 },
+    { Excellent: 10, Good: 20, Normal: 7, Falling: 3 },
+    { Excellent: 9, Good: 17, Normal: 6, Falling: 4 },
+    { Excellent: 14, Good: 15, Normal: 8, Falling: 1 },
+    { Excellent: 13, Good: 16, Normal: 9, Falling: 2 },
+    { Excellent: 12, Good: 18, Normal: 5, Falling: 2 },
+  ]
+  // Срез по странице:
+  const start = (p - 1) * performanceFilter.value.pageSize
+  const end = start + performanceFilter.value.pageSize
+  performance.value.labels = allLabels.slice(start, end)
+  performance.value.values = allValues.slice(start, end)
+  performance.value.performanceData = allPerf.slice(start, end)
+  // Обновляем общее количество страниц
+  performanceFilter.value.totalPages = Math.ceil(allLabels.length / performanceFilter.value.pageSize)
+}
+
+function onPerformancePageChange (newPage) {
+  console.log('fetchPerformance, page =', p)
+  performanceFilter.value.page = newPage
+  fetchPerformance(newPage)
+}
+
+onMounted(() => {
+  fetchPerformance(performanceFilter.value.page)
+  fetchKPIs()
+})
 </script>
 
 <style scoped>
