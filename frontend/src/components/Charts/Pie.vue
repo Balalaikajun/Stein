@@ -5,16 +5,16 @@
     </div>
     <div v-if="showLegend" class="legend-container">
       <div
-          v-for="(label, index) in labels"
-          :key="label"
+          v-for="segment in pie.segments"
+          :key="segment.label"
           class="legend-item"
       >
         <span
             class="legend-color"
-            :style="{ backgroundColor: colors[index] }"
+            :style="{ backgroundColor: segment.color || defaultColor }"
         ></span>
-        <span class="legend-text">{{ label }}</span>
-        <span class="legend-percent">{{ percentages[index] }}%</span>
+        <span class="legend-text">{{ segment.label }}</span>
+        <span class="legend-percent">{{ percentMap[segment.label] }}%</span>
       </div>
     </div>
   </div>
@@ -27,21 +27,10 @@ import { Chart, PieController, ArcElement, Tooltip, Legend } from 'chart.js'
 Chart.register(PieController, ArcElement, Tooltip, Legend)
 
 const props = defineProps({
-  labels: {
-    type: Array,
-    required: true
-  },
-  values: {
-    type: Array,
-    required: true
-  },
-  colors: {
-    type: Array,
-    default: () => ['#5B00E1', '#7C4DFF', '#FFD740', '#FF5252']
-  },
-  title: {
-    type: String,
-    default: ''
+  pie: {
+    type: Object,
+    required: true,
+    // ожидаем { title: string, segments: Array<{ label, value, color? }> }
   },
   showLegend: {
     type: Boolean,
@@ -50,16 +39,33 @@ const props = defineProps({
   animate: {
     type: Boolean,
     default: true
+  },
+  defaultColor: {
+    type: String,
+    default: '#CCCCCC'
   }
 })
 
 const chart = ref(null)
 let chartInstance = null
 
-const total = computed(() => props.values.reduce((a, b) => a + b, 0))
-const percentages = computed(() =>
-    props.values.map(value => ((value / total.value) * 100).toFixed(1))
+// Вынимаем из pie.segments три параллельных массива:
+const labels = computed(() => props.pie.segments.map(s => s.label))
+const values = computed(() => props.pie.segments.map(s => s.value))
+const colors = computed(() =>
+    props.pie.segments.map(s => s.color || props.defaultColor)
 )
+
+// Считаем проценты и мапим по label для легенды
+const total = computed(() => values.value.reduce((sum, v) => sum + v, 0))
+const percentMap = computed(() => {
+  const m = {}
+  values.value.forEach((v, i) => {
+    const p = total.value > 0 ? ((v / total.value) * 100).toFixed(1) : '0.0'
+    m[labels.value[i]] = p
+  })
+  return m
+})
 
 const initChart = () => {
   if (chartInstance) {
@@ -67,26 +73,27 @@ const initChart = () => {
   }
 
   const ctx = chart.value.getContext('2d')
-
   chartInstance = new Chart(ctx, {
     type: 'pie',
     data: {
-      labels: props.labels,
-      datasets: [{
-        data: props.values,
-        backgroundColor: props.colors,
-        borderColor: 'white',
-        borderWidth: 2,
-        hoverOffset: 8
-      }]
+      labels: labels.value,
+      datasets: [
+        {
+          data: values.value,
+          backgroundColor: colors.value,
+          borderColor: 'white',
+          borderWidth: 2,
+          hoverOffset: 8
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         title: {
-          display: !!props.title,
-          text: props.title,
+          display: !!props.pie.title,
+          text: props.pie.title,
           font: {
             size: 16,
             weight: '600'
@@ -94,17 +101,15 @@ const initChart = () => {
         },
         tooltip: {
           callbacks: {
-            label: (context) => {
-              const label = context.label || ''
-              const value = context.raw || 0
-              const percent = percentages.value[context.dataIndex]
-              return `${label}: ${value} (${percent}%)`
+            label: ctx => {
+              const lbl = ctx.label || ''
+              const val = ctx.raw || 0
+              const pct = percentMap.value[lbl]
+              return `${lbl}: ${val} (${pct}%)`
             }
           }
         },
-        legend: {
-          display: false
-        }
+        legend: { display: false }
       },
       animation: {
         duration: props.animate ? 1000 : 0
@@ -113,9 +118,14 @@ const initChart = () => {
   })
 }
 
-watch(() => [props.values, props.labels], () => {
-  initChart()
-})
+// Следим за изменениями сегментов
+watch(
+    () => props.pie.segments,
+    () => {
+      initChart()
+    },
+    { deep: true }
+)
 
 onMounted(initChart)
 </script>

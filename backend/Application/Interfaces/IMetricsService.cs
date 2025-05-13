@@ -1,10 +1,19 @@
+using Application.DTOs.Metrics;
+
 namespace Application.Interfaces;
 
 public interface IMetricsService
 {
-    Task<int> GetStudentsCountAsync();
-    Task<int> GetOrdersCountAsync();
-    Task<int> GetForeignersCountAsync();
+    Task<CountDto> GetStudentCountAsync();
+    Task<CountDto> GetOrderCountAsync();
+    Task<CountDto> GetForeignCountAsync();
+    Task<CountsDto> GetAllCountsAsync();
+    
+    
+    Task<PieDto> GetGenderDistributionAsync();
+    Task<PieDto> GetAgeDistributionAsync();
+    Task<PieDto> GetCitizenshipDistributionAsync();
+    Task<PiesDto> GetAllPieDistributionsAsync();
     
     
 }
