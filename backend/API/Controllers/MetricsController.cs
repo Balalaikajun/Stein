@@ -1,3 +1,4 @@
+using Application.DTOs.Metrics;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,21 +15,58 @@ public class MetricsController:ControllerBase
         _metricsService = metricsService;
     }
 
-    [HttpGet("StudentsCount")]
-    public async Task<IActionResult> GetStudentsCountAsync()
+    [HttpGet("counts/students")]
+    public async Task<ActionResult<CountDto>> GetStudentCountAsync()
     {
-        return Ok(await _metricsService.GetStudentsCountAsync());
+        var dto = await _metricsService.GetStudentCountAsync();
+        return Ok(dto);
     }
     
-    [HttpGet("OrdersCount")]
-    public async Task<IActionResult> GetOrdersCountAsync()
+    [HttpGet("counts/orders")]
+    public async Task<ActionResult<CountDto>> GetOrderCountAsync()
     {
-        return Ok(await _metricsService.GetOrdersCountAsync());
+        var dto = await _metricsService.GetOrderCountAsync();
+        return Ok(dto);
     }
     
-    [HttpGet("ForeignersCount")]
-    public async Task<IActionResult> GetForeignersCountAsync()
+    [HttpGet("counts/foreigners")]
+    public async Task<ActionResult<CountDto>> GetForeignCountAsync()
     {
-        return Ok(await _metricsService.GetForeignersCountAsync());
+        var dto = await _metricsService.GetForeignCountAsync();
+        return Ok(dto);
+    }
+    [HttpGet("counts")]
+    public async Task<ActionResult<CountsDto>> GetAllCountsAsync()
+    {
+        var dto = await _metricsService.GetAllCountsAsync();
+        return Ok(dto);
+    }
+    
+    [HttpGet("pies/gender")]
+    public async Task<ActionResult<PieDto>> GetGenderDistributionAsync()
+    {
+        var dto = await _metricsService.GetGenderDistributionAsync();
+        return Ok(dto);
+    }
+    
+    [HttpGet("pies/age")]
+    public async Task<ActionResult<PieDto>> GetAgeDistributionAsync()
+    {
+        var dto = await _metricsService.GetAgeDistributionAsync();
+        return Ok(dto);
+    }
+    
+    [HttpGet("pies/citizenship")]
+    public async Task<ActionResult<PieDto>> GetCitizenshipDistributionAsync()
+    {
+        var dto = await _metricsService.GetCitizenshipDistributionAsync();
+        return Ok(dto);
+    }
+    
+    [HttpGet("pies")]
+    public async Task<ActionResult<IEnumerable<PieDto>>> GetAllPieDistributionsAsync()
+    {
+        var dto = await _metricsService.GetAllPieDistributionsAsync();
+        return Ok(dto);
     }
 }

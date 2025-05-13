@@ -27,10 +27,9 @@
               :key="index"
           >
             <Pie
-                :labels="pie.labels"
-                :values="pie.values"
-                :colors="pie.colors"
-                :title="pie.title"
+                :pie="pie"
+                :show-legend="true"
+                :animate="true"
             />
           </div>
         </div>
@@ -132,26 +131,30 @@ const kpis = ref({
   }
 })
 
-const pies = ref([
-  {
-    labels: ['Мужчины', 'Женщины'],
-    values: [68, 32],
-    colors: ['#5B00E1', '#7C4DFF'],
-    title: 'Распределение по полу'
+const pies = ref({
+  gender: {
+    title: 'Распределение по полу',
+    segments: []
   },
-  {
-    labels: ['17-20', '21-25', '26+'],
-    values: [45, 50, 5],
-    colors: ['#5B00E1', '#7C4DFF', '#FFD740'],
-    title: 'Возрастные группы'
+  age: {
+    title: 'Возрастные группы',
+    segments: []
   },
-  {
-    labels: ['РФ', 'СНГ', 'Другое'],
-    values: [85, 12, 3],
-    colors: ['#5B00E1', '#7C4DFF', '#FFD740'],
-    title: 'Гражданство'
+  citizenship: {
+    title: 'Гражданство',
+    segments: []
   }
-])
+})
+const piesMap ={
+  genderLabelMap: {
+    Male: 'Мужчины',
+    Female: 'Женщины'
+  },
+  citizenshipLabelMap:{
+    True: 'Иностранцы',
+    False: 'Граждане РФ'
+  }
+}
 
 const performanceFilter = ref({
   page: 1,
@@ -366,6 +369,8 @@ const specialtiesData = ref([
   }
 ])
 
+const defaultColors = ['#5B00E1', '#7C4DFF', '#FFD740', '#00B8D4', '#FF6D00']
+
 const fetchOrdersData = async () => {
   try {
     const params = new URLSearchParams({
@@ -378,40 +383,38 @@ const fetchOrdersData = async () => {
   }
 }
 
+function mapSegments(segments, labelMap = {}) {
+  return segments.map((s, index) => ({
+    label: labelMap[s.label] ?? s.label,
+    value: s.value,
+    color: defaultColors[index % defaultColors.length]
+  }))
+}
+
 async function fetchKPIs () {
   try {
-    const [
-      studentsRes,
-      ordersRes,
-      foreignRes] = await Promise.all([
-      axios.get(`${BACKEND_API_HOST}/api/Metrics/StudentsCount`),
-      axios.get(`${BACKEND_API_HOST}/api/Metrics/OrdersCount`),
-      axios.get(`${BACKEND_API_HOST}/api/Metrics/ForeignersCount`),
-    ])
-console.log('${BACKEND_API_HOST}/api/Metrics/StudentsCount')
-    // Извлекаем реальные данные из .data
-    const studentsCount = studentsRes.data;
-    const ordersCount   = ordersRes.data;
-    const foreignCount  = foreignRes.data;
+    const data = (await axios.get(`${BACKEND_API_HOST}/api/Metrics/counts`)).data
 
-    // Допустим, у вас есть реактивный объект kpis.value
-    kpis.value.students.value = studentsCount;
-    kpis.value.orders.value   = ordersCount;
-    kpis.value.foreign.value  = foreignCount;
+    kpis.value.students.value = data.students.count
+    kpis.value.orders.value = data.orders.count
+    kpis.value.foreign.value = data.foreign.count
 
-    // Возвращаем то, что ожидаем — например, весь объект KPI
-    return {
-      students: studentsCount,
-      orders: ordersCount,
-      foreign: foreignCount
-    };
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error)
   }
+}
 
+async function fetchPies () {
+  try {
+    const { data } = await axios.get(`${BACKEND_API_HOST}/api/Metrics/pies`)
 
-  return data // ожидаем массив или объект с KPI
+    pies.value.gender.segments = mapSegments(data.gender.segments, piesMap.genderLabelMap)
+    pies.value.age.segments = mapSegments(data.age.segments)
+    pies.value.citizenship.segments = mapSegments(data.citizenship.segments, piesMap.citizenshipLabelMap)
+
+  } catch (error) {
+    console.error('Ошибка при загрузке пай-чартов:', error)
+  }
 }
 
 async function fetchPerformance (p) {
@@ -444,6 +447,7 @@ function onPerformancePageChange (newPage) {
 onMounted(() => {
   fetchPerformance(performanceFilter.value.page)
   fetchKPIs()
+  fetchPies()
 })
 </script>
 
