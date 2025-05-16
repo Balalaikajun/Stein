@@ -34,21 +34,10 @@
           </div>
         </div>
 
-
         <div class="chart-row">
           <div class="chart-wrapper">
-            <Trend
-                v-if="performance.labels?.length"
-                :labels="performance.labels"
-                :values="performance.values"
-                :performance-data="performance.performanceData"
-                :page="performanceFilter.page"
-                :total-pages="performanceFilter.totalPages"
-                @update:page="onPerformancePageChange"
-            />
-            <div v-else class="loading-placeholder">
-              Загрузка данных...
-            </div>
+            <PerformanceHistogram
+              :data="newPerformance.data"/>
           </div>
         </div>
 
@@ -115,6 +104,7 @@ import OrdersHistogram from '@/components/Charts/OrdersHistogram.vue'
 import SpecializationHistogram from '@/components/Charts/SpecializationHistogram.vue'
 import axios from 'axios'
 import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
+import PerformanceHistogram from '@/components/Charts/PerformanceHistogram.vue'
 
 const kpis = ref({
   students: {
@@ -145,12 +135,12 @@ const pies = ref({
     segments: []
   }
 })
-const piesMap ={
+const piesMap = {
   genderLabelMap: {
     Male: 'Мужчины',
     Female: 'Женщины'
   },
-  citizenshipLabelMap:{
+  citizenshipLabelMap: {
     True: 'Иностранцы',
     False: 'Граждане РФ'
   }
@@ -226,148 +216,19 @@ const specialtiesData = ref([
       '3': 35,
       '4': 27
     }
-  },
-  {
-    name: 'Математика',
-    total: 90,
-    courses: {
-      '1': 25,
-      '2': 22,
-      '3': 24,
-      '4': 19
-    }
-  },
-  {
-    name: 'Физика',
-    total: 75,
-    courses: {
-      '1': 20,
-      '2': 18,
-      '3': 22,
-      '4': 15
-    }
-  },
-  {
-    name: 'Информатика',
-    total: 120,
-    courses: {
-      '1': 30,
-      '2': 28,
-      '3': 35,
-      '4': 27
-    }
-  },
-  {
-    name: 'Математика',
-    total: 90,
-    courses: {
-      '1': 25,
-      '2': 22,
-      '3': 24,
-      '4': 19
-    }
-  },
-  {
-    name: 'Физика',
-    total: 75,
-    courses: {
-      '1': 20,
-      '2': 18,
-      '3': 22,
-      '4': 15
-    }
-  },
-  {
-    name: 'Информатика',
-    total: 120,
-    courses: {
-      '1': 30,
-      '2': 28,
-      '3': 35,
-      '4': 27
-    }
-  },
-  {
-    name: 'Математика',
-    total: 90,
-    courses: {
-      '1': 25,
-      '2': 22,
-      '3': 24,
-      '4': 19
-    }
-  },
-  {
-    name: 'Физика',
-    total: 75,
-    courses: {
-      '1': 20,
-      '2': 18,
-      '3': 22,
-      '4': 15
-    }
-  },
-  {
-    name: 'Информатика',
-    total: 120,
-    courses: {
-      '1': 30,
-      '2': 28,
-      '3': 35,
-      '4': 27
-    }
-  },
-  {
-    name: 'Математика',
-    total: 90,
-    courses: {
-      '1': 25,
-      '2': 22,
-      '3': 24,
-      '4': 19
-    }
-  },
-  {
-    name: 'Физика',
-    total: 75,
-    courses: {
-      '1': 20,
-      '2': 18,
-      '3': 22,
-      '4': 15
-    }
-  },
-  {
-    name: 'Информатика',
-    total: 120,
-    courses: {
-      '1': 30,
-      '2': 28,
-      '3': 35,
-      '4': 27
-    }
-  },
-  {
-    name: 'Математика',
-    total: 90,
-    courses: {
-      '1': 25,
-      '2': 22,
-      '3': 24,
-      '4': 19
-    }
-  },
-  {
-    name: 'Физика',
-    total: 75,
-    courses: {
-      '1': 20,
-      '2': 18,
-      '3': 22,
-      '4': 15
-    }
   }
 ])
+
+const newPerformance = ref({
+  data: [
+    { Year: 2024, Month: 1, Count: 50, ExcellentCount: 15, GoodCount: 20, NormalCount: 10, FallingCount: 5 },
+    { Year: 2024, Month: 2, Count: 48, ExcellentCount: 12, GoodCount: 22, NormalCount: 9, FallingCount: 5 },
+    { Year: 2024, Month: 3, Count: 52, ExcellentCount: 18, GoodCount: 18, NormalCount: 10, FallingCount: 6 },
+    { Year: 2024, Month: 4, Count: 55, ExcellentCount: 20, GoodCount: 20, NormalCount: 10, FallingCount: 5 },
+    { Year: 2024, Month: 5, Count: 53, ExcellentCount: 17, GoodCount: 19, NormalCount: 12, FallingCount: 5 },
+    { Year: 2024, Month: 6, Count: 50, ExcellentCount: 16, GoodCount: 18, NormalCount: 11, FallingCount: 5 }
+  ]
+})
 
 const defaultColors = ['#5B00E1', '#7C4DFF', '#FFD740', '#00B8D4', '#FF6D00']
 
@@ -383,7 +244,7 @@ const fetchOrdersData = async () => {
   }
 }
 
-function mapSegments(segments, labelMap = {}) {
+function mapSegments (segments, labelMap = {}) {
   return segments.map((s, index) => ({
     label: labelMap[s.label] ?? s.label,
     value: s.value,
