@@ -12,4 +12,4 @@ public class AcademicPerformance
     
     // Navigation
     public Student Student { get; set; }
-}
+} 

@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Application.DTOs.Order;
 using Application.Interfaces;
 using Application.Services;
@@ -19,7 +20,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddControllers();
+builder.Services.AddControllers().
+    AddJsonOptions(o => 
+        o.JsonSerializerOptions.Converters
+            .Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -86,7 +90,9 @@ builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IAcademicPerformanceService, AcademicPerformanceService>();
-builder.Services.AddScoped<IMetricsService, MetricsService>();
+builder.Services.AddScoped<IUniqueChartsService, UniqueChartsService>();
+builder.Services.AddScoped<IKpiService, KpiService>();
+builder.Services.AddScoped<IPieService, PieService>();
 
 builder.Services.AddAutoMapper(typeof(DepartmentProfile));
 builder.Services.AddAutoMapper(typeof(SpecializationProfile));
@@ -105,6 +111,7 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader();
     });
 });
+
 
 var app = builder.Build();
 

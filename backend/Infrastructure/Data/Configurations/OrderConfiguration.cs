@@ -23,10 +23,5 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .WithMany()
             .HasForeignKey(o => o.StudentId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasDiscriminator(o => o.Discriminator)
-            .HasValue<EnrollmentOrder>(nameof(EnrollmentOrder))
-            .HasValue<TransferOrder>(nameof(TransferOrder))
-            .HasValue<ExpulsionOrder>(nameof(ExpulsionOrder));
     }
 }
