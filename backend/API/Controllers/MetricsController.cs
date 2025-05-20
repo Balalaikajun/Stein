@@ -8,7 +8,7 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class MetricsController:ControllerBase
+public class MetricsController : ControllerBase
 {
     private readonly IKpiService _kpiService;
     private readonly IPieService _pieService;
@@ -23,7 +23,7 @@ public class MetricsController:ControllerBase
         _pieService = pieService;
         _uniqueChartsService = uniqueChartsService;
     }
-   
+
     [HttpPost("kpi")]
     public async Task<ActionResult<CountDto>> GetKpiAsync(
         [FromQuery] KpiTypes type,
@@ -39,9 +39,8 @@ public class MetricsController:ControllerBase
         {
             return BadRequest(ex.Message);
         }
-        
     }
-    
+
     [HttpPost("pie")]
     public async Task<ActionResult<CountDto>> GetPisAsync(
         [FromQuery] PieTypes type,
@@ -58,8 +57,8 @@ public class MetricsController:ControllerBase
             return BadRequest(ex.Message);
         }
     }
-    
-    
+
+
     [HttpPost("histogram/performance")]
     public async Task<ActionResult<PerformanceHistogramDto>> GetPerformanceHistogramAsync(
         [FromBody] PerformanceRequest request)
@@ -76,7 +75,7 @@ public class MetricsController:ControllerBase
         }
     }
 
-    
+
     [HttpPost("histogram/order")]
     public async Task<ActionResult<OrderHistogramDto>> GetOrderHistogramAsync(OrderHistogramRequest request)
     {
@@ -91,5 +90,12 @@ public class MetricsController:ControllerBase
             return BadRequest(ex.Message.ToString());
         }
     }
-   
+
+    [HttpPost("histogram/contingent")]
+    public async Task<ActionResult<OrderHistogramDto>> GetOrderHistogramAsync(ContingentHistogramRequest request)
+    {
+        var dto = await _uniqueChartsService.GetContingentHistogramAsync(request);
+
+        return Ok(dto);
+    }
 }

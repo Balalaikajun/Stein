@@ -23,5 +23,25 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .WithMany()
             .HasForeignKey(o => o.StudentId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.HasOne(o => o.FromGroup)
+            .WithMany(g => g.ExplitOrders)
+            .HasForeignKey(o => new
+            {
+                o.FromSpecializationId,
+                o.FromYear,
+                o.FromGroupId
+            })
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.HasOne(o => o.ToGroup)
+            .WithMany(g => g.EnrollmentOrders)
+            .HasForeignKey(o => new
+            {
+                o.ToSpecializationId,
+                o.ToYear,
+                o.ToGroupId
+            })
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

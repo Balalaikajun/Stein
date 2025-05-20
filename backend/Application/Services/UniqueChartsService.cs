@@ -95,69 +95,117 @@ public class UniqueChartsService : IUniqueChartsService
         return result;
     }
 
-public async Task<OrderHistogramDto> GetOrderHistogramAsync(OrderHistogramRequest request)
-{
-    var query = _context.Orders
-        .AsNoTracking();
-
-    // Фильтр по кафедрам через специализацию
-    if (request.Departments?.Any() == true)
+    public async Task<OrderHistogramDto> GetOrderHistogramAsync(OrderHistogramRequest request)
     {
-        query = query.Where(a => 
-            (a.FromSpecialization != null && 
-             request.Departments.Contains(a.FromSpecialization.DepartmentId)) ||
-            (a.ToSpecialization != null && 
-             request.Departments.Contains(a.ToSpecialization.DepartmentId))
-        );
-    }
+        var query = _context.Orders
+            .AsNoTracking();
 
-    // Фильтр по специализациям
-    if (request.Specializations?.Any() == true)
-    {
-        var specs = request.Specializations.Cast<int?>();
-        query = query.Where(a => 
-            specs.Contains(a.FromSpecializationId) || 
-            specs.Contains(a.ToSpecializationId)
-        );
-    }
-
-    // Фильтр по группам с явной группировкой условий
-    if (request.Groups?.Any() == true)
-    {
-        var groupPredicate = PredicateBuilder.New<Order>(false);
-        foreach (var group in request.Groups)
+        // Фильтр по кафедрам через специализацию
+        if (request.Departments?.Any() == true)
         {
-            groupPredicate = groupPredicate.Or(o =>
-                (o.FromSpecializationId == group.SpecializationId || o.ToSpecializationId == group.SpecializationId) &&
-                (o.FromYear == group.Year || o.ToYear == group.Year) &&
-                (o.FromGroupId == group.Index || o.ToGroupId == group.Index)
+            query = query.Where(a =>
+                (a.FromGroup.Specialization.DepartmentId != null &&
+                 request.Departments.Contains(a.FromGroup.Specialization.DepartmentId)) ||
+                (a.ToGroup.Specialization.DepartmentId != null &&
+                 request.Departments.Contains(a.ToGroup.Specialization.DepartmentId))
             );
         }
-        query = query.Where(groupPredicate);
+
+        // Фильтр по специализациям
+        if (request.Specializations?.Any() == true)
+        {
+            var specs = request.Specializations.Cast<int?>();
+            query = query.Where(a =>
+                specs.Contains(a.FromSpecializationId) ||
+                specs.Contains(a.ToSpecializationId)
+            );
+        }
+
+        if (request.Groups?.Any() == true)
+        {
+            var groupPredicate = PredicateBuilder.New<Group>(false);
+            foreach (var k in request.Groups)
+            {
+                groupPredicate = groupPredicate.Or(s =>
+                    s.SpecializationId == k.SpecializationId &&
+                    s.Year == k.Year &&
+                    s.Index == k.Index);
+            }
+
+            query = query.Where(groupPredicate);
+        }
+
+        // Фильтр по форме обучения
+        if (request.IsFullTime == true)
+        {
+            query = query.Where(a =>
+                !a.FromGroupId.Contains("з") &&
+                !a.ToGroupId.Contains("з")
+            );
+        }
+        else if (request.IsFullTime == false)
+        {
+            query = query.Where(a =>
+                a.FromGroupId.Contains("з") ||
+                a.ToGroupId.Contains("з")
+            );
+        }
+
+        var count = await query.CountAsync();
+        var data = await query
+            .GroupBy(o => o.OrderType)
+            .Select(g => new { Category = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.Category, x => x.Count);
+
+        return new OrderHistogramDto(count, data);
     }
 
-    // Фильтр по форме обучения
-    if (request.IsFullTime == true)
+    public async Task<ContingentHistogramDto> GetContingentHistogramAsync(ContingentHistogramRequest request)
     {
-        query = query.Where(a => 
-            !a.FromGroupId.Contains("з") && 
-            !a.ToGroupId.Contains("з")
-        );
-    }
-    else if (request.IsFullTime == false)
-    {
-        query = query.Where(a => 
-            a.FromGroupId.Contains("з") || 
-            a.ToGroupId.Contains("з")
-        );
-    }
+        var query = _context.Groups
+            .AsNoTracking();
 
-    var count = await query.CountAsync();
-    var data = await query
-        .GroupBy(o => o.OrderType)
-        .Select(g => new { Category = g.Key, Count = g.Count() })
-        .ToDictionaryAsync(x => x.Category, x => x.Count);
+        // Фильтр по форме обучения
+        if (request.IsFullTime == true)
+        {
+            query = query.Where(a => !a.Index.Contains("з"));
+        }
+        else if (request.IsFullTime == false)
+        {
+            query = query.Where(a =>
+                a.Index.Contains("з")
+            );
+        }
 
-    return new OrderHistogramDto(count, data);
-}
+        var nowDate = DateOnly.FromDateTime(DateTime.Now);
+        
+        var raw = await query
+            .Where(g =>
+                g.Year <= request.Date.Year
+                && (g.ReleaseDate.HasValue
+                    ? g.ReleaseDate.Value
+                    : nowDate) >= request.Date
+            )
+            .OrderBy(g => g.Specialization.Department.Title).ThenBy(g => g.Specialization.Title)
+            .Select(g => new {
+                Department=  g.Specialization.Department.Title,
+                Specialization=g.Specialization.Title,
+                Group = g.Acronym,
+                Course = g.IsActive ? (request.Date.Year - g.Year).ToString() : "Выпускники",
+                Count = g.Students.Count
+                - g.EnrollmentOrders.Count(o => o.Date >= request.Date)
+                + g.ExplitOrders.Count(o => o.Date >= request.Date)
+            })
+            .ToListAsync();
+
+        var arr = raw.Select(g => new ContingentDto(
+            g.Department,
+            g.Specialization,
+            g.Course,
+            g.Group,
+            g.Count
+        ));
+
+        return new ContingentHistogramDto(arr);
+    }
 }

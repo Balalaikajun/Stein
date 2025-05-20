@@ -8,11 +8,14 @@ public class Group
     public string Acronym { get; set; }
     public int TeacherId { get; set; }
     public bool IsActive { get; set; } = true;
+    public DateOnly? ReleaseDate { get; set; }
 
     // Navigation
-    public Specialization Specialization { get; set; }
-    public Teacher Teacher { get; set; }
-    public ICollection<Student> Students { get; set; }
-    = new List<Student>();
-    
+    public Specialization? Specialization { get; set; }
+    public Teacher? Teacher { get; set; }
+    public ICollection<Student>? Students { get; set; }
+    public ICollection<Order>? EnrollmentOrders { get; set; }
+
+    public ICollection<Order>? ExplitOrders { get; set; }
+
 }
