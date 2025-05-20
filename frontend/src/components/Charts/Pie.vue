@@ -5,14 +5,14 @@
     </div>
     <div v-if="showLegend" class="legend-container">
       <div
-          v-for="segment in pie.segments"
+          v-for="(segment, index) in pie.segments"
           :key="segment.label"
           class="legend-item"
       >
-        <span
-            class="legend-color"
-            :style="{ backgroundColor: segment.color || defaultColor }"
-        ></span>
+  <span
+      class="legend-color"
+      :style="{ backgroundColor: colors[index] }"
+  ></span>
         <span class="legend-text">{{ segment.label }}</span>
         <span class="legend-percent">{{ percentMap[segment.label] }}%</span>
       </div>
@@ -41,8 +41,12 @@ const props = defineProps({
     default: true
   },
   defaultColor: {
+    type: [String, Array],
+    default: () => '#CCCCCC'
+  },
+  title:{
     type: String,
-    default: '#CCCCCC'
+    required: true
   }
 })
 
@@ -53,8 +57,11 @@ let chartInstance = null
 const labels = computed(() => props.pie.segments.map(s => s.label))
 const values = computed(() => props.pie.segments.map(s => s.value))
 const colors = computed(() =>
-    props.pie.segments.map(s => s.color || props.defaultColor)
-)
+    props.pie.segments.map((s, i) =>
+        s.color || (Array.isArray(props.defaultColor)
+            ? props.defaultColor[i % props.defaultColor.length]
+            : props.defaultColor)
+    ))
 
 // Считаем проценты и мапим по label для легенды
 const total = computed(() => values.value.reduce((sum, v) => sum + v, 0))
@@ -92,8 +99,8 @@ const initChart = () => {
       maintainAspectRatio: false,
       plugins: {
         title: {
-          display: !!props.pie.title,
-          text: props.pie.title,
+          display: !!props.title,
+          text: props.title,
           font: {
             size: 16,
             weight: '600'

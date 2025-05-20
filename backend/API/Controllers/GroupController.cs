@@ -21,7 +21,7 @@ public class GroupController: ControllerBase
 
     [HttpPost("filter")]
     [Authorize]
-    public async Task<IActionResult> GetPaginated(GroupPaginatedRequest request)
+    public async Task<ActionResult<BasePaginatedResult<GroupGetDto>>> GetPaginated(GroupPaginatedRequest request)
     {
         var result = await _groupService.GetPaginated(request);
         

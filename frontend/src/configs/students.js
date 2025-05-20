@@ -141,7 +141,7 @@ export const filters = [
       sortKey: 'sortBy',
       sortOrder: 'descending'
     },
-    mapOption: opt => ({ label: opt.acronym, value: opt.key})
+    mapOption: opt => ({ label: opt.acronym, value: opt.id})
   },
   {
     id: 'Years',

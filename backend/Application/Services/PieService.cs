@@ -37,21 +37,21 @@ public class PieService : IPieService
         var quarry = _context.Students
             .AsNoTracking();
 
-        if (request.Departments?.Any() == true)
-            quarry = quarry.Where(a => request.Departments.Contains(a.Group.Specialization.DepartmentId));
+        if (request.DepartmentIds?.Any() == true)
+            quarry = quarry.Where(a => request.DepartmentIds.Contains(a.Group.Specialization.DepartmentId));
 
-        if (request.Specializations?.Any() == true)
-            quarry = quarry.Where(a => request.Specializations.Contains(a.Group.SpecializationId));
+        if (request.SpecializationIds?.Any() == true)
+            quarry = quarry.Where(a => request.SpecializationIds.Contains(a.Group.SpecializationId));
 
         if (request.IsFullTime == true)
             quarry = quarry.Where(a => !a.GroupId.Contains("з"));
         else if (request.IsFullTime == false)
             quarry = quarry.Where(a => a.GroupId.Contains("з"));
 
-        if (request.Groups?.Any() == true)
+        if (request.GroupKeys?.Any() == true)
         {
             var groupPredicate = PredicateBuilder.New<Student>(false);
-            foreach (var k in request.Groups)
+            foreach (var k in request.GroupKeys)
             {
                 groupPredicate = groupPredicate.Or(s =>
                     s.GroupSpecializationId == k.SpecializationId &&
@@ -82,21 +82,21 @@ public class PieService : IPieService
         var quarry = _context.Students
             .AsNoTracking();
 
-        if (request.Departments?.Any() == true)
-            quarry = quarry.Where(a => request.Departments.Contains(a.Group.Specialization.DepartmentId));
+        if (request.DepartmentIds?.Any() == true)
+            quarry = quarry.Where(a => request.DepartmentIds.Contains(a.Group.Specialization.DepartmentId));
 
-        if (request.Specializations?.Any() == true)
-            quarry = quarry.Where(a => request.Specializations.Contains(a.Group.SpecializationId));
+        if (request.SpecializationIds?.Any() == true)
+            quarry = quarry.Where(a => request.SpecializationIds.Contains(a.Group.SpecializationId));
 
         if (request.IsFullTime == true)
             quarry = quarry.Where(a => !a.GroupId.Contains("з"));
         else if (request.IsFullTime == false)
             quarry = quarry.Where(a => a.GroupId.Contains("з"));
 
-        if (request.Groups?.Any() == true)
+        if (request.GroupKeys?.Any() == true)
         {
             var groupPredicate = PredicateBuilder.New<Student>(false);
-            foreach (var k in request.Groups)
+            foreach (var k in request.GroupKeys)
             {
                 groupPredicate = groupPredicate.Or(s =>
                     s.GroupSpecializationId == k.SpecializationId &&
@@ -124,21 +124,21 @@ public class PieService : IPieService
         var quarry = _context.Students
             .AsNoTracking();
 
-        if (request.Departments?.Any() == true)
-            quarry = quarry.Where(a => request.Departments.Contains(a.Group.Specialization.DepartmentId));
+        if (request.DepartmentIds?.Any() == true)
+            quarry = quarry.Where(a => request.DepartmentIds.Contains(a.Group.Specialization.DepartmentId));
 
-        if (request.Specializations?.Any() == true)
-            quarry = quarry.Where(a => request.Specializations.Contains(a.Group.SpecializationId));
+        if (request.SpecializationIds?.Any() == true)
+            quarry = quarry.Where(a => request.SpecializationIds.Contains(a.Group.SpecializationId));
 
         if (request.IsFullTime == true)
             quarry = quarry.Where(a => !a.GroupId.Contains("з"));
         else if (request.IsFullTime == false)
             quarry = quarry.Where(a => a.GroupId.Contains("з"));
 
-        if (request.Groups?.Any() == true)
+        if (request.GroupKeys?.Any() == true)
         {
             var groupPredicate = PredicateBuilder.New<Student>(false);
-            foreach (var k in request.Groups)
+            foreach (var k in request.GroupKeys)
             {
                 groupPredicate = groupPredicate.Or(s =>
                     s.GroupSpecializationId == k.SpecializationId &&

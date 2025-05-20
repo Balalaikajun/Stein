@@ -81,7 +81,6 @@ function updateFilterValue(filterId, value) {
       .forEach(dep => {
         selectedFilters.value[dep.id] = [];
       });
-
   // Эмитим единожды
   emit('update-filters', { ...selectedFilters.value });
 }

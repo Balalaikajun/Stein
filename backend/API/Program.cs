@@ -20,10 +20,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddControllers().
-    AddJsonOptions(o => 
-        o.JsonSerializerOptions.Converters
-            .Add(new JsonStringEnumConverter()));
+builder.Services.AddControllers()
+    .AddJsonOptions(o =>
+    {
+        o.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
