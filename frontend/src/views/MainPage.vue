@@ -118,7 +118,7 @@
               Загрузка данных приказов...
             </div>
             <div v-else-if="ordersError" class="error-placeholder">
-              Ошибка загрузки приказов. <button @click="fetchOrdersData">Повторить</button>
+              Ошибка загрузки приказов. <button @click="fetchOrders">Повторить</button>
             </div>
             <div v-else class="loading-placeholder">Загрузка данных приказов...</div>
           </div>
@@ -126,7 +126,22 @@
 
         <div class="chart-row">
           <div class="chart-wrapper">
-            <ContingentHistogram :data="chartData" type="Контингент" />
+            <!-- Передаём в компонент нужные пропсы и вставляем слот controls -->
+            <ContingentHistogram :data="contingentData?.data" type="Контингент">
+              <template #controls>
+                <div class="date-range-picker">
+                  <div class="date-range">
+                    <label>На дату:</label>
+                    <input
+                        type="date"
+                        v-model="contingentFilters.date"
+                        :max="new Date().toISOString().split('T')[0]"
+                        class="contingent-date-input"
+                    />
+                  </div>
+                </div>
+              </template>
+            </ContingentHistogram>
           </div>
         </div>
       </div>
@@ -148,6 +163,7 @@ import { usePieCards } from '@/composables/usePieCards.js'
 import FiltersContainer from '@/components/Filters/FiltersContainer.vue'
 import { usePerformanceHistogram } from '@/composables/usePerformanceHistogram.js'
 import { useOrdersHistogram } from '@/composables/useOrdersHistogram.js'
+import {useContingentHistogram} from '@/composables/useContingentHistogram.js'
 
 const filters = ref({})
 const filtersConfig = [
@@ -256,7 +272,6 @@ const {
 
 
 const performance = usePerformanceHistogram(filters)
-console.log(performance.data.value)
 
 // Фильтры для приказов
 const ordersFilters = ref({
@@ -284,74 +299,25 @@ const {
   fetchOrders
 } = useOrdersHistogram(ordersRequestBody)
 
-const chartData = ref([
-  // Физико-математический факультет
-  {
-    department: 'Физико-математический факультет',
-    specialization: 'Прикладная математика',
-    course: '1',
-    group: 'ПМ-101',
-    count: 10
-  },
-  {
-    department: 'Физико-математический факультет',
-    specialization: 'Прикладная математика',
-    course: '1',
-    group: 'ПМ-102',
-    count: 15
-  },
-  {
-    department: 'Физико-математический факультет',
-    specialization: 'Прикладная математика',
-    course: '2',
-    group: 'ПМ-201',
-    count: 12
-  },
-  {
-    department: 'Физико-математический факультет',
-    specialization: 'Прикладная математика',
-    course: '2',
-    group: 'ПМ-202',
-    count: 8
-  },
-  {
-    department: 'Физико-математический факультет',
-    specialization: 'Теоретическая физика',
-    course: '1',
-    group: 'ТФ-101',
-    count: 8
-  },
-  {
-    department: 'Физико-математический факультет',
-    specialization: 'Теоретическая физика',
-    course: '1',
-    group: 'ТФ-102',
-    count: 10
-  },
+const contingentFilters = ref({
+  date: new Date().toISOString().split('T')[0]
+})
 
-  // Филологический факультет
-  {
-    department: 'Филологический факультет',
-    specialization: 'Русская литература',
-    course: '1',
-    group: 'РЛ-101',
-    count: 20
-  },
-  {
-    department: 'Филологический факультет',
-    specialization: 'Русская литература',
-    course: '1',
-    group: 'РЛ-102',
-    count: 18
-  }
-])
+// Собираем тело запроса реактивно
+const contingentRequestBody = computed(() => ({
+  date: contingentFilters.value.date,
+  // Пример: можно добавить дополнительные фильтры
+  isFullTime:filters.value.isFullTime ?? null
+}))
 
-const fetchOrdersData = async () => {
-  await fetchOrders()
-}
+const {
+  data: contingentData,
+  loading: contingentLoading,
+  error: contingentError,
+  fetchContingent
+} = useContingentHistogram(contingentRequestBody)
 
 function onFilterChange (newFilter) {
-  console.log(newFilter)
 
 
 

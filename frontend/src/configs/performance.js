@@ -31,7 +31,7 @@ export const filters = [
     },
     mapOption: opt => ({
       label: opt.acronym,
-      value: [opt.key]
+      value: [opt.id]
     }),
     allowDeselect: false
   },
@@ -48,7 +48,7 @@ export const filters = [
 
 export const apiConfig = {
   student: {
-    endpoint: '/api/Student',
+    endpoint: '/api/Student/filter',
     paramsMapping: {
       take: 'take',
       skip: 'skip',

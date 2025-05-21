@@ -2,7 +2,7 @@
   <div class="filter-item">
     <FilterButton
         ref="btnRef"
-        :title="selectedLabel || filter.title"
+        :title="filter.title ||selectedLabel "
         @toggle="toggle"
         :isOpen="isOpen"
         :hasValue="hasValue"
