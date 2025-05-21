@@ -100,6 +100,12 @@ public class UniqueChartsService : IUniqueChartsService
         var query = _context.Orders
             .AsNoTracking();
 
+        var now = DateOnly.FromDateTime(DateTime.Now);
+        var start = request.DateRange.FromDate.GetValueOrDefault(new DateOnly(now.Year-1, now.Month, now.Day));
+        var end = request.DateRange.FromDate.GetValueOrDefault(new DateOnly(now.Year, now.Month, now.Day));
+        
+        query = query.Where(o => o.Date >= start && o.Date <= end);
+        
         // Фильтр по кафедрам через специализацию
         if (request.Departments?.Any() == true)
         {
@@ -150,7 +156,7 @@ public class UniqueChartsService : IUniqueChartsService
                 a.ToGroupId.Contains("з")
             );
         }
-
+        
         var count = await query.CountAsync();
         var data = await query
             .GroupBy(o => o.OrderType)

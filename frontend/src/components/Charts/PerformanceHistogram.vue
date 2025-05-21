@@ -42,7 +42,6 @@ const props = defineProps({
   },
   title: { type: String, default: 'Динамика успеваемости' }
 })
-
 const chart = ref(null)
 let chartInstance = null
 

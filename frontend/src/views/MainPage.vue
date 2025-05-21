@@ -1,6 +1,6 @@
 <template>
   <div class="main-layout">
-    <Sidebar :items="menuItems"/>
+    <Sidebar :items="menuItems" />
 
     <div class="content-area">
       <div class="dashboard-header">
@@ -12,13 +12,8 @@
         />
       </div>
 
-
-
-      <!-- Блок KPI -->
       <div class="kpi-container">
-        <div v-if="kpiIsLoading" class="kpi-loading">
-          Загрузка KPI…
-        </div>
+        <div v-if="kpiIsLoading" class="kpi-loading">Загрузка KPI…</div>
         <div v-else-if="kpiError" class="kpi-error">
           Ошибка при загрузке KPI.
           <button @click="fetchAllKpis">Повторить</button>
@@ -35,18 +30,9 @@
       </div>
 
       <div class="charts-container">
-        <!-- Блок Pie-диаграмм -->
         <div class="chart-row pie-row">
-          <div
-              class="chart-wrapper"
-              v-if="pieIsLoading"
-          >
-            Загрузка Pie‐данных…
-          </div>
-          <div
-              v-else-if="pieError"
-              class="chart-wrapper error"
-          >
+          <div v-if="pieIsLoading" class="chart-wrapper">Загрузка Pie‐данных…</div>
+          <div v-else-if="pieError" class="chart-wrapper error">
             Ошибка при загрузке Pie.
             <button @click="fetchAllPies">Повторить</button>
           </div>
@@ -67,20 +53,44 @@
           </template>
         </div>
 
-        <div class="chart-row">
-          <div class="chart-wrapper">
-            <PerformanceHistogram
-                :data="newPerformance.data"
-            />
-          </div>
-        </div>
+
+            <div class="chart-row">
+              <div class="chart-wrapper">
+                <PerformanceHistogram
+                    :data="performance.data.value"
+                    :loading="performance.loading"
+                >
+                  <template #controls>
+                    <div class="performance-controls-simple">
+                      <button
+                          @click="performance.prevPage"
+                          class="pagination-btn-simple"
+                          :disabled="!performance.hasBefore"
+                      >
+                        Назад
+                      </button>
+                      <span class="date-range-simple">
+                    {{ performance.monthFrom }}/{{ performance.yearFrom }}
+                    – {{ performance.monthTo }}/{{ performance.yearTo }}
+                  </span>
+                      <button
+                          @click="performance.nextPage"
+                          class="pagination-btn-simple"
+                          :disabled="!performance.hasAfter"
+                      >
+                        Вперёд
+                      </button>
+                    </div>
+                  </template>
+                </PerformanceHistogram>
+              </div>
+            </div>
 
         <div class="chart-row">
           <div class="chart-wrapper">
             <OrdersHistogram
-                v-if="orders.labels?.length"
-                :labels="orders.labels"
-                :values="orders.values"
+                v-if="ordersData?.data"
+                :order-dto="ordersData"
                 title="Распределение приказов"
             >
               <template #controls>
@@ -91,8 +101,7 @@
                         type="date"
                         v-model="ordersFilters.startDate"
                         :max="ordersFilters.endDate"
-                        @change="fetchOrdersData"
-                    >
+                    />
                   </div>
                   <div class="date-range">
                     <label>По:</label>
@@ -100,24 +109,24 @@
                         type="date"
                         v-model="ordersFilters.endDate"
                         :min="ordersFilters.startDate"
-                        @change="fetchOrdersData"
-                    >
+                    />
                   </div>
                 </div>
               </template>
             </OrdersHistogram>
-            <div v-else class="loading-placeholder">
+            <div v-else-if="ordersLoading" class="loading-placeholder">
               Загрузка данных приказов...
             </div>
+            <div v-else-if="ordersError" class="error-placeholder">
+              Ошибка загрузки приказов. <button @click="fetchOrdersData">Повторить</button>
+            </div>
+            <div v-else class="loading-placeholder">Загрузка данных приказов...</div>
           </div>
         </div>
 
         <div class="chart-row">
           <div class="chart-wrapper">
-            <ContingentHistogram
-                :data="chartData"
-                type="Контингент"
-            />
+            <ContingentHistogram :data="chartData" type="Контингент" />
           </div>
         </div>
       </div>
@@ -137,6 +146,8 @@ import ContingentHistogram from '@/components/Charts/ContingentHistogram.vue'
 import { useAllKpis } from '@/composables/useKpiCards.js'
 import { usePieCards } from '@/composables/usePieCards.js'
 import FiltersContainer from '@/components/Filters/FiltersContainer.vue'
+import { usePerformanceHistogram } from '@/composables/usePerformanceHistogram.js'
+import { useOrdersHistogram } from '@/composables/useOrdersHistogram.js'
 
 const filters = ref({})
 const filtersConfig = [
@@ -244,38 +255,34 @@ const {
 } = usePieCards(pieTypes, filters.value)
 
 
+const performance = usePerformanceHistogram(filters)
+console.log(performance.data.value)
 
-
-const performanceFilter = ref({
-  page: 1,
-  pageSize: 6,
-  totalPages: 1
-})
-
-const performance = ref({
-  labels: [],
-  values: [],
-  performanceData: []
-})
-
+// Фильтры для приказов
 const ordersFilters = ref({
-  startDate: new Date().toISOString().split('T')[0],
+  startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 2)
+      .toISOString().split('T')[0],
   endDate: new Date().toISOString().split('T')[0]
 })
-const orders = ref({
-  labels: [
-    'Зачисление',
-    'Перевод из вуза',
-    'Перевод в вуз',
-    'Восст. из отчисления',
-    'Восст. из академа',
-    'Академотпуск',
-    'Перевод между группами',
-    'Отчисление',
-    'Выпуск'
-  ],
-  values: [12, 5, 3, 2, 4, 7, 6, 9, 15]
-})
+
+// Собираем тело запроса реактивно
+const ordersRequestBody = computed(() => ({
+  dateRange:{
+    fromDate: ordersFilters.value.startDate,
+    toDate: ordersFilters.value.endDate
+  },
+  // Пример: можно добавить дополнительные фильтры
+  departments: filters.value.departmentIds ?? null,
+  specializations: filters.value.SpecializationIds ?? null,
+  groups: filters.value.GroupKeys ?? null
+}))
+
+const {
+  data: ordersData,
+  loading: ordersLoading,
+  error: ordersError,
+  fetchOrders
+} = useOrdersHistogram(ordersRequestBody)
 
 const chartData = ref([
   // Физико-математический факультет
@@ -339,84 +346,17 @@ const chartData = ref([
   }
 ])
 
-const specialtiesData = ref([
-  {
-    name: 'Информатика',
-    total: 120,
-    courses: {
-      '1': 30,
-      '2': 28,
-      '3': 35,
-      '4': 27
-    }
-  },
-  {
-    name: 'Математика',
-    total: 90,
-    courses: {
-      '1': 25,
-      '2': 22,
-      '3': 24,
-      '4': 19
-    }
-  }
-])
-
-const newPerformance = ref({
-  data: [
-    { Year: 2024, Month: 1, Count: 50, ExcellentCount: 15, GoodCount: 20, NormalCount: 10, FallingCount: 5 },
-    { Year: 2024, Month: 2, Count: 48, ExcellentCount: 12, GoodCount: 22, NormalCount: 9, FallingCount: 5 },
-    { Year: 2024, Month: 3, Count: 52, ExcellentCount: 18, GoodCount: 18, NormalCount: 10, FallingCount: 6 },
-  ]
-})
-
-const defaultColors = ['#5B00E1', '#7C4DFF', '#FFD740', '#00B8D4', '#FF6D00']
-
 const fetchOrdersData = async () => {
-  try {
-    const params = new URLSearchParams({
-      start: ordersFilters.value.startDate,
-      end: ordersFilters.value.endDate
-    })
-    // Ваш код для загрузки данных приказов
-  } catch (error) {
-    console.error('Ошибка загрузки:', error)
-  }
-}
-
-async function fetchPerformance (p) {
-  const allLabels = ['Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь', 'Январь', 'Февраль']
-  const allValues = [82.5, 78.3, 75, 88.2, 90.1, 85.5]
-  const allPerf = [
-    { Excellent: 12, Good: 18, Normal: 5, Falling: 2 },
-    { Excellent: 10, Good: 20, Normal: 7, Falling: 3 },
-    { Excellent: 9, Good: 17, Normal: 6, Falling: 4 },
-    { Excellent: 14, Good: 15, Normal: 8, Falling: 1 },
-    { Excellent: 13, Good: 16, Normal: 9, Falling: 2 },
-    { Excellent: 12, Good: 18, Normal: 5, Falling: 2 }
-  ]
-  const start = (p - 1) * performanceFilter.value.pageSize
-  const end = start + performanceFilter.value.pageSize
-  performance.value.labels = allLabels.slice(start, end)
-  performance.value.values = allValues.slice(start, end)
-  performance.value.performanceData = allPerf.slice(start, end)
-  performanceFilter.value.totalPages = Math.ceil(allLabels.length / performanceFilter.value.pageSize)
-}
-
-function onMetricsPageChange (newPage) {
-  performanceFilter.value.page = newPage
-  fetchPerformance(newPage)
+  await fetchOrders()
 }
 
 function onFilterChange (newFilter) {
   console.log(newFilter)
 
+
+
   fetchAllPies(newFilter)
 }
-
-onMounted(() => {
-  fetchPerformance(performanceFilter.value.page)
-})
 </script>
 
 <style scoped>
@@ -540,4 +480,47 @@ onMounted(() => {
 .kpi-error button {
   margin-top: 0.5rem;
 }
+
+
+/* === Упрощённый стиль блока успеваемости === */
+.performance-controls-simple {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* выровнять элементы по центру */
+  background: var(--background-color);
+  border: none;              /* Убрали рамку */
+  border-radius: var(--border-radius);
+  padding: 0.5rem 1rem;
+  gap: 1rem;                 /* расстояние между кнопками и датой */
+}
+
+.date-range-simple {
+  color: var(--text-color);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.pagination-btn-simple {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--text-color);
+  border-radius: var(--border-radius);
+  background: var(--background-color);
+  color: var(--text-color);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.pagination-btn-simple:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(91, 0, 225, 0.1); /* чуть светлее, без тени */
+}
+
+.pagination-btn-simple:disabled {
+  background-color: #f5f5f5;
+  color: #a0a0a0;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 </style>

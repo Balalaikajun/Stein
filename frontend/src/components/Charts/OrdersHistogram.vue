@@ -2,7 +2,6 @@
   <div class="orders-chart">
     <div class="chart-header">
       <h3 class="chart-title">{{ title }}</h3>
-      <!-- Слот справа -->
       <div class="chart-controls">
         <slot name="controls"></slot>
       </div>
@@ -37,24 +36,53 @@ Chart.register(
 )
 
 const props = defineProps({
-  labels: {
-    type: Array,
-    default: () => [],
-    validator: value => value.every(item => typeof item === 'string')
+  orderDto: {
+    type: Object,
+    required: true,
+    validator: obj => obj !== null && typeof obj === 'object' && 'data' in obj
   },
-  values: {
-    type: Array,
-    default: () => [],
-    validator: value => value.every(item => Number.isInteger(item)),
-  },
-  title: { type: String, default: 'Статистика приказов' }
+  title: {
+    type: String,
+    default: 'Статистика приказов'
+  }
 })
 
 const chart = ref(null)
 let chartInstance = null
 
+const orderedKeys = [
+  'Enrollment',
+  'TransferFromOtherInstitution',
+  'TransferToOtherInstitution',
+  'ReinstatementFromExpelled',
+  'ReinstatementFromAcademy',
+  'AcademicLeave',
+  'TransferBetweenGroups',
+  'Expulsion',
+  'Graduation'
+]
+
+const keyToLabel = {
+  Enrollment: 'Зачисление',
+  TransferFromOtherInstitution: 'Перевод из вуза',
+  TransferToOtherInstitution: 'Перевод в вуз',
+  ReinstatementFromExpelled: 'Восст. из отчисления',
+  ReinstatementFromAcademy: 'Восст. из академа',
+  AcademicLeave: 'Академотпуск',
+  TransferBetweenGroups: 'Перевод между группами',
+  Expulsion: 'Отчисление',
+  Graduation: 'Выпуск'
+}
+
+const chartLabels = ref([])
+const chartValues = ref([])
+
 const initChart = () => {
-  if (chartInstance) chartInstance.destroy()
+  if (!chart.value || !chart.value.getContext) return
+  if (chartInstance) {
+    chartInstance.destroy()
+    chartInstance = null
+  }
 
   const styles = getComputedStyle(document.documentElement)
   const primaryColor = styles.getPropertyValue('--primary-color').trim() || '#5B00E1'
@@ -66,10 +94,10 @@ const initChart = () => {
   chartInstance = new Chart(chart.value, {
     type: 'bar',
     data: {
-      labels: props.labels,
+      labels: chartLabels.value,
       datasets: [{
         label: 'Количество приказов',
-        data: props.values,
+        data: chartValues.value,
         backgroundColor: primaryColor,
         borderColor: secondaryColor,
         borderWidth: 1,
@@ -82,9 +110,7 @@ const initChart = () => {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false
-        },
+        legend: { display: false },
         tooltip: {
           backgroundColor: bgColor,
           titleColor: textColor,
@@ -92,9 +118,7 @@ const initChart = () => {
           borderColor: secondaryColor,
           borderWidth: 1,
           padding: { x: 12, y: 8 },
-          callbacks: {
-            label: (context) => `Количество: ${context.raw}`
-          }
+          callbacks: { label: context => `Количество: ${context.raw}` }
         }
       },
       scales: {
@@ -105,28 +129,22 @@ const initChart = () => {
             autoSkip: false,
             maxRotation: 45,
             minRotation: 45,
-            // функция-обёртка для переноса по словам
             callback: function(value) {
-              const label = this.getLabelForValue(value) || '';
-              const maxCharsPerLine = 10;  // настраивайте по необходимости
-              const words = label.split(' ');
-              const lines = [];
-              let line = '';
-
+              const label = this.getLabelForValue(value) || ''
+              const maxCharsPerLine = 10
+              const words = label.split(' ')
+              const lines = []
+              let line = ''
               words.forEach(word => {
-                // если добавление слова не превышает лимит — продолжаем в той же строке
                 if ((line + ' ' + word).trim().length <= maxCharsPerLine) {
-                  line = (line + ' ' + word).trim();
+                  line = (line + ' ' + word).trim()
                 } else {
-                  // иначе сохраняем предыдущую строку и начинаем новую
-                  if (line) lines.push(line);
-                  line = word;
+                  if (line) lines.push(line)
+                  line = word
                 }
-              });
-              // не забываем последнюю
-              if (line) lines.push(line);
-
-              return lines;
+              })
+              if (line) lines.push(line)
+              return lines
             }
           }
         },
@@ -137,9 +155,7 @@ const initChart = () => {
             stepSize: 1,
             precision: 0
           },
-          grid: {
-            color: 'rgba(0, 0, 0, 0.05)'
-          }
+          grid: { color: 'rgba(0, 0, 0, 0.05)' }
         }
       }
     }
@@ -147,19 +163,31 @@ const initChart = () => {
 }
 
 watch(
-    () => [props.labels, props.values],
-    () => {
-      if (props.labels.length !== props.values.length) {
-        console.error('Labels and values arrays must have the same length')
-        return
+    () => props.orderDto,
+    dto => {
+      const dataObj = dto?.data ?? {}
+
+      chartLabels.value = orderedKeys.map(key => keyToLabel[key] || key)
+      chartValues.value = orderedKeys.map(key => {
+        const v = dataObj[key]
+        return Number.isInteger(v) ? v : 0
+      })
+
+      if (chartLabels.value.length === chartValues.value.length) {
+        nextTick(() => {
+          initChart()
+        })
       }
-      initChart()
     },
-    { deep: true }
+    { immediate: true }
 )
 
 onMounted(() => {
-  nextTick(initChart)
+  nextTick(() => {
+    if (!chartInstance && chartLabels.value.length && chartValues.value.length) {
+      initChart()
+    }
+  })
 })
 </script>
 
@@ -167,7 +195,7 @@ onMounted(() => {
 .orders-chart {
   display: flex;
   flex-direction: column;
-  height: 400px;           /* или 300px для мобилки */
+  height: 400px;
   background: var(--background-color);
   border-radius: var(--border-radius);
   padding: 1.5rem;
@@ -176,28 +204,35 @@ onMounted(() => {
 }
 
 .chart-header {
-  display: flex;                  /* включаем flex */
-  justify-content: space-between; /* распределяем элементы по краям */
-  align-items: center;            /* центрируем по вертикали */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
 }
 
+.chart-title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.chart-controls {
+  /* сюда попадёт слот "controls" */
+}
+
 .chart-body {
-  flex: 1 1 auto;          /* тело — занимает всё оставшееся место */
+  flex: 1 1 auto;
   position: relative;
 }
 
 .chart-body canvas {
   position: absolute;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   width: 100% !important;
   height: 100% !important;
   display: block;
 }
-.chart-title {
-  margin: 0;
-  font-size: 1.25rem;
-}
+
 @media (max-width: 768px) {
   .orders-chart {
     height: 300px;
