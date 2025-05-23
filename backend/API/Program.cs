@@ -12,8 +12,12 @@ using Microsoft.IdentityModel.Tokens;
 using Application.Interfaces;
 using Domain.Interfaces;
 using Infrastructure.Mapping;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
+using OfficeOpenXml;
+
+ExcelPackage.License.SetNonCommercialPersonal("Вася");
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -95,6 +99,7 @@ builder.Services.AddScoped<IAcademicPerformanceService, AcademicPerformanceServi
 builder.Services.AddScoped<IUniqueChartsService, UniqueChartsService>();
 builder.Services.AddScoped<IKpiService, KpiService>();
 builder.Services.AddScoped<IPieService, PieService>();
+builder.Services.AddScoped<IExcelMigrationService, ExcelMigrationService>();
 
 builder.Services.AddAutoMapper(typeof(DepartmentProfile));
 builder.Services.AddAutoMapper(typeof(SpecializationProfile));

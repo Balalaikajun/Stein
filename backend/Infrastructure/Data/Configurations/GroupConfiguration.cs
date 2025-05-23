@@ -34,6 +34,6 @@ public class GroupConfiguration: IEntityTypeConfiguration<Group>
         builder.HasOne<Teacher>(g => g.Teacher)
             .WithMany(t => t.Groups)
             .HasForeignKey(g => g.TeacherId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
