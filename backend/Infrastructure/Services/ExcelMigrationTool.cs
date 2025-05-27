@@ -236,7 +236,7 @@ public class ExcelMigrationService : IExcelMigrationService
                     "Отчислены" => OrderTypes.Expulsion,
                     "Выпущен" => OrderTypes.Graduation
                 },
-                OrderNumber = ordersWorksheet.Cells[row, 3].Text,
+                Number = ordersWorksheet.Cells[row, 3].Text,
                 StudentId = int.Parse(ordersWorksheet.Cells[row, 4].Text),
                 Date = DateOnly.FromDateTime(DateTime.FromOADate((double)ordersWorksheet.Cells[row, 5].Value)),
                 ToSpecializationId = ParseNullableInt(ordersWorksheet.Cells[row, 6].Text),
@@ -321,14 +321,14 @@ public class ExcelMigrationService : IExcelMigrationService
         }
     }
 
-    private void UpdateStudentFromOrder(Student student, Order order)
+    private static void UpdateStudentFromOrder(Student student, Order order)
     {
         switch (order.OrderType)
         {
             case OrderTypes.Enrollment 
                 or OrderTypes.TransferFromOtherInstitution
-                or OrderTypes.TransferToOtherInstitution
-                or OrderTypes.ReinstatementFromAcademy:
+                or OrderTypes.ReinstatementFromAcademy
+                or OrderTypes.ReinstatementFromExpelled:
                 student.Status = StudentStatuses.Active;
                 student.GroupSpecializationId = order.ToSpecializationId;
                 student.GroupYear = order.ToYear;

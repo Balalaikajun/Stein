@@ -8,6 +8,7 @@ import StudentsPage from '@/views/StudentsPage.vue'
 import OrderPage from '@/views/OrderPage.vue'
 import PerformancePage from '@/views/PerformancePage.vue'
 import MainPage from '@/views/MainPage.vue'
+import MigrationPage from '@/views/MigrationPage.vue'
 
 
 const routes = [
@@ -55,6 +56,11 @@ const routes = [
         path: "/",
         name: "home",
         component: MainPage
+    },
+    {
+        path: "/admin/migration",
+        name: "migration",
+        component: MigrationPage,
     }
 
 

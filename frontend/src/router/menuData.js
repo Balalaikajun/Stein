@@ -10,12 +10,8 @@ export default [
     isOpen: false,
     children: [
       {
-        title: 'Добавить приказ',
-        path: '/admin/add-order'
-      },
-      {
-        title: 'Внести данные',
-        path: '/admin/performance'
+        title: 'Внесение данных',
+        path: '/admin/migration',
       }
     ]
   },
@@ -32,10 +28,5 @@ export default [
       { title: 'Приказы', path: '/orders' },
       { title: 'Успеваемость', path: '/performance' }
     ]
-  },
-  {
-    title: 'Дашборд',
-    path: '/dashboard',
-    icon: '📊'
   }
 ]

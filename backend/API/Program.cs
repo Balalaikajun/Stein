@@ -4,13 +4,12 @@ using System.Text.Json.Serialization;
 using Application.DTOs.Order;
 using Application.Interfaces;
 using Application.Services;
-using Domain.Exceptions;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Application.Interfaces;
 using Domain.Interfaces;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Infrastructure.Mapping;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -58,6 +57,8 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<OrderPostDtoValidator>();
 
 
 builder.Services.AddDbContext<IApplicationDbContext,ApplicationDbContext>(options => 
