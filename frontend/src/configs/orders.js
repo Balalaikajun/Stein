@@ -66,7 +66,7 @@ export const filters = [
 ]
 
 export const apiConfig = {
-  endpoint: '/api/Order',
+  endpoint: '/api/Order/filter',
   paramsMapping: {
     search: 'searchText',
     sortKey: 'sortBy',
@@ -85,9 +85,80 @@ export const initialSort = {
   descending: true
 }
 
+export const  createFormConfig = {
+  title: 'курс',
+  apiEndpoint: '/api/Specialization',
+  fields: [
+    {
+      name: 'title',
+      label: 'Название специальности',
+      type: 'text',
+      required: true,
+      validate: (v) => v.length <= 150,
+      errorMessage: 'Максимум 300 символов'
+    },
+    {
+      name: 'code',
+      label: 'Код',
+      type: 'text',
+      required: true,
+      validate: (v) => v.length <= 25,
+      errorMessage: 'Максимум 50 символов'
+    },
+    {
+      name: 'acronym',
+      label: 'Сокращение',
+      type: 'text',
+      required: true,
+      validate: (v) => v.length <= 15,
+      errorMessage: 'Максимум 50 символов'
+    },
+    {
+      name: 'departmentId',
+      label: 'Отделение',
+      type: 'select',
+      required: true,
+      filter: {
+        id: 'DepartmentId',
+        title: 'Отделение',
+        dataType: 'lookup',
+        apiEndpoint: '/api/Department/filter',
+        params: {
+          take: 15,
+        },
+        paramKeys: {
+          skip: 'skip',
+          take: 'take',
+          search: 'searchText',
+          sortKey: 'sortBy',
+          sortOrder: 'descending'
+        },
+        mapOption: opt => ({ label: opt.title, value: opt.id })
+      }
+    },
+    {
+      name: 'isActive',
+      label: 'Статус',
+      type: 'select',
+      required: true,
+      errorMessage: 'Необходимо выбрать статус',
+      filter: {
+        id: 'statusFilter',
+        title: 'Статус',
+        staticOptions: [
+          { label: 'Активен', value: true },
+          { label: 'Неактивен', value: false }
+        ],
+        allowDeselect: false
+      }
+    }
+  ]
+}
+
 export default {
   tableConfig,
   filters,
   apiConfig,
-  initialSort
+  initialSort,
+  createFormConfig
 }

@@ -6,7 +6,7 @@ public class Order
 {
     public int Id { get; set; }
     public OrderTypes OrderType { get;  set; }
-    public string OrderNumber { get; set; }
+    public string Number { get; set; }
     public int StudentId { get; set; }
     public int? FromSpecializationId { get; set; }
     public int? FromYear { get; set; }

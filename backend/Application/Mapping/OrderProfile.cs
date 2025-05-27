@@ -21,6 +21,8 @@ public class OrderProfile: Profile
                 o => o.MapFrom(src => src.ToGroup.Acronym))
             .ForMember(d => d.GroupFromAcronym,
                 o => o.MapFrom(src => src.FromGroup.Acronym));
+
+        CreateMap<OrderPostDto, Order>();
     }
     
 }

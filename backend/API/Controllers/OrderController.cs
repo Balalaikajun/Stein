@@ -2,6 +2,8 @@ using Application.DTOs.Order;
 using Application.Interfaces;
 using Application.Services;
 using Domain.Entities;
+using Domain.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -17,13 +19,44 @@ public class OrderController: ControllerBase
         _orderService = orderService;
     }
 
-    [HttpPost]
+    [Authorize]
+    [HttpPost("filter")]
     public async Task<ActionResult> GetPaginated(OrderPaginatedRequest request)
     {
         var result =await _orderService.GetPaginated(request);
         
         return Ok(result);
     }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<ActionResult> Create(OrderPostDto dto)
+    {
+        try
+        {
+            await _orderService.Create(dto);
+            return Created();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(e.InnerException.Message);
+        }
+    }
     
-    
+    [HttpDelete]
+    [Authorize]
+    public async Task<ActionResult> Delete(int id)
+    {
+        try
+        {
+            await _orderService.Delete(id);
+            return NoContent();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(e.Message);
+        }
+    }
 }

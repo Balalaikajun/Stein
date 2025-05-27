@@ -3,13 +3,15 @@
     <div v-if="isVisible" class="modal-overlay" @click.self="close">
       <div class="modal-container">
         <div class="modal-header">
-          <h2>{{ isEditing ? `Редактировать ${config.title}` : `Создать ${config.title}` }}</h2>
+          <h2>
+            {{ isEditing ? `Редактировать ${config.title}` : `Создать ${config.title}` }}
+          </h2>
           <button class="close-button" @click="close">&times;</button>
         </div>
         <div class="modal-content">
           <form @submit.prevent="handleSubmit">
             <div
-                v-for="field in config.fields"
+                v-for="field in visibleFields"
                 :key="field.name"
                 class="form-group"
             >
@@ -28,6 +30,7 @@
                   v-else-if="field.type === 'select'"
                   v-model="formData[field.name]"
                   :filter="field.filter"
+                  :options="field.options"
               />
 
               <div v-if="errors[field.name]" class="error-message">
@@ -51,33 +54,27 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import Selector from '@/components/Form/Fields/Selector.vue'
 
 const props = defineProps({
-  config: {
-    type: Object,
-    required: true
-  },
-  isVisible: {
-    type: Boolean,
-    required: true
-  },
-  isEditing: {
-    type: Boolean,
-    default: false
-  },
-  initialData: {
-    type: Object,
-    default: () => ({})
-  }
+  config: { type: Object, required: true },
+  isVisible: { type: Boolean, required: true },
+  isEditing: { type: Boolean, default: false },
+  initialData: { type: Object, default: () => ({}) }
 })
-
 const emit = defineEmits(['update:isVisible', 'submit'])
 
 const formData = reactive({})
 const errors = reactive({})
 
+// 1) Инициализируем сразу ВСЕ поля (без учёта initialData)
+props.config.fields.forEach(f => {
+  formData[f.name] = ''
+  errors[f.name] = ''
+})
+
+// 2) При первом появлении initialData, перезаполняем formData и errors
 watch(
     () => props.initialData,
     (data) => {
@@ -89,14 +86,24 @@ watch(
     { immediate: true }
 )
 
-function validate() {
+// 3) visibleFields: фильтруем по showIf (или всегда true, если showIf нет)
+const visibleFields = computed(() => {
+  return props.config.fields.filter(field => {
+    if (!field.showIf) return true
+    return field.showIf(formData)
+  })
+})
+
+function validate () {
   let isValid = true
-  props.config.fields.forEach(f => {
+
+  // Валидируем только видимые поля
+  visibleFields.value.forEach(f => {
     errors[f.name] = ''
     const val = formData[f.name]
 
-    // Обновленная проверка
-    if (f.required && (val === undefined || val === null)) {
+    // требуем непустое значение, если field.required=true
+    if (f.required && (val === undefined || val === null || val === '')) {
       errors[f.name] = f.errorMessage || 'Обязательное поле'
       isValid = false
     }
@@ -106,14 +113,14 @@ function validate() {
       isValid = false
     }
   })
+
   return isValid
 }
 
-async function handleSubmit (data) {
+async function handleSubmit () {
   if (!validate()) return
 
   const filteredData = filterNonEmptyFields(formData)
-
   const payload = props.isEditing
       ? { ...filteredData, id: props.initialData.id }
       : { ...filteredData }
@@ -122,7 +129,7 @@ async function handleSubmit (data) {
   close()
 }
 
-function filterNonEmptyFields(obj) {
+function filterNonEmptyFields (obj) {
   const filtered = {}
   for (const key in obj) {
     const value = obj[key]

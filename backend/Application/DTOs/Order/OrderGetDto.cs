@@ -8,7 +8,7 @@ public record OrderGetDto
 
     public int Id { get; init; }
     public OrderTypes OrderType { get; init; }
-    public string OrderNumber { get; init; } = default!;
+    public string Number { get; init; } = default!;
     public string StudentFullName { get; init; } = default!;
     public DateOnly Date { get; init; }
     public string? GroupFromAcronym { get; init; }
