@@ -6,6 +6,6 @@ import teachers from '@/configs/teachers.js'
 <template>
   <GenericTableView
       :config="teachers"
-      page-title="Отделения"
+      page-title="Преподаватели"
   />
 </template>

@@ -47,7 +47,7 @@ export default {
       id: 'DepartmentIds',
       title: 'Отделения',
       dataType: 'lookup',
-      apiEndpoint: '/api/Department',
+      apiEndpoint: '/api/Department/filter',
       params: {
         take: 100,
         activeFilter: true,
@@ -70,11 +70,11 @@ export default {
     deleteEndpoint: '/api/Specialization',
     paramsMapping: {
       id: 'id',
-      search: 'SearchText',
-      sortKey: 'SortBy',
-      sortOrder: 'Descending',
-      take: 'Take',
-      skip: 'Skip'
+      search: 'searchText',
+      sortKey: 'sortBy',
+      sortOrder: 'descending',
+      take: 'take',
+      skip: 'skip'
     }
   },
   initialSort: {

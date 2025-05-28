@@ -40,8 +40,8 @@ public class AcademicPerformanceService : IAcademicPerformanceService
     var monthQuery = baseQuery
         .Select(ap => new { ap.Year, ap.Month })
         .Distinct()
-        .OrderByDescending(x => x.Year)
-        .ThenByDescending(x => x.Month);
+        .OrderBy(x => x.Year)
+        .ThenBy(x => x.Month);
 
     // Применяем пагинацию к месяцам
     var months = await monthQuery

@@ -7,4 +7,5 @@ public class GroupGetDto
     public string TeacherFullname { get; set; }
     public int StudentCount { get; set; }
     public bool IsActive { get; set; }
+    public DateOnly? ReleaseDate { get; set; }
 }

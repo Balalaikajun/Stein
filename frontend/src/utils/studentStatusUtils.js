@@ -1,8 +1,10 @@
 export const STUDENT_STATUS_KEYS = {
-  1: 'Активный',
-  2: 'Отчислен',
-  3: 'Академ',
-  4: 'Выпускник'
+  'Active': 'Активный',
+  'Expelled': 'Отчислен',
+  'Vacation': 'Академ',
+  'Released': 'Выпускник',
+  'TransferToOtherInstitution': 'Переведён в другое ОУ',
+  'NotActive':'Не активен'
 };
 
 export function formatStudentStatus(code) {

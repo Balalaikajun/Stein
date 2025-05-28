@@ -61,7 +61,7 @@ public class KpiService : IKpiService
         quarry = quarry
             .Where(s => s.IsCitizen == false && s.Status == StudentStatuses.Active);
         
-        return new CountDto(await _context.Students
+        return new CountDto(await quarry
             .CountAsync());
     }
 }

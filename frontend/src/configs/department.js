@@ -33,11 +33,11 @@ export default {
     deleteEndpoint:'/api/Department',
     paramsMapping: {
       id: "id",
-      search: 'SearchText',
-      sortKey: 'SortBy',
-      sortOrder: 'Descending',
-      take: 'Take',
-      skip: 'Skip'
+      search: 'searchText',
+      sortKey: 'sortBy',
+      sortOrder: 'descending',
+      take: 'take',
+      skip: 'skip'
     }
   },
   initialSort: {

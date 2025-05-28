@@ -28,7 +28,7 @@ export const tableConfig = {
       title: 'Пол',
       key: 'gender',
       sortKey: 'Gender',
-      formatter: (row) => row.gender  === 0 ? 'Мужской' : 'Женский',
+      formatter: (row) => row.gender  === 'Male' ? 'Мужской' : 'Женский',
       width: '120px'
     },
     {
@@ -65,8 +65,8 @@ export const filters = [
     title: 'Пол',
     dataType: 'radio',
     staticOptions: [
-      { label: 'Мужской', value: 0 },
-      { label: 'Женский', value: 1 }
+      { label: 'Мужской', value: 'Male' },
+      { label: 'Женский', value: 'Female' }
     ],
     allowDeselect: true,
   },

@@ -231,6 +231,16 @@ const filtersConfig = [
     },
     mapOption: opt => ({ label: opt.acronym, value: opt.id })
   },
+  {
+    id: 'isFulltime',
+    title: 'Очно/заочно',
+    dataType: 'radio',
+    staticOptions: [
+      { label: 'Очное отделение', value: true },
+      { label: 'Заочное отделение', value: false }
+    ],
+    allowDeselect: true,
+  }
 ]
 
 const {
@@ -263,12 +273,22 @@ const pieNameMapping = {
   agegroup: 'Распределение во возрастам',
   nationality: 'Распределение по гражданству'
 }
+const piesValuesMapping = {
+  Gender: {
+    Male:   'Мужской',
+    Female: 'Женский'
+  },
+  Nationality: {
+    False:   "Рф",
+    True:"Иное"
+  }
+};
 const {
   pies,
   pieIsLoading,
   pieError,
   fetchAllPies
-} = usePieCards(pieTypes, filters.value)
+} = usePieCards(pieTypes,piesValuesMapping, filters.value)
 
 
 const performance = usePerformanceHistogram(filters)

@@ -87,9 +87,11 @@ const loadData = async (reset = false) => {
         `${BACKEND_API_HOST}${apiConfig.endpoint}`,
         params
     )
-
+    console.log(params)
+    console.log(data)
+    console.log(data.total)
     tableItems.value = reset ? data.items : [...tableItems.value, ...data.items]
-    if (params.Skip === 0) {
+    if (params.skip === 0) {
       total.value = data.total
     }
     hasMore.value = data.hasMore
@@ -106,35 +108,35 @@ const toggleVisibility = () => {
   isOpen.value = !isOpen.value
 }
 
-async function handleDelete(item) {
-  const idField = apiConfig.paramsMapping.id;
-  let deleteUrl = `${BACKEND_API_HOST}${apiConfig.deleteEndpoint}`;
+async function handleDelete (item) {
+  const idField = apiConfig.paramsMapping.id
+  let deleteUrl = `${BACKEND_API_HOST}${apiConfig.deleteEndpoint}`
 
   // Валидация
   if (Array.isArray(idField)) {
-    const missing = idField.filter(f => !item.id[f]);
+    const missing = idField.filter(f => !item.id[f])
     if (missing.length) {
-      alert(`Ошибка: нет полей ${missing.join(', ')}`);
-      return;
+      alert(`Ошибка: нет полей ${missing.join(', ')}`)
+      return
     }
     const params = idField
         .map(f => `${f}=${encodeURIComponent(item.id[f])}`)
-        .join('&');
-    deleteUrl += `?${params}`;
+        .join('&')
+    deleteUrl += `?${params}`
   } else {
     if (!item[idField]) {
-      alert('Не найден идентификатор');
-      return;
+      alert('Не найден идентификатор')
+      return
     }
-    deleteUrl += `?${idField}=${encodeURIComponent(item[idField])}`;
+    deleteUrl += `?${idField}=${encodeURIComponent(item[idField])}`
   }
 
   try {
     console.log(deleteUrl)
-    await axios.delete(deleteUrl);
-    await loadData(true);
+    await axios.delete(deleteUrl)
+    await loadData(true)
   } catch (error) {
-    console.error('Ошибка:', error);
+    console.error('Ошибка:', error)
   }
 }
 
@@ -152,27 +154,25 @@ function openEditModal (item) {
 async function onCreateFormSubmit (data) {
   console.log(data)
   try {
-      await axios.post(
-          `${BACKEND_API_HOST}${createFormConfig.apiEndpoint}`,
-          data)
+    await axios.post(
+        `${BACKEND_API_HOST}${createFormConfig.apiEndpoint}`,
+        data)
 
     await loadData(true)
-  }
-  catch(error) {
+  } catch (error) {
     console.log(error)
   }
 }
 
 async function onEditFormSubmit (data) {
   let success = false
-console.log(data)
+  console.log(data)
   try {
-      await axios.patch(
-          `${BACKEND_API_HOST}${editFormConfig.apiEndpoint}`,
-          data)
+    await axios.patch(
+        `${BACKEND_API_HOST}${editFormConfig.apiEndpoint}`,
+        data)
     await loadData(true)
-  }
-  catch(error) {
+  } catch (error) {
     console.log(error)
   }
 }
@@ -199,7 +199,8 @@ watch(searchQuery, () => loadData(true))
           <button
               @click="openCreateModal"
               class="button"
-          v-if="createFormConfig.apiEndpoint">Создать</button>
+              v-if="createFormConfig.apiEndpoint">Создать
+          </button>
         </div>
       </div>
 

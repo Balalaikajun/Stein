@@ -27,7 +27,13 @@ export const tableConfig = {
       sortKey: 'IsActive',
       formatter: (value) => value ? 'Активна' : 'Неактивна',
       width: '120px'
+    },
+    {
+      title: 'Дата выпуска',
+      key: 'releaseDate',
+      sortKey: 'ReleaseDate'
     }
+
   ]
 }
 

@@ -21,9 +21,9 @@ function shiftMonth(year, month, offset) {
 export function usePerformanceHistogram(
   filtersRef,
   options = {
-    pageSize: 6,            // Сколько месяцев показывать в одном «листе»
-    initialYearTo: null,     // По умолчанию — текущая дата (year, month)
-    initialMonthTo: null
+    pageSize: 12,            // Сколько месяцев показывать в одном «листе»
+    initialYearTo: 2025,    // По умолчанию — текущая дата (year, month)
+    initialMonthTo: 7
   }
 ) {
   // === Состояние пагинации ===
