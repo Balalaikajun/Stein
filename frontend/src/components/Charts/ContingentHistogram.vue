@@ -11,6 +11,11 @@
         <canvas ref="chart"></canvas>
       </div>
     </div>
+    <!-- Блок с общей численностью приказов (теперь под графиком) -->
+    <div class="total-orders">
+      <span>Всего приказов:</span>
+      <span class="total-value">{{ totalOrders }}</span>
+    </div>
   </div>
 </template>
 
@@ -52,6 +57,10 @@ const props = defineProps({
             'count' in item &&
             Number.isInteger(item.count)
         )
+  },
+  totalOrders: {
+    type: Number,
+    required: true
   },
   title: { type: String, default: 'Распределение студентов' }
 })
@@ -322,6 +331,20 @@ onMounted(() => {
 .chart-wrapper {
   min-width: 800px;
   height: 100%;
+}
+
+/* Теперь блок с общим числом стоит ПОД графиком, не покрывая его */
+.total-orders {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: flex-end;
+  font-size: 0.95rem;
+  color: var(--text-color);
+}
+
+.total-orders .total-value {
+  font-weight: bold;
+  margin-left: 0.25rem;
 }
 
 @media (max-width: 768px) {

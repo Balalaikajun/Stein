@@ -11,23 +11,29 @@
       <!-- Меню -->
       <ul class="sidebar__menu">
         <li v-for="item in items" :key="item.title" class="menu-item">
+          <!-- добавляем :class для активного состояния -->
           <div
               class="menu-item__header"
+              :class="{
+              'menu-item__header--active': isActive(item.path)
+            }"
               :aria-expanded="item.isOpen"
               @click="item.children ? toggleItem(item) : null"
           >
             <span v-if="item.icon" class="menu-item__icon">{{ item.icon }}</span>
+
             <!-- Если элемент не имеет вложенных пунктов -->
             <template v-if="!item.children">
+              <!-- можно оставить router-link как раньше -->
               <router-link
                   :to="item.path"
                   class="menu-item__link"
-                  :class="{ 'menu-item__link--active': isActive(item.path) }"
                   exact-active-class="menu-item__link--active"
               >
                 {{ item.title }}
               </router-link>
             </template>
+
             <!-- Если элемент имеет вложения -->
             <template v-else>
               <span class="menu-item__title">{{ item.title }}</span>
@@ -38,7 +44,11 @@
           <!-- Подменю с анимацией -->
           <transition name="menu-slide">
             <ul v-if="item.children && item.isOpen" class="submenu">
-              <li v-for="child in item.children" :key="child.title" class="submenu__item">
+              <li
+                  v-for="child in item.children"
+                  :key="child.title"
+                  class="submenu__item"
+              >
                 <router-link
                     :to="child.path"
                     class="submenu__link"
@@ -61,7 +71,6 @@
     </div>
   </nav>
 </template>
-
 <script setup>
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -82,9 +91,11 @@ const handleLogout = () => {
   router.push('/authentication')
 }
 
-const isActive = (path) => route.path === path
+// Проверка активности: если точное совпадение или вложенный путь
+const isActive = (path) => {
+  return route.path === path || route.path.startsWith(path + '/')
+}
 </script>
-
 <!-- Стили можно оставить без изменений, если они соответствуют дизайну -->
 <style scoped>
 .sidebar {
@@ -139,10 +150,6 @@ const isActive = (path) => route.path === path
   gap: 0.625rem;
 }
 
-.menu-item__header:hover {
-  background-color: var(--hover-color);
-}
-
 .menu-item__link,
 .menu-item__title {
   flex: 1;
@@ -161,7 +168,6 @@ const isActive = (path) => route.path === path
 
 .menu-item__link--active,
 .menu-item__header[aria-expanded="true"] {
-  background-color: var(--active-bg-color);
   color: var(--primary-color);
   font-weight: 500;
 }
@@ -200,10 +206,6 @@ const isActive = (path) => route.path === path
   border-radius: var(--border-radius);
   transition: all var(--transition-duration) ease;
   font-size: 0.875rem;
-}
-
-.submenu__link:hover {
-  background-color: var(--hover-color);
 }
 
 .submenu__link--active {
@@ -256,4 +258,23 @@ const isActive = (path) => route.path === path
   opacity: 1;
   transform: translateY(0);
 }
+
+.menu-item__header--active {
+  background-color: var(--active-bg-color); /* или любой другой фон */
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+/* Чтобы текст внутри ссылок унаследовал цвет, можно добавить: */
+.menu-item__header--active .menu-item__link {
+  color: inherit;
+  font-weight: inherit;
+}
+
+/* Если нужно, чтобы и иконка и стрелка тоже поменяли цвет, можно написать: */
+.menu-item__header--active .menu-item__icon,
+.menu-item__header--active .menu-item__arrow {
+  color: var(--primary-color);
+}
+
 </style>

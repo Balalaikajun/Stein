@@ -185,15 +185,17 @@ public class UniqueChartsService : IUniqueChartsService
                 a.Index.Contains("з")
             );
         }
-        
-        var raw = await query
+
+        query = query
             .Where(g =>
                 g.Year <= request.Date.Year
                 && (
                     !g.ReleaseDate.HasValue
                     || g.ReleaseDate.Value >= request.Date
                 )
-            )
+            );
+        
+        var raw = await query
             .OrderBy(g => g.Specialization.Department.Title)
             .ThenBy(g => g.Specialization.Title)
             .Select(g => new {
@@ -211,6 +213,7 @@ public class UniqueChartsService : IUniqueChartsService
             })
             .ToListAsync();
 
+        var count = raw.Sum(x => x.Count);
         var arr = raw.Select(g => new ContingentDto(
             g.Department,
             g.Specialization,
@@ -219,7 +222,7 @@ public class UniqueChartsService : IUniqueChartsService
             g.Count
         ));
 
-        return new ContingentHistogramDto(arr);
+        return new ContingentHistogramDto(count,arr);
     }
     private static string CalculateCourse(int groupStartYear, DateOnly date)
     {

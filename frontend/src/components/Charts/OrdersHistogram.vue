@@ -6,8 +6,16 @@
         <slot name="controls"></slot>
       </div>
     </div>
+
+    <!-- График -->
     <div class="chart-body">
       <canvas ref="chart"></canvas>
+    </div>
+
+    <!-- Блок с общей численностью приказов (теперь под графиком) -->
+    <div class="total-orders">
+      <span>Всего приказов:</span>
+      <span class="total-value">{{ totalOrders }}</span>
     </div>
   </div>
 </template>
@@ -36,10 +44,14 @@ Chart.register(
 )
 
 const props = defineProps({
-  orderDto: {
+  orderData: {
     type: Object,
     required: true,
-    validator: obj => obj !== null && typeof obj === 'object' && 'data' in obj
+    validator: obj => obj !== null && typeof obj === 'object'
+  },
+  totalOrders: {
+    type: Number,
+    required: true
   },
   title: {
     type: String,
@@ -74,10 +86,10 @@ const keyToLabel = {
   Graduation: 'Выпуск'
 }
 
-const chartLabels = ref([])
+const chartLabels = ref(orderedKeys.map(key => keyToLabel[key] || key))
 const chartValues = ref([])
 
-const initChart = () => {
+function initChart() {
   if (!chart.value || !chart.value.getContext) return
   if (chartInstance) {
     chartInstance.destroy()
@@ -118,7 +130,9 @@ const initChart = () => {
           borderColor: secondaryColor,
           borderWidth: 1,
           padding: { x: 12, y: 8 },
-          callbacks: { label: context => `Количество: ${context.raw}` }
+          callbacks: {
+            label: context => `Количество: ${context.raw}`
+          }
         }
       },
       scales: {
@@ -129,7 +143,7 @@ const initChart = () => {
             autoSkip: false,
             maxRotation: 45,
             minRotation: 45,
-            callback: function(value) {
+            callback(value) {
               const label = this.getLabelForValue(value) || ''
               const maxCharsPerLine = 10
               const words = label.split(' ')
@@ -163,28 +177,24 @@ const initChart = () => {
 }
 
 watch(
-    () => props.orderDto,
-    dto => {
-      const dataObj = dto?.data ?? {}
-
-      chartLabels.value = orderedKeys.map(key => keyToLabel[key] || key)
-      chartValues.value = orderedKeys.map(key => {
-        const v = dataObj[key]
+    () => props.orderData,
+    newObj => {
+      const arr = orderedKeys.map(key => {
+        const v = newObj[key]
         return Number.isInteger(v) ? v : 0
       })
+      chartValues.value = arr
 
-      if (chartLabels.value.length === chartValues.value.length) {
-        nextTick(() => {
-          initChart()
-        })
-      }
+      nextTick(() => {
+        initChart()
+      })
     },
     { immediate: true }
 )
 
 onMounted(() => {
   nextTick(() => {
-    if (!chartInstance && chartLabels.value.length && chartValues.value.length) {
+    if (!chartInstance && chartValues.value.length) {
       initChart()
     }
   })
@@ -195,12 +205,10 @@ onMounted(() => {
 .orders-chart {
   display: flex;
   flex-direction: column;
-  height: 400px;
   background: var(--background-color);
   border-radius: var(--border-radius);
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
 }
 
 .chart-header {
@@ -220,8 +228,9 @@ onMounted(() => {
 }
 
 .chart-body {
-  flex: 1 1 auto;
   position: relative;
+  flex: 1 1 auto;
+  height: 350px; /* фиксируем высоту, чтобы канвас занял всегда определённое место */
 }
 
 .chart-body canvas {
@@ -233,10 +242,29 @@ onMounted(() => {
   display: block;
 }
 
+/* Теперь блок с общим числом стоит ПОД графиком, не покрывая его */
+.total-orders {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: flex-end;
+  font-size: 0.95rem;
+  color: var(--text-color);
+}
+
+.total-orders .total-value {
+  font-weight: bold;
+  margin-left: 0.25rem;
+}
+
 @media (max-width: 768px) {
   .orders-chart {
-    height: 300px;
     padding: 1rem;
+  }
+  .chart-body {
+    height: 250px;
+  }
+  .total-orders {
+    font-size: 0.85rem;
   }
 }
 </style>

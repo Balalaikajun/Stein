@@ -90,7 +90,8 @@
           <div class="chart-wrapper">
             <OrdersHistogram
                 v-if="ordersData?.data"
-                :order-dto="ordersData"
+                :order-data="ordersData.data"
+                :total-orders="ordersData.count"
                 title="Распределение приказов"
             >
               <template #controls>
@@ -127,7 +128,10 @@
         <div class="chart-row">
           <div class="chart-wrapper">
             <!-- Передаём в компонент нужные пропсы и вставляем слот controls -->
-            <ContingentHistogram :data="contingentData?.data" type="Контингент">
+            <ContingentHistogram
+                :data="contingentData?.data"
+                :total-orders="contingentData.count"
+                type="Контингент">
               <template #controls>
                 <div class="date-range-picker">
                   <div class="date-range">
