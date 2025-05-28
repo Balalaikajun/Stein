@@ -101,8 +101,8 @@ public class UniqueChartsService : IUniqueChartsService
             .AsNoTracking();
 
         var now = DateOnly.FromDateTime(DateTime.Now);
-        var start = request.DateRange.FromDate.GetValueOrDefault(new DateOnly(now.Year-1, now.Month, now.Day));
-        var end = request.DateRange.FromDate.GetValueOrDefault(new DateOnly(now.Year, now.Month, now.Day));
+        var start = request.DateRange.FromDate.GetValueOrDefault(new DateOnly(now.Year, now.Month, 1));
+        var end = request.DateRange.ToDate.GetValueOrDefault(new DateOnly(now.Year, now.Month, now.Day));
         
         query = query.Where(o => o.Date >= start && o.Date <= end);
         
