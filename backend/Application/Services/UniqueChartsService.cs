@@ -145,7 +145,7 @@ public class UniqueChartsService : IUniqueChartsService
         if (request.IsFullTime == true)
         {
             query = query.Where(a =>
-                !a.FromGroupId.Contains("з") &&
+                !a.FromGroupId.Contains("з") ||
                 !a.ToGroupId.Contains("з")
             );
         }

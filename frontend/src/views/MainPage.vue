@@ -1,6 +1,6 @@
 <template>
   <div class="main-layout">
-    <Sidebar :items="menuItems" />
+    <Sidebar :items="menuItems"/>
 
     <div class="content-area">
       <div class="dashboard-header">
@@ -30,6 +30,7 @@
       </div>
 
       <div class="charts-container">
+        <!-- ROW 1: Pie‐графики -->
         <div class="chart-row pie-row">
           <div v-if="pieIsLoading" class="chart-wrapper">Загрузка Pie‐данных…</div>
           <div v-else-if="pieError" class="chart-wrapper error">
@@ -47,45 +48,45 @@
                   :title="pieNameMapping[key]"
                   :show-legend="true"
                   :animate="true"
-                  :defaultColor="['#5B00E1', '#7C4DFF', '#FFD740 ']"
+                  :defaultColor="['#5B00E1', '#7C4DFF', '#FFD740']"
               />
             </div>
           </template>
         </div>
 
-
-            <div class="chart-row">
-              <div class="chart-wrapper">
-                <PerformanceHistogram
-                    :data="performance.data.value"
-                    :loading="performance.loading"
-                >
-                  <template #controls>
-                    <div class="performance-controls-simple">
-                      <button
-                          @click="performance.prevPage"
-                          class="pagination-btn-simple"
-                          :disabled="!performance.hasBefore"
-                      >
-                        Назад
-                      </button>
-                      <span class="date-range-simple">
-                    {{ performance.monthFrom }}/{{ performance.yearFrom }}
-                    – {{ performance.monthTo }}/{{ performance.yearTo }}
+        <!-- ROW 2: PerformanceHistogram -->
+        <div class="chart-row">
+          <div class="chart-wrapper">
+            <PerformanceHistogram
+                :data="performanceData"
+                :loading="performanceLoading"
+            >
+              <template #controls>
+                <div class="performance-controls-simple">
+                  <button
+                      @click="prevPage"
+                      class="pagination-btn-simple"
+                      :disabled="!hasBefore"
+                  >
+                    Назад
+                  </button>
+                  <span class="date-range-simple">
+                    {{ monthFrom }}/{{ yearFrom }} – {{ monthTo }}/{{ yearTo }}
                   </span>
-                      <button
-                          @click="performance.nextPage"
-                          class="pagination-btn-simple"
-                          :disabled="!performance.hasAfter"
-                      >
-                        Вперёд
-                      </button>
-                    </div>
-                  </template>
-                </PerformanceHistogram>
-              </div>
-            </div>
+                  <button
+                      @click="nextPage"
+                      class="pagination-btn-simple"
+                      :disabled="!hasAfter"
+                  >
+                    Вперёд
+                  </button>
+                </div>
+              </template>
+            </PerformanceHistogram>
+          </div>
+        </div>
 
+        <!-- ROW 3: OrdersHistogram -->
         <div class="chart-row">
           <div class="chart-wrapper">
             <OrdersHistogram
@@ -119,19 +120,25 @@
               Загрузка данных приказов...
             </div>
             <div v-else-if="ordersError" class="error-placeholder">
-              Ошибка загрузки приказов. <button @click="fetchOrders">Повторить</button>
+              Ошибка загрузки приказов.
+              <button @click="fetchOrders">Повторить</button>
             </div>
-            <div v-else class="loading-placeholder">Загрузка данных приказов...</div>
+            <div v-else class="loading-placeholder">
+              Загрузка данных приказов...
+            </div>
           </div>
         </div>
 
+        <!-- ROW 4: ContingentHistogram -->
         <div class="chart-row">
           <div class="chart-wrapper">
-            <!-- Передаём в компонент нужные пропсы и вставляем слот controls -->
+            <!-- 1) Когда есть данные (contingentData.data) → рендерим сам компонент -->
             <ContingentHistogram
-                :data="contingentData?.data"
+                v-if="contingentData?.data"
+                :data="contingentData.data"
                 :total-orders="contingentData.count"
-                type="Контингент">
+                type="Контингент"
+            >
               <template #controls>
                 <div class="date-range-picker">
                   <div class="date-range">
@@ -146,6 +153,22 @@
                 </div>
               </template>
             </ContingentHistogram>
+
+            <!-- 2) Пока идёт загрузка -->
+            <div v-else-if="contingentLoading" class="loading-placeholder">
+              Загрузка данных контингента...
+            </div>
+
+            <!-- 3) Если упала ошибка -->
+            <div v-else-if="contingentError" class="error-placeholder">
+              Ошибка загрузки контингента.
+              <button @click="fetchContingent">Повторить</button>
+            </div>
+
+            <!-- 4) На всякий случай: дефолтный плэйсхолдер (если ни одна из веток выше не сработала) -->
+            <div v-else class="loading-placeholder">
+              Загрузка данных контингента...
+            </div>
           </div>
         </div>
       </div>
@@ -154,7 +177,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import KpiCard from '@/components/Charts/KpiCard.vue'
 import menuItems from '@/router/menuData.js'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
@@ -162,26 +185,30 @@ import Pie from '@/components/Charts/Pie.vue'
 import OrdersHistogram from '@/components/Charts/OrdersHistogram.vue'
 import PerformanceHistogram from '@/components/Charts/PerformanceHistogram.vue'
 import ContingentHistogram from '@/components/Charts/ContingentHistogram.vue'
+import FiltersContainer from '@/components/Filters/FiltersContainer.vue'
+
 import { useAllKpis } from '@/composables/useKpiCards.js'
 import { usePieCards } from '@/composables/usePieCards.js'
-import FiltersContainer from '@/components/Filters/FiltersContainer.vue'
 import { usePerformanceHistogram } from '@/composables/usePerformanceHistogram.js'
 import { useOrdersHistogram } from '@/composables/useOrdersHistogram.js'
-import {useContingentHistogram} from '@/composables/useContingentHistogram.js'
+import { useContingentHistogram } from '@/composables/useContingentHistogram.js'
 
-const filters = ref({})
+// 1. РЕАКТИВНЫЕ ФИЛЬТРЫ — единый объект, за которым будут «следить» все хуки
+const filters = ref({
+  isFullTime: null,
+  departmentIds: [],
+  SpecializationIds: [],
+  GroupKeys: []
+})
+
+// Конфигурация для FiltersContainer (UI‐настройки)
 const filtersConfig = [
   {
     id: 'departmentIds',
     title: 'Кафедры',
     dataType: 'lookup',
     apiEndpoint: '/api/Department/filter',
-    params: {
-      take: 15,
-      activeFilter: true,
-      sortBy: 'Title',
-      descending: false
-    },
+    params: { take: 15, activeFilter: true, sortBy: 'Title', descending: false },
     paramKeys: {
       skip: 'skip',
       take: 'take',
@@ -197,13 +224,9 @@ const filtersConfig = [
     title: 'Специализации',
     dataType: 'lookup',
     apiEndpoint: '/api/Specialization/filter',
-    dependsOn: ['DepartmentIds'],
-    dependentParams: {
-      DepartmentIds: 'departmentIds'
-    },
-    params: {
-      take: 15,
-    },
+    dependsOn: ['departmentIds'],
+    dependentParams: { DepartmentIds: 'departmentIds' },
+    params: { take: 15 },
     paramKeys: {
       skip: 'skip',
       take: 'take',
@@ -218,14 +241,9 @@ const filtersConfig = [
     title: 'Группы',
     dataType: 'lookup',
     apiEndpoint: '/api/Group/filter',
-    dependsOn: ['DepartmentIds', 'SpecializationIds'],
-    dependentParams: {
-      DepartmentIds: 'departmentIds',
-      SpecializationIds: 'specializationIds'
-    },
-    params: {
-      take: 15,
-    },
+    dependsOn: ['departmentIds', 'SpecializationIds'],
+    dependentParams: { DepartmentIds: 'departmentIds', SpecializationIds: 'specializationIds' },
+    params: { take: 15 },
     paramKeys: {
       skip: 'skip',
       take: 'take',
@@ -236,34 +254,33 @@ const filtersConfig = [
     mapOption: opt => ({ label: opt.acronym, value: opt.id })
   },
   {
-    id: 'isFulltime',
+    id: 'isFullTime',
     title: 'Очно/заочно',
     dataType: 'radio',
     staticOptions: [
       { label: 'Очное отделение', value: true },
-      { label: 'Заочное отделение', value: false }
+      { label: 'Заочное отделение', value: false },
+      {label: 'Все', value: null },
     ],
-    allowDeselect: true,
+    allowDeselect: true
   }
 ]
 
+// ========== KPI ========== //
 const {
   kpis,
-  kpiIsLoading, // Было isLoading
-  kpiError,     // Было error
+  kpiIsLoading,
+  kpiError,
   fetchAllKpis
 } = useAllKpis()
 
-// Заголовки для каждого типа KPI
 const kpiNamingMapping = {
   Students: 'Число студентов',
   Orders: 'Приказы за месяц',
   Foreigners: 'Иностранные граждане'
 }
 
-// Формируем массив для перебора в шаблоне
 const kpiList = computed(() => {
-  // kpis.value = { Students: { count: ... }, Orders: { count: ... }, Foreigners: { count: ... } }
   return Object.entries(kpis.value).map(([type, data]) => ({
     title: kpiNamingMapping[type] || type,
     value: data ? data.count : '-',
@@ -271,6 +288,7 @@ const kpiList = computed(() => {
   }))
 })
 
+// ========== PIE ========== //
 const pieTypes = ref(['Gender', 'AgeGroup', 'Nationality'])
 const pieNameMapping = {
   gender: 'Распределение по полам',
@@ -279,38 +297,52 @@ const pieNameMapping = {
 }
 const piesValuesMapping = {
   Gender: {
-    Male:   'Мужской',
+    Male: 'Мужской',
     Female: 'Женский'
   },
   Nationality: {
-    False:   "Рф",
-    True:"Иное"
+    False: 'РФ',
+    True: 'Иное'
   }
-};
+}
+
+// Обратите внимание: передаём именно filters (Ref), а не filters.value
 const {
   pies,
   pieIsLoading,
   pieError,
   fetchAllPies
-} = usePieCards(pieTypes,piesValuesMapping, filters.value)
+} = usePieCards(pieTypes, piesValuesMapping, filters)
 
+// ========== PERFORMANCE ========== //
+// Передаём filters (Ref), внутри хук сам «следит» и перезагружает данные
+const {
+  data: performanceData,
+  loading: performanceLoading,
+  prevPage,
+  nextPage,
+  hasBefore,
+  hasAfter,
+  yearFrom,
+  monthFrom,
+  yearTo,
+  monthTo,
+  reload: fetchPage
+} = usePerformanceHistogram(filters)
 
-const performance = usePerformanceHistogram(filters)
-
-// Фильтры для приказов
+// ========== ORDERS ========== //
 const ordersFilters = ref({
   startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 2)
       .toISOString().split('T')[0],
   endDate: new Date().toISOString().split('T')[0]
 })
 
-// Собираем тело запроса реактивно
 const ordersRequestBody = computed(() => ({
-  dateRange:{
+  dateRange: {
     fromDate: ordersFilters.value.startDate,
     toDate: ordersFilters.value.endDate
   },
-  // Пример: можно добавить дополнительные фильтры
+  // Дополнительно добавляем текущие департаменты/специализации/группы
   departments: filters.value.departmentIds ?? null,
   specializations: filters.value.SpecializationIds ?? null,
   groups: filters.value.GroupKeys ?? null
@@ -323,15 +355,14 @@ const {
   fetchOrders
 } = useOrdersHistogram(ordersRequestBody)
 
+// ========== CONTINGENT ========== //
 const contingentFilters = ref({
   date: new Date().toISOString().split('T')[0]
 })
 
-// Собираем тело запроса реактивно
 const contingentRequestBody = computed(() => ({
   date: contingentFilters.value.date,
-  // Пример: можно добавить дополнительные фильтры
-  isFullTime:filters.value.isFullTime ?? null
+  isFullTime: filters.value.isFullTime
 }))
 
 const {
@@ -341,11 +372,11 @@ const {
   fetchContingent
 } = useContingentHistogram(contingentRequestBody)
 
-function onFilterChange (newFilter) {
-
-
-
-  fetchAllPies(newFilter)
+// ========== ФУНКЦИЯ для обработки смены фильтров ========== //
+// При получении нового набора фильтров просто перезаписываем filters.value.
+// Все хуки, «подписанные» на filters, автоматически перезагрузят свои данные.
+function onFilterChange(newFilter) {
+  filters.value = { ...newFilter }
 }
 </script>
 
@@ -388,7 +419,6 @@ function onFilterChange (newFilter) {
   gap: 1.5rem;
 }
 
-/* Flexbox-ряд для Pie-блоков */
 .pie-row {
   display: flex;
   flex-wrap: nowrap;
@@ -454,8 +484,7 @@ function onFilterChange (newFilter) {
   box-shadow: 0 0 0 3px rgba(91, 0, 225, 0.2);
 }
 
-/* Обработка ошибок */
-.date-range.error input[type="date"] {
+.date-range input[type="date"].error {
   border-color: #ff4444;
   background: rgba(255, 68, 68, 0.05);
 }
@@ -471,17 +500,15 @@ function onFilterChange (newFilter) {
   margin-top: 0.5rem;
 }
 
-
-/* === Упрощённый стиль блока успеваемости === */
 .performance-controls-simple {
   display: flex;
   align-items: center;
-  justify-content: center; /* выровнять элементы по центру */
+  justify-content: center;
   background: var(--background-color);
-  border: none;              /* Убрали рамку */
+  border: none;
   border-radius: var(--border-radius);
   padding: 0.5rem 1rem;
-  gap: 1rem;                 /* расстояние между кнопками и датой */
+  gap: 1rem;
 }
 
 .date-range-simple {
@@ -503,7 +530,7 @@ function onFilterChange (newFilter) {
 
 .pagination-btn-simple:hover:not(:disabled) {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(91, 0, 225, 0.1); /* чуть светлее, без тени */
+  box-shadow: 0 0 0 2px rgba(91, 0, 225, 0.1);
 }
 
 .pagination-btn-simple:disabled {
@@ -512,5 +539,4 @@ function onFilterChange (newFilter) {
   cursor: not-allowed;
   opacity: 0.6;
 }
-
 </style>

@@ -1,38 +1,50 @@
-import { ref, watch } from 'vue'
+import { ref, isRef, unref, computed, watch } from 'vue'
 import axios from 'axios'
 import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 
-export function useOrdersHistogram(requestBodyRef) {
+/**
+ * Хук для загрузки гистограммы приказов
+ *
+ * @param {Object|Ref<Object>} initialRequestBody - тело запроса
+ */
+export function useOrdersHistogram(initialRequestBody = {}) {
+  const requestBodyRef = isRef(initialRequestBody) ? initialRequestBody : ref(initialRequestBody)
+
   const data = ref([])
-  const loading = ref(false)
+  const isLoading = ref(false)
   const error = ref(null)
 
-  const fetchOrders = async () => {
-    loading.value = true
+  const mergedBody = computed(() => unref(requestBodyRef))
+
+  const fetchOrders = async (additionalBody = {}) => {
+    isLoading.value = true
     error.value = null
 
     try {
-      const response = await axios.post(
-        `${BACKEND_API_HOST}/api/Metrics/histogram/order`,
-        requestBodyRef.value,
-        { headers: { 'Content-Type': 'application/json' } }
-      )
+      const finalBody = { ...mergedBody.value, ...additionalBody }
+      const url = `${BACKEND_API_HOST}/api/Metrics/histogram/order`
+
+      const response = await axios.post(url, finalBody, {
+        headers: { 'Content-Type': 'application/json' }
+      })
 
       data.value = response.data
     } catch (err) {
-      console.error('Ошибка загрузки приказов:', err)
+      console.error('Ошибка загрузки гистограммы приказов:', err)
       error.value = err
+      data.value = []
     } finally {
-      loading.value = false
+      isLoading.value = false
     }
   }
 
-  // Подгружаем при изменении параметров
-  watch(requestBodyRef, fetchOrders, { immediate: true })
+  watch(mergedBody, () => {
+    fetchOrders()
+  }, { deep: true, immediate: true })
 
   return {
     data,
-    loading,
+    isLoading,
     error,
     fetchOrders
   }
