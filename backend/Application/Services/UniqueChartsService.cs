@@ -209,7 +209,6 @@ public class UniqueChartsService : IUniqueChartsService
                     && o.Date >= DateOnly.FromDateTime(new DateTime(g.Year, 9, 1))
                 )
             })
-            .Where(g => g.Count > 0)
             .ToListAsync();
 
         var arr = raw.Select(g => new ContingentDto(
