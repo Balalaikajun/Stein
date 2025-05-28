@@ -2,6 +2,7 @@ using Application.DTOs.Metrics;
 using Application.Enums.MetricTypes;
 using Application.Interfaces;
 using Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -25,6 +26,7 @@ public class MetricsController : ControllerBase
     }
 
     [HttpPost("kpi")]
+    [Authorize]
     public async Task<ActionResult<CountDto>> GetKpiAsync(
         [FromQuery] KpiTypes type,
         [FromBody] KpiRequest request)
@@ -42,6 +44,7 @@ public class MetricsController : ControllerBase
     }
 
     [HttpPost("pie")]
+    [Authorize]
     public async Task<ActionResult<CountDto>> GetPisAsync(
         [FromQuery] PieTypes type,
         [FromBody] PieRequest request)
@@ -60,6 +63,7 @@ public class MetricsController : ControllerBase
 
 
     [HttpPost("histogram/performance")]
+    [Authorize]
     public async Task<ActionResult<PerformanceHistogramDto>> GetPerformanceHistogramAsync(
         [FromBody] PerformanceRequest request)
     {
@@ -77,6 +81,7 @@ public class MetricsController : ControllerBase
 
 
     [HttpPost("histogram/order")]
+    [Authorize]
     public async Task<ActionResult<OrderHistogramDto>> GetOrderHistogramAsync(OrderHistogramRequest request)
     {
         try
@@ -92,7 +97,8 @@ public class MetricsController : ControllerBase
     }
 
     [HttpPost("histogram/contingent")]
-    public async Task<ActionResult<OrderHistogramDto>> GetOrderHistogramAsync(ContingentHistogramRequest request)
+    [Authorize]
+    public async Task<ActionResult<ContingentDto>> GetOrderContingentAsync(ContingentHistogramRequest request)
     {
         var dto = await _uniqueChartsService.GetContingentHistogramAsync(request);
 

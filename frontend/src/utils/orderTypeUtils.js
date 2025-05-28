@@ -15,4 +15,4 @@ export function formatOrderType(code) {
 }
 
 export const ORDER_TYPE_OPTIONS = Object.entries(ORDER_TYPE_KEYS)
-  .map(([value, label]) => ({ value: +value, label }));
+  .map(([value, label]) => ({ value, label }));

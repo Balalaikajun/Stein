@@ -28,21 +28,21 @@ public class GroupController: ControllerBase
         return Ok(result);
     }
     
-    [HttpPost]
-    [Authorize]
-    public async Task<ActionResult> Create(GroupPostDto dto)
-    {
-        try
-        {
-            await _groupService.Create(dto);
-            return Created();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            return BadRequest("Неизвестная ошибка");
-        }
-    }
+    // [HttpPost]
+    // [Authorize]
+    // public async Task<ActionResult> Create(GroupPostDto dto)
+    // {
+    //     try
+    //     {
+    //         await _groupService.Create(dto);
+    //         return Created();
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Console.WriteLine(e);
+    //         return BadRequest("Неизвестная ошибка");
+    //     }
+    // }
     
     [HttpPatch]
     [Authorize]

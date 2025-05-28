@@ -28,7 +28,7 @@ public class TeacherController: ControllerBase
         return result;
     }
     
-    [HttpPost]
+    /*[HttpPost]
     [Authorize]
     public async Task<ActionResult> Create(TeacherPostDto dto)
     {
@@ -44,7 +44,7 @@ public class TeacherController: ControllerBase
         }
         
         
-    }
+    }*/
     
     [HttpPatch]
     [Authorize]

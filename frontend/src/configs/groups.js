@@ -115,108 +115,6 @@ export const initialSort = {
   descending: false
 }
 
-export const createFormConfig = {
-  title: 'группу',
-  apiEndpoint: '/api/Group',
-  fields: [
-    {
-      name: 'specializationId',
-      label: 'Специальность',
-      type: 'select',
-      required: true,
-      filter: {
-        id: 'SpecializationId',
-        title: 'Специальность',
-        dataType: 'lookup',
-        apiEndpoint: '/api/Specialization/filter',
-        params: {
-          take: 15,
-        },
-        paramKeys: {
-          skip: 'skip',
-          take: 'take',
-          search: 'searchText',
-          sortKey: 'sortBy',
-          sortOrder: 'descending'
-        },
-        mapOption: opt => ({ label: opt.title, value: opt.id })
-      }
-    },
-    {
-      name: 'year',
-      label: 'год',
-      type: 'select',
-      required: true,
-      filter: {
-        id: 'year',
-        title: 'год',
-        staticOptions: generateYearOptions({
-          from: 2018,
-          to: new Date().getFullYear()
-        }),
-        allowDeselect: false
-      }
-    },
-    {
-      name: 'index',
-      label: 'Идентификатор',
-      type: 'text',
-      required: true,
-      validate: (v) => v.length <= 3,
-      errorMessage: 'Максимум 3 символа'
-    },
-    {
-      name: 'isActive',
-      label: 'Статус',
-      type: 'select',
-      required: true,
-      errorMessage: 'Необходимо выбрать статус',
-      filter: {
-        id: 'statusFilter',
-        title: 'Статус',
-        staticOptions: [
-          { label: 'Активен', value: true },
-          { label: 'Неактивен', value: false }
-        ],
-        allowDeselect: false
-      }
-    },
-    {
-      name: 'acronym',
-      label: 'Сокращение',
-      type: 'text',
-      required: true,
-      validate: (v) => v.length <= 10,
-      errorMessage: 'Максимум 10 символов'
-    },
-    {
-      name: 'teacherId',
-      label: 'Классный руководитель',
-      type: 'select',
-      required: true,
-      filter: {
-        id: 'TeacherId',
-        title: 'Классный руководитель',
-        dataType: 'lookup',
-        apiEndpoint: '/api/Teacher/filter',
-        params: {
-          take: 15,
-        },
-        paramKeys: {
-          skip: 'skip',
-          take: 'take',
-          search: 'searchText',
-          sortKey: 'sortBy',
-          sortOrder: 'descending'
-        },
-        mapOption: opt => ({
-          label: `${opt.surname} ${opt.name[0]}.${opt.patronymic[0]}`,
-          value: opt.id })
-      }
-    }
-  ]
-}
-
 export const editFormConfig = {
   title: 'группу',
   apiEndpoint: '/api/Group',
@@ -263,7 +161,6 @@ export default {
   filters,
   apiConfig,
   initialSort,
-  createFormConfig,
   editFormConfig,
 }
 

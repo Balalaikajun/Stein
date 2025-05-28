@@ -1,6 +1,8 @@
 using Application.DTOs.AcademicPerformance;
+using Application.DTOs.Department;
 using Application.Interfaces;
 using Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -16,8 +18,9 @@ public class AcademicPerformanceController: ControllerBase
         _academicPerformanceService = academicPerformanceService;
     }
 
+    [Authorize]
     [HttpPost]
-    public async Task<IActionResult> Post(AcademicPerformancePaginatedRequest request)
+    public async Task<ActionResult<BasePaginatedResult<AcademicPerformanceGetDto>>> Get(AcademicPerformancePaginatedRequest request)
     {
         var result = await _academicPerformanceService.GetPaginated(request);
         

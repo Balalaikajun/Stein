@@ -1,3 +1,4 @@
+using Application.DTOs.Department;
 using Application.DTOs.Student;
 using Application.DTOs.Teacher;
 using Application.Interfaces;
@@ -19,29 +20,29 @@ public class StudentController:ControllerBase
     }
 
     [HttpPost("filter")]
-    public async Task<IActionResult> GetStudents(StudentPaginatedRequest request)
+    public async Task<ActionResult<BasePaginatedResult<StudentGetDto>>> GetStudents(StudentPaginatedRequest request)
     {
         var result = await _studentService.GetPaginated(request);
         
         return Ok(result);
     }
-    [HttpPost]
-    [Authorize]
-    public async Task<ActionResult> Create(StudentPostDto dto)
-    {
-        try
-        {
-            await _studentService.Create(dto);
-            return Created();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            return BadRequest("Неизвестная ошибка");
-        }
-        
-        
-    }
+    // [HttpPost]
+    // [Authorize]
+    // public async Task<ActionResult> Create(StudentPostDto dto)
+    // {
+    //     try
+    //     {
+    //         await _studentService.Create(dto);
+    //         return Created();
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Console.WriteLine(e);
+    //         return BadRequest("Неизвестная ошибка");
+    //     }
+    //     
+    //     
+    // }
     
     [HttpPatch]
     [Authorize]

@@ -12,4 +12,4 @@ export function formatStudentStatus(code) {
 }
 
 export const STUDENT_STATUS_OPTIONS = Object.entries(STUDENT_STATUS_KEYS)
-  .map(([value, label]) => ({ value: +value, label }));
+  .map(([value, label]) => ({ value, label }));

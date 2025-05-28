@@ -50,7 +50,7 @@ export default {
     key: 'Surname',
     descending: false
   },
-  createFormConfig: {
+  editFormConfig: {
     title: 'преподавателя',
     apiEndpoint: '/api/Teacher',
     fields: [

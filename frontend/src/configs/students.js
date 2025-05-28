@@ -181,69 +181,6 @@ export const initialSort = {
   descending: false
 }
 
-export const createFormConfig = {
-  title: 'студента',
-  apiEndpoint: '/api/Student',
-  fields: [
-    {
-      name: 'surname',
-      label: 'Фамилия',
-      type: 'text',
-      required: true,
-      validate: v => v.length <= 32,
-      errorMessage: 'Максимум 32 символа'
-    },
-    {
-      name: 'name',
-      label: 'Имя',
-      type: 'text',
-      required: true,
-      validate: v => v.length <= 32,
-      errorMessage: 'Максимум 32 символа'
-    },
-    {
-      name: 'patronymic',
-      label: 'Отчество',
-      type: 'text',
-      required: true,
-      validate: v => v.length <= 32,
-      errorMessage: 'Максимум 32 символа'
-    },
-    {
-      name: 'gender',
-      label: 'Пол',
-      type: 'select',
-      required: true,
-      filter: {
-        staticOptions: [
-          { label: 'Мужской', value: 0 },
-          { label: 'Женский', value: 1 }
-        ],
-        allowDeselect: false
-      }
-    },
-    {
-      name: 'dateOfBirth',
-      label: 'Дата рождения',
-      type: 'date',
-      required: true
-    },
-    {
-      name: 'isCitizen',
-      label: 'Гражданство',
-      type: 'select',
-      required: true,
-      filter: {
-        staticOptions: [
-          { label: 'РФ', value: true },
-          { label: 'Иное', value: false }
-        ],
-        allowDeselect: false
-      }
-    }
-  ]
-}
-
 export const editFormConfig = {
   title: 'студента',
   apiEndpoint: '/api/Student',
@@ -312,6 +249,5 @@ export default {
   filters,
   apiConfig,
   initialSort,
-  createFormConfig,
   editFormConfig
 }

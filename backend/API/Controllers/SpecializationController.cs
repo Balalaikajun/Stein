@@ -1,3 +1,4 @@
+using Application.DTOs.Department;
 using Application.DTOs.Specialization;
 using Application.DTOs.Teacher;
 using Application.Interfaces;
@@ -21,30 +22,30 @@ public class SpecializationController:ControllerBase
 
     [HttpPost("filter")]
     [Authorize]
-    public async Task<ActionResult> GetSpecializations(SpecializationPaginatedRequest request)
+    public async Task<ActionResult<BasePaginatedResult<SpecializationGetDto>>> GetSpecializations(SpecializationPaginatedRequest request)
     {
         var result = await _specializationService.GetPaginated(request);
         
         return Ok(result);
     }
     
-    [HttpPost]
-    [Authorize]
-    public async Task<ActionResult> Create(SpecializationPostDto dto)
-    {
-        try
-        {
-            await _specializationService.Create(dto);
-            return Created();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            return BadRequest("Неизвестная ошибка");
-        }
-        
-        
-    }
+    // [HttpPost]
+    // [Authorize]
+    // public async Task<ActionResult> Create(SpecializationPostDto dto)
+    // {
+    //     try
+    //     {
+    //         await _specializationService.Create(dto);
+    //         return Created();
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Console.WriteLine(e);
+    //         return BadRequest("Неизвестная ошибка");
+    //     }
+    //     
+    //     
+    // }
     
     [HttpPatch]
     [Authorize]

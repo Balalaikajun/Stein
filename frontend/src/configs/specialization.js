@@ -81,7 +81,7 @@ export default {
     key: 'Title',
     descending: false
   },
-  createFormConfig: {
+  editFormConfig: {
     title: 'курс',
     apiEndpoint: '/api/Specialization',
     fields: [

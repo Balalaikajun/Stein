@@ -1,3 +1,4 @@
+using Application.DTOs.Department;
 using Application.DTOs.Order;
 using Application.Interfaces;
 using Application.Services;
@@ -21,28 +22,28 @@ public class OrderController: ControllerBase
 
     [Authorize]
     [HttpPost("filter")]
-    public async Task<ActionResult> GetPaginated(OrderPaginatedRequest request)
+    public async Task<ActionResult<BasePaginatedResult<OrderGetDto>>> GetPaginated(OrderPaginatedRequest request)
     {
         var result =await _orderService.GetPaginated(request);
         
         return Ok(result);
     }
-
-    [HttpPost]
-    [Authorize]
-    public async Task<ActionResult> Create(OrderPostDto dto)
-    {
-        try
-        {
-            await _orderService.Create(dto);
-            return Created();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            return BadRequest(e.InnerException.Message);
-        }
-    }
+    //
+    // [HttpPost]
+    // [Authorize]
+    // public async Task<ActionResult> Create(OrderPostDto dto)
+    // {
+    //     try
+    //     {
+    //         await _orderService.Create(dto);
+    //         return Created();
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Console.WriteLine(e);
+    //         return BadRequest(e.InnerException.Message);
+    //     }
+    // }
     
     [HttpDelete]
     [Authorize]

@@ -44,36 +44,6 @@ export default {
     key: 'Title',
     descending: false
   },
-  createFormConfig: {
-    title: 'отделение',
-    apiEndpoint: '/api/Department',
-    fields: [
-      {
-        name: 'title',
-        label: 'Наименование',
-        type: 'text',
-        required: true,
-        validate: (v) => v.length <= 125,
-        errorMessage: 'Максимум 125 символов'
-      },
-      {
-        name: 'isActive',
-        label: 'Статус',
-        type: 'select',
-        required: true,
-        errorMessage: 'Необходимо выбрать статус',
-        filter: {
-          id: 'statusFilter', // Уникальный идентификатор фильтра
-          title: 'Статус',
-          staticOptions: [     // Статические данные
-            { label: 'Активен', value: true },
-            { label: 'Неактивен', value: false }
-          ],
-          allowDeselect: false  // Разрешить снятие выбора
-        }
-      }
-    ],
-  },
   editFormConfig: {
     title: 'отделение',
     apiEndpoint: '/api/Department',
