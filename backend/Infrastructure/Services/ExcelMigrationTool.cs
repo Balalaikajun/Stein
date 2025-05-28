@@ -34,8 +34,10 @@ public class ExcelMigrationService : IExcelMigrationService
         await OrdersUpsert(package);
         await PerformanceUpsert(package);
 
+        await _context.SaveChangesAsync();
+        
         await UpdateStudentStatuses();
-
+        
         await _context.SaveChangesAsync();
     }
 
@@ -145,6 +147,11 @@ public class ExcelMigrationService : IExcelMigrationService
 
         for (var row = 2; row <= groupsWorksheet.Dimension.Rows; row++)
         {
+            DateOnly? releaseDate = groupsWorksheet.Cells[row, 7].Text == ""
+                ? null
+                : DateOnly.FromDateTime(DateTime.FromOADate((double)groupsWorksheet.Cells[row, 7].Value));
+            
+            
             var group = new Group()
             {
                 SpecializationId = int.Parse(groupsWorksheet.Cells[row, 1].Text),
@@ -153,6 +160,7 @@ public class ExcelMigrationService : IExcelMigrationService
                 Acronym = groupsWorksheet.Cells[row, 4].Text,
                 TeacherId = int.Parse(groupsWorksheet.Cells[row, 5].Text),
                 IsActive = bool.Parse(groupsWorksheet.Cells[row, 6].Text),
+                ReleaseDate = releaseDate
             };
 
             var existing = await _context.Groups.FindAsync(group.SpecializationId, group.Year, group.Index);

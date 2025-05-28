@@ -1,13 +1,13 @@
 export const ORDER_TYPE_KEYS = {
-  1: 'Зачисление',
-  2: 'Перевод из другого учреждения',
-  3: 'Перевод в другое учреждение',
-  4: 'Восстановление после отчисления',
-  5: 'Восстановление после академа',
-  6: 'Академический отпуск',
-  7: 'Перевод между группами',
-  8: 'Отчисление',
-  9: 'Выпуск'
+  'Enrollment': 'Зачисление',
+  'TransferFromOtherInstitution': 'Перевод из другого учреждения',
+  'TransferToOtherInstitution': 'Перевод в другое учреждение',
+  'ReinstatementFromExpelled': 'Восстановление после отчисления',
+  'ReinstatementFromAcademy': 'Восстановление после академа',
+  'AcademicLeave': 'Академический отпуск',
+  'TransferBetweenGroups': 'Перевод между группами',
+  'Expulsion': 'Отчисление',
+  'Graduation' : 'Выпуск'
 };
 
 export function formatOrderType(code) {

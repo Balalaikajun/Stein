@@ -168,6 +168,9 @@ public class UniqueChartsService : IUniqueChartsService
 
     public async Task<ContingentHistogramDto> GetContingentHistogramAsync(ContingentHistogramRequest request)
     {
+        var todayDate = DateOnly.FromDateTime(DateTime.Now);
+        var requestDate = request.Date;
+        
         var query = _context.Groups
             .AsNoTracking();
 
@@ -182,26 +185,31 @@ public class UniqueChartsService : IUniqueChartsService
                 a.Index.Contains("з")
             );
         }
-
-        var nowDate = DateOnly.FromDateTime(DateTime.Now);
         
         var raw = await query
             .Where(g =>
                 g.Year <= request.Date.Year
-                && (g.ReleaseDate.HasValue
-                    ? g.ReleaseDate.Value
-                    : nowDate) >= request.Date
+                && (
+                    !g.ReleaseDate.HasValue
+                    || g.ReleaseDate.Value >= request.Date
+                )
             )
-            .OrderBy(g => g.Specialization.Department.Title).ThenBy(g => g.Specialization.Title)
+            .OrderBy(g => g.Specialization.Department.Title)
+            .ThenBy(g => g.Specialization.Title)
             .Select(g => new {
                 Department=  g.Specialization.Department.Title,
                 Specialization=g.Specialization.Title,
                 Group = g.Acronym,
-                Course = g.IsActive ? (request.Date.Year - g.Year).ToString() : "Выпускники",
-                Count = g.Students.Count
-                - g.EnrollmentOrders.Count(o => o.Date >= request.Date)
-                + g.ExplitOrders.Count(o => o.Date >= request.Date)
+                Course = CalculateCourse(g.Year,requestDate),
+                Count = g.EnrollmentOrders.Count(o =>
+                    o.Date <= requestDate
+                    && o.Date >= DateOnly.FromDateTime(new DateTime(g.Year, 9, 1))
+                ) - g.ExplitOrders.Count(o =>
+                    o.Date <= requestDate
+                    && o.Date >= DateOnly.FromDateTime(new DateTime(g.Year, 9, 1))
+                )
             })
+            .Where(g => g.Count > 0)
             .ToListAsync();
 
         var arr = raw.Select(g => new ContingentDto(
@@ -213,5 +221,37 @@ public class UniqueChartsService : IUniqueChartsService
         ));
 
         return new ContingentHistogramDto(arr);
+    }
+    private static string CalculateCourse(int groupStartYear, DateOnly date)
+    {
+        var academicYearStart = DateOnly.FromDateTime(new DateTime(groupStartYear, 9, 1));
+
+        if (date < academicYearStart)
+        {
+            return "1";
+        }
+
+        var yearsPassed = date.Year - academicYearStart.Year;
+        var boundaryThisYear  = academicYearStart.AddYears(yearsPassed);
+        var boundaryNextYear  = academicYearStart.AddYears(yearsPassed + 1);
+
+        int course;
+        if (date < boundaryThisYear)
+        {
+            course = yearsPassed;
+        }
+        else if (date < boundaryNextYear)
+        {
+            course = yearsPassed + 1;
+        }
+        else
+        {
+            course = yearsPassed + 1;
+        }
+
+        if (course < 1)
+            course = 1;
+
+        return course.ToString();
     }
 }
