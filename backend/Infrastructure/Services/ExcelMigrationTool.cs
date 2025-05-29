@@ -4,6 +4,7 @@ using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Interfaces;
+using LinqKit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
@@ -27,19 +28,34 @@ public class ExcelMigrationService : IExcelMigrationService
 
         using var package = new ExcelPackage(stream);
 
+        var times = new Dictionary<string, TimeSpan>();
+        var startTime = DateTime.Now;
+        var endTime = DateTime.Now;
+
+
         await DepartmentsUpsert(package);
         await SpecializationsUpsert(package);
         await TeachersUpsert(package);
         await GroupsUpsert(package);
         await StudentsUpsert(package);
+        startTime = DateTime.Now;
         await OrdersUpsert(package);
+        endTime = DateTime.Now;
+        times.Add("Время парсинга приказов", endTime - startTime);
+        startTime = DateTime.Now;
         await PerformanceUpsert(package);
-
+        endTime = DateTime.Now;
+        times.Add("Время парсинга успеваемости", endTime - startTime);
         await _context.SaveChangesAsync();
 
         await UpdateStudentStatuses();
 
         await _context.SaveChangesAsync();
+
+        foreach (var time in times)
+        {
+            Console.WriteLine($"[INFO] {time.Key} - {time.Value}");
+        }
     }
 
     private async Task DepartmentsUpsert(ExcelPackage package)
@@ -245,10 +261,8 @@ public class ExcelMigrationService : IExcelMigrationService
             .Select(s => s.Id)
             .ToListAsync();
 
-        // Словарь: StudentId → (SpecializationId, Year, GroupId)
         var currentStatus =
             new Dictionary<int, (int? SpecId, int? Year, string? GroupId)>(capacity: allStudentIdsInDb.Count);
-        // Заполняем из БД текущее состояние (можно выбирать только нужные поля через проекцию).
         var studentsFromDb = await _context.Students
             .Select(s => new
             {
@@ -269,7 +283,6 @@ public class ExcelMigrationService : IExcelMigrationService
 
         for (var row = 2; row <= ordersWorksheet.Dimension.Rows; row++)
         {
-            // Парсим поля заказа (предполагаем, что используем ваш метод ParseNullableDate)
             var order = new Order
             {
                 Id = int.Parse(ordersWorksheet.Cells[row, 1].Text),
@@ -313,11 +326,8 @@ public class ExcelMigrationService : IExcelMigrationService
         // 4) Перебираем и валидируем/вставляем
         foreach (var order in parsedOrders)
         {
-            // Если нет в словаре (студента ещё нет в БД), можно считать, что студента раньше не было:
             if (!currentStatus.TryGetValue(order.StudentId, out var status))
             {
-                // Можно либо считать, что до первого приказа студент не был ни в какой группе (null,null,null),
-                // либо вставить дефолтное значение:
                 status = (null, null, null);
                 currentStatus[order.StudentId] = status;
             }
@@ -328,18 +338,9 @@ public class ExcelMigrationService : IExcelMigrationService
                 || status.Year != order.FromYear
                 || status.GroupId != order.FromGroupId)
             {
-                // Варианты обработки:
-                //  - Пропустить этот приказ: continue
-                //  - Логировать предупреждение: Console.WriteLine(...)
-                //  - Бросить исключение, чтобы сразу остановиться и править файл
-                //  - Принять “как есть” (если решения поочередные загадочны)
                 Console.WriteLine($"[Warning] Студент {order.StudentId}: приказ {order.Id} " +
                                   $"указывает FromGroup ({order.FromSpecializationId},{order.FromYear},{order.FromGroupId}), " +
                                   $"но текущий статус ({status.SpecId},{status.Year},{status.GroupId}).");
-
-                // Если хотим пропускать:
-                // continue;
-                // Если всё-таки вставляем, просто идём дальше без continue.
             }
 
 
@@ -354,17 +355,15 @@ public class ExcelMigrationService : IExcelMigrationService
             //    Graduation/Expulsion меняют группу у студента).
             currentStatus[order.StudentId] = order.OrderType switch
             {
-                OrderTypes.Enrollment 
-                    or OrderTypes.TransferFromOtherInstitution 
+                OrderTypes.Enrollment
+                    or OrderTypes.TransferFromOtherInstitution
                     or OrderTypes.ReinstatementFromAcademy
-                    or OrderTypes.ReinstatementFromExpelled 
+                    or OrderTypes.ReinstatementFromExpelled
                     or OrderTypes.TransferBetweenGroups =>
-                    // Переходим в новую группу ToGroupId
                     (order.ToSpecializationId, order.ToYear, order.ToGroupId),
                 OrderTypes.AcademicLeave
                     or OrderTypes.Graduation
                     or OrderTypes.Expulsion =>
-                    // После академического отпуска / выпуска / отчисления студент вообще “нигде не числится”
                     (null, null, null),
                 _ => currentStatus[order.StudentId]
             };
@@ -379,29 +378,71 @@ public class ExcelMigrationService : IExcelMigrationService
         if (performanceWorksheet == null)
             return;
 
+        var totalRows = performanceWorksheet.Dimension.Rows;
+        var batchSize = 1000;
+        var totalBatches = (int)Math.Ceiling((double)(totalRows - 1) / batchSize);
 
-        for (var row = 2; row <= performanceWorksheet.Dimension.Rows; row++)
+        for (var batchIndex = 0;
+             batchIndex <= totalBatches;
+             batchIndex++)
         {
-            var performance = new AcademicPerformance()
-            {
-                Year = int.Parse(performanceWorksheet.Cells[row, 1].Text),
-                Month = int.Parse(performanceWorksheet.Cells[row, 2].Text),
-                StudentId = int.Parse(performanceWorksheet.Cells[row, 3].Text),
-                Performance = (PerformanceCategory)Enum.Parse(typeof(PerformanceCategory),
-                    performanceWorksheet.Cells[row, 4].Text)
-            };
+            var startRow = batchIndex * batchSize + 2;
+            var endRow = Math.Min(startRow + batchSize - 1, totalRows);
+            var performances = new List<AcademicPerformance>();
 
-            var existing =
-                await _context.AcademicPerformances.FindAsync(performance.Year, performance.Month,
-                    performance.StudentId);
-
-            if (existing == null)
+            for (var row = startRow; row <= endRow; row++)
             {
-                _context.AcademicPerformances.Add(performance);
+                if (string.IsNullOrWhiteSpace(performanceWorksheet.Cells[row, 1].Text))
+                    continue; // Пропускаем пустые строки, если они есть
+
+                var year = int.Parse(performanceWorksheet.Cells[row, 1].Text);
+                var month = int.Parse(performanceWorksheet.Cells[row, 2].Text);
+                var studentId = int.Parse(performanceWorksheet.Cells[row, 3].Text);
+                var perfCat = (PerformanceCategory)Enum.Parse(
+                    typeof(PerformanceCategory),
+                    performanceWorksheet.Cells[row, 4].Text);
+
+                performances.Add(new AcademicPerformance
+                {
+                    Year = year,
+                    Month = month,
+                    StudentId = studentId,
+                    Performance = perfCat
+                });
             }
-            else
+
+            performances = performances
+                .GroupBy(g => new { g.StudentId, g.Month, g.Year })
+                .Select(g => g.First())
+                .ToList();
+
+            var keyStrings = performances
+                .Select(p => $"{p.Year}|{p.Month}|{p.StudentId}")
+                .ToList();
+
+            var existings = await _context.AcademicPerformances
+                .Where(ap => keyStrings.Contains(
+                    ap.Year.ToString() + "|" +
+                    ap.Month.ToString() + "|" +
+                    ap.StudentId.ToString()))
+                .ToListAsync();
+
+            foreach (var performance in performances)
             {
-                _context.AcademicPerformances.Entry(existing).CurrentValues.SetValues(performance);
+                var existing = existings
+                    .FirstOrDefault(ap =>
+                        ap.StudentId == performance.StudentId &&
+                        ap.Year == performance.Year &&
+                        ap.Month == performance.Month);
+
+                if (existing == null)
+                {
+                    _context.AcademicPerformances.Add(performance);
+                }
+                else
+                {
+                    _context.AcademicPerformances.Entry(existing).CurrentValues.SetValues(performance);
+                }
             }
         }
     }

@@ -129,13 +129,16 @@ public class UniqueChartsService : IUniqueChartsService
 
         if (request.Groups?.Any() == true)
         {
-            var groupPredicate = PredicateBuilder.New<Group>(false);
+            var groupPredicate = PredicateBuilder.New<Order>(false);
             foreach (var k in request.Groups)
             {
-                groupPredicate = groupPredicate.Or(s =>
-                    s.SpecializationId == k.SpecializationId &&
-                    s.Year == k.Year &&
-                    s.Index == k.Index);
+                groupPredicate = groupPredicate.Or(s =>(
+                    s.FromSpecializationId == k.SpecializationId &&
+                    s.FromYear== k.Year &&
+                    s.FromGroupId == k.Index) || (
+                    s.ToSpecializationId == k.SpecializationId &&
+                    s.ToYear== k.Year &&
+                    s.ToGroupId == k.Index));
             }
 
             query = query.Where(groupPredicate);
@@ -211,6 +214,7 @@ public class UniqueChartsService : IUniqueChartsService
                     && o.Date >= DateOnly.FromDateTime(new DateTime(g.Year, 9, 1))
                 )
             })
+            .Where(c => c.Count != 0)
             .ToListAsync();
 
         var count = raw.Sum(x => x.Count);

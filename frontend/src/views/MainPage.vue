@@ -205,7 +205,7 @@ const filters = ref({
 const filtersConfig = [
   {
     id: 'departmentIds',
-    title: 'Кафедры',
+    title: 'Отделения',
     dataType: 'lookup',
     apiEndpoint: '/api/Department/filter',
     params: { take: 15, activeFilter: true, sortBy: 'Title', descending: false },
@@ -275,9 +275,9 @@ const {
 } = useAllKpis()
 
 const kpiNamingMapping = {
-  Students: 'Число студентов',
+  Students: 'Количество студентов на данный момент',
   Orders: 'Приказы за месяц',
-  Foreigners: 'Иностранные граждане'
+  Foreigners: 'Иностранные граждане на данный момент'
 }
 
 const kpiList = computed(() => {
