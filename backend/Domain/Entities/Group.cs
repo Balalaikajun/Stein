@@ -17,5 +17,4 @@ public class Group
     public ICollection<Order>? EnrollmentOrders { get; set; }
 
     public ICollection<Order>? ExplitOrders { get; set; }
-
 }

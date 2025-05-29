@@ -1,8 +1,8 @@
 ﻿using Application.Interfaces;
+using Application.Mapping;
 using Application.Services;
 using Domain.Interfaces;
 using Infrastructure.Data;
-using Infrastructure.Mapping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 

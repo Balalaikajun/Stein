@@ -1,10 +1,8 @@
 using System.Globalization;
-using System.Text.Json;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Interfaces;
-using LinqKit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
@@ -13,7 +11,7 @@ namespace Infrastructure.Services;
 
 public class ExcelMigrationService : IExcelMigrationService
 {
-    private IApplicationDbContext _context;
+    private readonly IApplicationDbContext _context;
 
     public ExcelMigrationService(IApplicationDbContext context)
     {
@@ -52,10 +50,7 @@ public class ExcelMigrationService : IExcelMigrationService
 
         await _context.SaveChangesAsync();
 
-        foreach (var time in times)
-        {
-            Console.WriteLine($"[INFO] {time.Key} - {time.Value}");
-        }
+        foreach (var time in times) Console.WriteLine($"[INFO] {time.Key} - {time.Value}");
     }
 
     private async Task DepartmentsUpsert(ExcelPackage package)
@@ -72,19 +67,15 @@ public class ExcelMigrationService : IExcelMigrationService
             {
                 Id = int.Parse(departmentsWorksheet.Cells[row, 1].Text),
                 Title = departmentsWorksheet.Cells[row, 2].Text,
-                IsActive = bool.Parse(departmentsWorksheet.Cells[row, 3].Text),
+                IsActive = bool.Parse(departmentsWorksheet.Cells[row, 3].Text)
             };
 
             var existing = await _context.Departments.FindAsync(department.Id);
 
             if (existing == null)
-            {
                 _context.Departments.Add(department);
-            }
             else
-            {
                 _context.Departments.Entry(existing).CurrentValues.SetValues(department);
-            }
         }
     }
 
@@ -105,19 +96,15 @@ public class ExcelMigrationService : IExcelMigrationService
                 Title = specializationsWorksheet.Cells[row, 3].Text,
                 Acronym = specializationsWorksheet.Cells[row, 4].Text,
                 DepartmentId = int.Parse(specializationsWorksheet.Cells[row, 5].Text),
-                IsActive = bool.Parse(specializationsWorksheet.Cells[row, 6].Text),
+                IsActive = bool.Parse(specializationsWorksheet.Cells[row, 6].Text)
             };
 
             var existing = await _context.Specializations.FindAsync(specialization.Id);
 
             if (existing == null)
-            {
                 _context.Specializations.Add(specialization);
-            }
             else
-            {
                 _context.Specializations.Entry(existing).CurrentValues.SetValues(specialization);
-            }
         }
     }
 
@@ -132,25 +119,21 @@ public class ExcelMigrationService : IExcelMigrationService
 
         for (var row = 2; row <= teachersWorksheet.Dimension.Rows; row++)
         {
-            var teacher = new Teacher()
+            var teacher = new Teacher
             {
                 Id = int.Parse(teachersWorksheet.Cells[row, 1].Text),
                 Surname = teachersWorksheet.Cells[row, 2].Text,
                 Name = teachersWorksheet.Cells[row, 3].Text,
                 Patronymic = teachersWorksheet.Cells[row, 4].Text,
-                IsActive = bool.Parse(teachersWorksheet.Cells[row, 5].Text),
+                IsActive = bool.Parse(teachersWorksheet.Cells[row, 5].Text)
             };
 
             var existing = await _context.Teachers.FindAsync(teacher.Id);
 
             if (existing == null)
-            {
                 _context.Teachers.Add(teacher);
-            }
             else
-            {
                 _context.Teachers.Entry(existing).CurrentValues.SetValues(teacher);
-            }
         }
     }
 
@@ -176,7 +159,7 @@ public class ExcelMigrationService : IExcelMigrationService
             var teacherId = int.Parse(groupsWorksheet.Cells[row, 5].Text);
             var isActive = bool.Parse(groupsWorksheet.Cells[row, 6].Text);
 
-            var group = new Group()
+            var group = new Group
             {
                 SpecializationId = specializationId,
                 Year = year,
@@ -190,13 +173,9 @@ public class ExcelMigrationService : IExcelMigrationService
             var existing = await _context.Groups.FindAsync(group.SpecializationId, group.Year, group.Index);
 
             if (existing == null)
-            {
                 _context.Groups.Add(group);
-            }
             else
-            {
                 _context.Groups.Entry(existing).CurrentValues.SetValues(group);
-            }
         }
     }
 
@@ -218,13 +197,13 @@ public class ExcelMigrationService : IExcelMigrationService
             var gender = studentsWorksheet.Cells[row, 9].Text switch
             {
                 "Мужской" => Gender.Male,
-                "Женский" => Gender.Female,
+                "Женский" => Gender.Female
             };
             var dateOfBirth = ParseNullableDate(studentsWorksheet.Cells[row, 10].Value,
                 studentsWorksheet.Cells[row, 10].Text);
 
 
-            var student = new Student()
+            var student = new Student
             {
                 Id = id,
                 Surname = surname,
@@ -238,13 +217,9 @@ public class ExcelMigrationService : IExcelMigrationService
             var existing = await _context.Students.FindAsync(student.Id);
 
             if (existing == null)
-            {
                 _context.Students.Add(student);
-            }
             else
-            {
                 _context.Students.Entry(existing).CurrentValues.SetValues(student);
-            }
         }
     }
 
@@ -262,7 +237,7 @@ public class ExcelMigrationService : IExcelMigrationService
             .ToListAsync();
 
         var currentStatus =
-            new Dictionary<int, (int? SpecId, int? Year, string? GroupId)>(capacity: allStudentIdsInDb.Count);
+            new Dictionary<int, (int? SpecId, int? Year, string? GroupId)>(allStudentIdsInDb.Count);
         var studentsFromDb = await _context.Students
             .Select(s => new
             {
@@ -273,13 +248,10 @@ public class ExcelMigrationService : IExcelMigrationService
             })
             .ToListAsync();
 
-        foreach (var s in studentsFromDb)
-        {
-            currentStatus[s.Id] = (s.GroupSpecializationId, s.GroupYear, s.GroupId);
-        }
+        foreach (var s in studentsFromDb) currentStatus[s.Id] = (s.GroupSpecializationId, s.GroupYear, s.GroupId);
 
         // 2) Читаем заказы из Excel в промежуточный список
-        var parsedOrders = new List<Order>(capacity: ordersWorksheet.Dimension.Rows - 1);
+        var parsedOrders = new List<Order>(ordersWorksheet.Dimension.Rows - 1);
 
         for (var row = 2; row <= ordersWorksheet.Dimension.Rows; row++)
         {
@@ -337,11 +309,9 @@ public class ExcelMigrationService : IExcelMigrationService
             if (status.SpecId != order.FromSpecializationId
                 || status.Year != order.FromYear
                 || status.GroupId != order.FromGroupId)
-            {
                 Console.WriteLine($"[Warning] Студент {order.StudentId}: приказ {order.Id} " +
                                   $"указывает FromGroup ({order.FromSpecializationId},{order.FromYear},{order.FromGroupId}), " +
                                   $"но текущий статус ({status.SpecId},{status.Year},{status.GroupId}).");
-            }
 
 
             // 5) Вставляем или обновляем сам приказ:
@@ -422,9 +392,9 @@ public class ExcelMigrationService : IExcelMigrationService
 
             var existings = await _context.AcademicPerformances
                 .Where(ap => keyStrings.Contains(
-                    ap.Year.ToString() + "|" +
-                    ap.Month.ToString() + "|" +
-                    ap.StudentId.ToString()))
+                    ap.Year + "|" +
+                    ap.Month + "|" +
+                    ap.StudentId))
                 .ToListAsync();
 
             foreach (var performance in performances)
@@ -436,13 +406,9 @@ public class ExcelMigrationService : IExcelMigrationService
                         ap.Month == performance.Month);
 
                 if (existing == null)
-                {
                     _context.AcademicPerformances.Add(performance);
-                }
                 else
-                {
                     _context.AcademicPerformances.Entry(existing).CurrentValues.SetValues(performance);
-                }
             }
         }
     }
@@ -539,7 +505,6 @@ public class ExcelMigrationService : IExcelMigrationService
 
         // 1. Если в ячейке лежит double (OLE-число) — пробуем конвертировать
         if (cellValue is double oaDate)
-        {
             try
             {
                 return DateOnly.FromDateTime(DateTime.FromOADate(oaDate));
@@ -549,7 +514,6 @@ public class ExcelMigrationService : IExcelMigrationService
                 // Если по какой-то причине не удалось преобразовать OADate — возвращаем null
                 throw new FormatException("Invalid date");
             }
-        }
 
         // 2. Если в ячейке строка — пробуем распарсить в нескольких форматах
         //    Список форматов, которые хотим поддерживать:
@@ -574,18 +538,14 @@ public class ExcelMigrationService : IExcelMigrationService
                 CultureInfo.InvariantCulture,
                 DateTimeStyles.None,
                 out var parsedDateTime))
-        {
             return DateOnly.FromDateTime(parsedDateTime);
-        }
 
         // 3. Если ни один из строгих форматов не подошёл, попробуем гибкий TryParse
         if (DateTime.TryParse(cellText,
                 CultureInfo.CurrentCulture,
                 DateTimeStyles.AllowWhiteSpaces,
                 out parsedDateTime))
-        {
             return DateOnly.FromDateTime(parsedDateTime);
-        }
 
         // 4. Если ничего не сработало — возвращаем null
         throw new FormatException("Invalid date");

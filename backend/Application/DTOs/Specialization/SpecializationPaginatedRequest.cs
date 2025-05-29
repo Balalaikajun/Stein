@@ -8,4 +8,3 @@ public record SpecializationPaginatedRequest(
     IEnumerable<int>? DepartmentIds = null,
     string SortBy = "Title",
     bool Descending = false);
-    

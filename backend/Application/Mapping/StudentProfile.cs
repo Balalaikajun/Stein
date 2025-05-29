@@ -2,9 +2,9 @@ using Application.DTOs.Student;
 using AutoMapper;
 using Domain.Entities;
 
-namespace Infrastructure.Mapping;
+namespace Application.Mapping;
 
-public class StudentProfile:Profile
+public class StudentProfile : Profile
 {
     public StudentProfile()
     {
@@ -13,5 +13,4 @@ public class StudentProfile:Profile
                 o => o.MapFrom(s => s.Group.Acronym));
         CreateMap<StudentPostDto, Student>();
     }
-    
 }

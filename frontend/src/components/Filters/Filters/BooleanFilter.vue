@@ -17,15 +17,15 @@
       <template #body>
         <div class="radio-group">
           <label class="radio-option">
-            <input type="radio" value="" v-model="local" />
+            <input type="radio" value="" v-model="local"/>
             <span class="radio-label">Все</span>
           </label>
           <label class="radio-option">
-            <input type="radio" value="true" v-model="local" />
+            <input type="radio" value="true" v-model="local"/>
             <span class="radio-label">Да</span>
           </label>
           <label class="radio-option">
-            <input type="radio" value="false" v-model="local" />
+            <input type="radio" value="false" v-model="local"/>
             <span class="radio-label">Нет</span>
           </label>
         </div>
@@ -52,7 +52,7 @@ const anchorRect = ref(null)
 const btnRef = ref(null)
 
 // Логика обработки значений
-function toggle() {
+function toggle () {
   isOpen.value = !isOpen.value
   if (isOpen.value) {
     nextTick(() => {
@@ -62,13 +62,13 @@ function toggle() {
   }
 }
 
-function apply() {
+function apply () {
   const value = local.value === 'true' ? true : local.value === 'false' ? false : null
   emit('update:modelValue', value)
   close()
 }
 
-function close() {
+function close () {
   isOpen.value = false
 }
 </script>

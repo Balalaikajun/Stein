@@ -1,12 +1,11 @@
 <script>
-import {computed} from "vue";
+import { computed } from 'vue'
 
 export default {
-  name: "FunButton",
-  data()
-  {
+  name: 'FunButton',
+  data () {
     return {
-     count: 0
+      count: 0
     }
   }
 }
@@ -14,12 +13,12 @@ export default {
 
 <template>
   <div>
-    <button @click="count++" class="fun-button" >{{count}}</button>
+    <button @click="count++" class="fun-button">{{ count }}</button>
   </div>
 </template>
 
 <style scoped>
-.fun-button{
+.fun-button {
   font-family: inherit;
   font-size: inherit;
   color: inherit;

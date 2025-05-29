@@ -1,5 +1,5 @@
-using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
+using Application.DTOs.Base;
 using Application.DTOs.Department;
 using Application.DTOs.Teacher;
 using Application.Interfaces;
@@ -12,10 +12,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services;
 
-public class TeacherService: ITeacherService
+public class TeacherService : ITeacherService
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
     private static readonly Dictionary<string, Expression<Func<Teacher, object>>> _sortSelectors = new()
     {
         ["Id"] = t => t.Id,
@@ -24,6 +22,9 @@ public class TeacherService: ITeacherService
         ["Patronymic"] = t => t.Patronymic,
         ["IsActive"] = t => t.IsActive
     };
+
+    private readonly IApplicationDbContext _context;
+    private readonly IMapper _mapper;
 
     public TeacherService(IApplicationDbContext context, IMapper mapper)
     {
@@ -55,11 +56,8 @@ public class TeacherService: ITeacherService
             : query.OrderBy(sortSelector).ThenBy(d => d.Id);
 
         int? total = null;
-        if (request.Skip == 0)
-        {
-            total = await query.CountAsync();
-        }
-        
+        if (request.Skip == 0) total = await query.CountAsync();
+
         // Пагинацияs
         var items = await query
             .Skip(request.Skip)
@@ -67,42 +65,41 @@ public class TeacherService: ITeacherService
             .ProjectTo<TeacherGetDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        
-        
+
         var hasMore = items.Count > request.Take;
         var resultItems = hasMore ? items.Take(request.Take) : items;
 
         return new BasePaginatedResult<TeacherGetDto>(
-            Items: resultItems,
-            HasMore: hasMore,
-            Total: total);
+            resultItems,
+            hasMore,
+            total);
     }
-    
+
     public async Task Create(TeacherPostDto dto)
     {
         var teacher = _mapper.Map<Teacher>(dto);
-        
+
         _context.Teachers.Add(teacher);
 
         await _context.SaveChangesAsync();
     }
-    
-    
+
+
     public async Task Update(TeacherPatchDto dto)
     {
         var teacher = await _context.Teachers.FirstOrDefaultAsync(x => x.Id == dto.Id) ??
-                         throw new NotFoundException($"Teacher with id - {dto.Id} was not found");
-        
+                      throw new NotFoundException($"Teacher with id - {dto.Id} was not found");
+
         if (!string.IsNullOrWhiteSpace(dto.Surname) && teacher.Surname != dto.Surname)
             teacher.Surname = dto.Surname;
-        
+
         if (!string.IsNullOrWhiteSpace(dto.Name) && teacher.Name != dto.Name)
             teacher.Name = dto.Name;
-        
+
         if (!string.IsNullOrWhiteSpace(dto.Patronymic) && teacher.Patronymic != dto.Patronymic)
             teacher.Patronymic = dto.Patronymic;
-        
-        if(dto.IsActive.HasValue && dto.IsActive != teacher.IsActive)
+
+        if (dto.IsActive.HasValue && dto.IsActive != teacher.IsActive)
             teacher.IsActive = dto.IsActive.Value;
 
         await _context.SaveChangesAsync();
@@ -112,9 +109,9 @@ public class TeacherService: ITeacherService
     {
         var teacher = await _context.Teachers.FirstOrDefaultAsync(x => x.Id == id) ??
                       throw new NotFoundException($"Teacher with id - {id} was not found");
-        
+
         _context.Teachers.Remove(teacher);
-        
+
         await _context.SaveChangesAsync();
     }
 }

@@ -1,9 +1,8 @@
+using Application.DTOs.Base;
 using Application.DTOs.Department;
 using Application.DTOs.Specialization;
-using Application.DTOs.Teacher;
 using Application.Interfaces;
 using Domain.Exceptions;
-using Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +10,7 @@ namespace API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class SpecializationController:ControllerBase
+public class SpecializationController : ControllerBase
 {
     private readonly ISpecializationService _specializationService;
 
@@ -22,13 +21,14 @@ public class SpecializationController:ControllerBase
 
     [HttpPost("filter")]
     [Authorize]
-    public async Task<ActionResult<BasePaginatedResult<SpecializationGetDto>>> GetSpecializations(SpecializationPaginatedRequest request)
+    public async Task<ActionResult<BasePaginatedResult<SpecializationGetDto>>> GetSpecializations(
+        SpecializationPaginatedRequest request)
     {
         var result = await _specializationService.GetPaginated(request);
-        
+
         return Ok(result);
     }
-    
+
     // [HttpPost]
     // [Authorize]
     // public async Task<ActionResult> Create(SpecializationPostDto dto)
@@ -46,7 +46,7 @@ public class SpecializationController:ControllerBase
     //     
     //     
     // }
-    
+
     [HttpPatch]
     [Authorize]
     public async Task<ActionResult> Patch(SpecializationPatchDto dto)
@@ -58,7 +58,7 @@ public class SpecializationController:ControllerBase
         }
         catch (NotFoundException e)
         {
-            return NotFound(e.Message);   
+            return NotFound(e.Message);
         }
         catch (Exception e)
         {
@@ -66,7 +66,7 @@ public class SpecializationController:ControllerBase
             return BadRequest("Неизвестная ошибка");
         }
     }
-    
+
     [HttpDelete]
     [Authorize]
     public async Task<ActionResult> Delete(int id)
@@ -85,7 +85,5 @@ public class SpecializationController:ControllerBase
             Console.WriteLine(e);
             return BadRequest("Неизвестная ошибка");
         }
-        
-        
     }
 }

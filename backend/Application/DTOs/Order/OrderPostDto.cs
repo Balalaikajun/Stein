@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Application.DTOs.Group;
 using Domain.Enums;
 
@@ -11,4 +10,4 @@ public record OrderPostDto(
     GroupKeyDto? GroupTo,
     int StudentId,
     DateOnly Date
-    );
+);

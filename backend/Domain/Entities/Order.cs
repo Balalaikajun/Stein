@@ -5,7 +5,7 @@ namespace Domain.Entities;
 public class Order
 {
     public int Id { get; set; }
-    public OrderTypes OrderType { get;  set; }
+    public OrderTypes OrderType { get; set; }
     public string Number { get; set; }
     public int StudentId { get; set; }
     public int? FromSpecializationId { get; set; }
@@ -15,7 +15,7 @@ public class Order
     public int? ToYear { get; set; }
     public string? ToGroupId { get; set; }
     public DateOnly Date { get; set; }
-    
+
     public Student? Student { get; set; }
     public Group? FromGroup { get; set; }
     public Group? ToGroup { get; set; }

@@ -1,5 +1,3 @@
-using Application.DTOs.Group;
-
 namespace Application.DTOs.Metrics;
 
-public record KpiRequest();
+public record KpiRequest;

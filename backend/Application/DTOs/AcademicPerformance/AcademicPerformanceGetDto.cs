@@ -1,7 +1,7 @@
 using Domain.Enums;
 
 namespace Application.DTOs.AcademicPerformance;
-    
+
 public class AcademicPerformanceGetDto
 {
     public int Year { get; init; }

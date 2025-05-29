@@ -32,13 +32,13 @@ export const tableConfig = {
     {
       title: 'Исходная группа',
       key: 'groupFromAcronym',
-      formatter: (row) => row.groupFromAcronym ? row.groupFromAcronym: '---',
+      formatter: (row) => row.groupFromAcronym ? row.groupFromAcronym : '---',
       width: '200px'
     },
     {
       title: 'Новая группа',
       key: 'groupToAcronym',
-      formatter: (row) => row.groupToAcronym ? row.groupToAcronym: '---',
+      formatter: (row) => row.groupToAcronym ? row.groupToAcronym : '---',
       width: '200px'
     }
   ]

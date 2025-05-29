@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Application.DTOs.Teacher;
 
 public record TeacherGetDto(
@@ -8,4 +6,3 @@ public record TeacherGetDto(
     string Name,
     string Patronymic,
     bool IsActive);
-    

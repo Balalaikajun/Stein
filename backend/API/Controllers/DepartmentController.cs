@@ -1,16 +1,15 @@
-using System.Text.Json;
+using Application.DTOs.Base;
 using Application.DTOs.Department;
 using Application.Interfaces;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class DepartmentController: ControllerBase
+public class DepartmentController : ControllerBase
 {
     private readonly IDepartmentService _departmentService;
 
@@ -21,10 +20,11 @@ public class DepartmentController: ControllerBase
 
     [HttpPost("filter")]
     [Authorize]
-    public async Task<ActionResult<BasePaginatedResult<DepartmentGetDto>>> GetDepartments(DepartmentPaginatedRequest request)
+    public async Task<ActionResult<BasePaginatedResult<DepartmentGetDto>>> GetDepartments(
+        DepartmentPaginatedRequest request)
     {
         var result = await _departmentService.GetPaginated(request);
-        
+
         return Ok(result);
     }
 
@@ -45,7 +45,7 @@ public class DepartmentController: ControllerBase
     //     
     //     
     // }
-    
+
     [HttpPatch]
     [Authorize]
     public async Task<ActionResult> Patch(DepartmentPatchDto dto)
@@ -57,7 +57,7 @@ public class DepartmentController: ControllerBase
         }
         catch (NotFoundException e)
         {
-         return NotFound(e.Message);   
+            return NotFound(e.Message);
         }
         catch (Exception e)
         {
@@ -65,7 +65,7 @@ public class DepartmentController: ControllerBase
             return BadRequest("Неизвестная ошибка");
         }
     }
-    
+
     [HttpDelete]
     [Authorize]
     public async Task<ActionResult> Delete(int id)
@@ -84,8 +84,5 @@ public class DepartmentController: ControllerBase
             Console.WriteLine(e);
             return BadRequest("Неизвестная ошибка");
         }
-        
-        
     }
-    
 }

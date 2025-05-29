@@ -1,7 +1,6 @@
 using Application.DTOs.Metrics;
 using Application.Enums.MetricTypes;
 using Application.Interfaces;
-using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -92,7 +91,7 @@ public class MetricsController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(ex.Message.ToString());
+            return BadRequest(ex.Message);
         }
     }
 

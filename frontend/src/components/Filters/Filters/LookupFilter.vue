@@ -95,11 +95,11 @@ const debounceMs = props.filter.debounceMs ?? 300
 const hasValue = computed(() => localValue.value.length > 0)
 
 // Helpers
-function uniqueKey(opt) {
+function uniqueKey (opt) {
   return typeof opt.value === 'object' ? JSON.stringify(opt.value) : opt.value
 }
 
-function buildRequestBody() {
+function buildRequestBody () {
   const { params = {}, paramKeys = {}, dependentParams = {} } = props.filter
   const body = {
     [paramKeys.skip || 'skip']: skip.value,
@@ -116,7 +116,7 @@ function buildRequestBody() {
   return body
 }
 
-async function loadOptions() {
+async function loadOptions () {
   if (loading.value) return
   loading.value = true
 
@@ -173,7 +173,7 @@ async function loadOptions() {
   }
 }
 
-function resetLoad() {
+function resetLoad () {
   options.value = []
   skip.value = 0
   hasMore.value = true

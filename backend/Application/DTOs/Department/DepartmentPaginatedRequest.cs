@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Application.DTOs.Department;
 
 public record DepartmentPaginatedRequest(

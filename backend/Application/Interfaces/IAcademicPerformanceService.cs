@@ -1,4 +1,5 @@
 using Application.DTOs.AcademicPerformance;
+using Application.DTOs.Base;
 using Application.DTOs.Department;
 
 namespace Application.Interfaces;

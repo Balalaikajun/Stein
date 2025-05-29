@@ -3,16 +3,16 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Application.DTOs.Order;
 using Application.Interfaces;
+using Application.Mapping;
 using Application.Services;
-using Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Domain.Interfaces;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using Infrastructure.Mapping;
+using Infrastructure.Data;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OfficeOpenXml;
 
@@ -61,7 +61,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<OrderPostDtoValidator>();
 
 
-builder.Services.AddDbContext<IApplicationDbContext,ApplicationDbContext>(options => 
+builder.Services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddAuthentication(options =>
@@ -146,4 +146,3 @@ app.MapControllers();
 
 
 app.Run();
-

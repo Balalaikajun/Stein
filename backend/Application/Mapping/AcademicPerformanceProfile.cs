@@ -2,9 +2,9 @@ using Application.DTOs.AcademicPerformance;
 using AutoMapper;
 using Domain.Entities;
 
-namespace Infrastructure.Mapping;
+namespace Application.Mapping;
 
-public class AcademicPerformanceProfile:Profile
+public class AcademicPerformanceProfile : Profile
 {
     public AcademicPerformanceProfile()
     {

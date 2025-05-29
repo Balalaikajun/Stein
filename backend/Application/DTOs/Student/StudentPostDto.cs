@@ -19,4 +19,4 @@ public record StudentPostDto(
     DateOnly DateOfBirth,
     [Required(ErrorMessage = "IsCitizen is required")]
     bool IsCitizen
-    );
+);

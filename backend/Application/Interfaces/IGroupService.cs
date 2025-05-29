@@ -1,3 +1,4 @@
+using Application.DTOs.Base;
 using Application.DTOs.Department;
 using Application.DTOs.Group;
 

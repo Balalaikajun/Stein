@@ -1,11 +1,8 @@
-using System.Linq.Dynamic.Core;
 using Application.DTOs.Metrics;
 using Application.Enums.MetricTypes;
 using Application.Interfaces;
-using Domain.Entities;
 using Domain.Enums;
 using Domain.Interfaces;
-using LinqKit;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services;
@@ -29,7 +26,7 @@ public class KpiService : IKpiService
 
     public async Task<CountDto> GetKpiAsync(KpiTypes types, KpiRequest request)
     {
-        if(!_handlers.ContainsKey(types))
+        if (!_handlers.ContainsKey(types))
             throw new InvalidOperationException($"No handler for '{types}' is registered.");
         return await _handlers[types](request);
     }
@@ -60,7 +57,7 @@ public class KpiService : IKpiService
 
         quarry = quarry
             .Where(s => s.IsCitizen == false && s.Status == StudentStatuses.Active);
-        
+
         return new CountDto(await quarry
             .CountAsync());
     }

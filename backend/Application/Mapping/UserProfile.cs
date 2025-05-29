@@ -1,10 +1,10 @@
+using Application.DTOs.User;
 using AutoMapper;
 using Domain.Entities;
-using Application.DTOs.User;
 
-namespace Infrastructure.Mapping;
+namespace Application.Mapping;
 
-public class UserProfile: Profile
+public class UserProfile : Profile
 {
     public UserProfile()
     {

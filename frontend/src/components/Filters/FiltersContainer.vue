@@ -72,22 +72,22 @@ watch(() => props.values, (newVal) => {
   selectedFilters.value = { ...newVal }
 }, { deep: true })
 
-function updateFilterValue(filterId, value) {
-  selectedFilters.value[filterId] = value;
+function updateFilterValue (filterId, value) {
+  selectedFilters.value[filterId] = value
 
   // Сбрасываем все фильтры, зависящие от filterId
   props.filters
       .filter(f => f.dependsOn?.includes(filterId))
       .forEach(dep => {
-        selectedFilters.value[dep.id] = [];
-      });
+        selectedFilters.value[dep.id] = []
+      })
   // Эмитим единожды
-  emit('update-filters', { ...selectedFilters.value });
+  emit('update-filters', { ...selectedFilters.value })
 }
 
 const debouncedEmit = debounce(filters => {
-  emit('update-filters', filters);
-}, 300);
+  emit('update-filters', filters)
+}, 300)
 </script>
 
 <style scoped>

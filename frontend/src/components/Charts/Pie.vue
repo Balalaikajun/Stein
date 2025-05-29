@@ -44,7 +44,7 @@ const props = defineProps({
     type: [String, Array],
     default: () => '#CCCCCC'
   },
-  title:{
+  title: {
     type: String,
     required: true
   }

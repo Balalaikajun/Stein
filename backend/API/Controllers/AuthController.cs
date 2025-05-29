@@ -15,14 +15,14 @@ public class AuthController : ControllerBase
     {
         _authService = authService;
     }
-    
+
     [HttpPost]
     public async Task<ActionResult<string>> Login(UserPostDto userPostDto)
     {
         try
         {
             var token = await _authService.LoginAsync(userPostDto);
-            
+
             return Ok(token);
         }
         catch (NotFoundException ex)

@@ -1,9 +1,7 @@
+using Application.DTOs.Base;
 using Application.DTOs.Department;
 using Application.DTOs.Order;
 using Application.Interfaces;
-using Application.Services;
-using Domain.Entities;
-using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +9,7 @@ namespace API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class OrderController: ControllerBase
+public class OrderController : ControllerBase
 {
     private readonly IOrderService _orderService;
 
@@ -24,8 +22,8 @@ public class OrderController: ControllerBase
     [HttpPost("filter")]
     public async Task<ActionResult<BasePaginatedResult<OrderGetDto>>> GetPaginated(OrderPaginatedRequest request)
     {
-        var result =await _orderService.GetPaginated(request);
-        
+        var result = await _orderService.GetPaginated(request);
+
         return Ok(result);
     }
     //
@@ -44,7 +42,7 @@ public class OrderController: ControllerBase
     //         return BadRequest(e.InnerException.Message);
     //     }
     // }
-    
+
     [HttpDelete]
     [Authorize]
     public async Task<ActionResult> Delete(int id)

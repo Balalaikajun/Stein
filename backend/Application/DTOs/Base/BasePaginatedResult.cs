@@ -1,6 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace Application.DTOs.Department;
+namespace Application.DTOs.Base;
 
 public record BasePaginatedResult<TDto>(
     IEnumerable<TDto> Items,

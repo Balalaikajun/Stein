@@ -2,14 +2,14 @@ using Application.DTOs.Teacher;
 using AutoMapper;
 using Domain.Entities;
 
-namespace Infrastructure.Mapping;
+namespace Application.Mapping;
 
-public class TeacherProfile:Profile
+public class TeacherProfile : Profile
 {
     public TeacherProfile()
     {
         CreateMap<Teacher, TeacherGetDto>();
-        
+
         CreateMap<TeacherPostDto, Teacher>();
     }
 }

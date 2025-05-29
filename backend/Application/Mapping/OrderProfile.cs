@@ -1,12 +1,10 @@
-using Application.DTOs.Group;
 using Application.DTOs.Order;
 using AutoMapper;
 using Domain.Entities;
-using Domain.Interfaces;
 
-namespace Infrastructure.Mapping;
+namespace Application.Mapping;
 
-public class OrderProfile: Profile
+public class OrderProfile : Profile
 {
     public OrderProfile()
     {
@@ -24,5 +22,4 @@ public class OrderProfile: Profile
 
         CreateMap<OrderPostDto, Order>();
     }
-    
 }

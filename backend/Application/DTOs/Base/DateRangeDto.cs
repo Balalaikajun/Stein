@@ -1,4 +1,4 @@
-namespace Application.DTOs.Department;
+namespace Application.DTOs.Base;
 
 public record DateRangeDto(
     DateOnly? FromDate = null,

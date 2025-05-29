@@ -3,7 +3,7 @@ using Application.DTOs.Group;
 namespace Application.DTOs.Metrics;
 
 public record PerformanceRequest(
-    int YearFrom, 
+    int YearFrom,
     int MonthFrom,
     int YearTo,
     int MonthTo,
@@ -11,4 +11,4 @@ public record PerformanceRequest(
     IEnumerable<int>? Departments = null,
     IEnumerable<int>? Specializations = null,
     IEnumerable<GroupKeyDto>? Groups = null
-    );
+);

@@ -52,12 +52,10 @@ public class PieService : IPieService
         {
             var groupPredicate = PredicateBuilder.New<Student>(false);
             foreach (var k in request.GroupKeys)
-            {
                 groupPredicate = groupPredicate.Or(s =>
                     s.GroupSpecializationId == k.SpecializationId &&
                     s.GroupYear == k.Year &&
                     s.GroupId == k.Index);
-            }
 
             quarry = quarry.Where(groupPredicate);
         }
@@ -97,12 +95,10 @@ public class PieService : IPieService
         {
             var groupPredicate = PredicateBuilder.New<Student>(false);
             foreach (var k in request.GroupKeys)
-            {
                 groupPredicate = groupPredicate.Or(s =>
                     s.GroupSpecializationId == k.SpecializationId &&
                     s.GroupYear == k.Year &&
                     s.GroupId == k.Index);
-            }
 
             quarry = quarry.Where(groupPredicate);
         }
@@ -139,12 +135,10 @@ public class PieService : IPieService
         {
             var groupPredicate = PredicateBuilder.New<Student>(false);
             foreach (var k in request.GroupKeys)
-            {
                 groupPredicate = groupPredicate.Or(s =>
                     s.GroupSpecializationId == k.SpecializationId &&
                     s.GroupYear == k.Year &&
                     s.GroupId == k.Index);
-            }
 
             quarry = quarry.Where(groupPredicate);
         }

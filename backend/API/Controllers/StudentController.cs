@@ -1,6 +1,6 @@
+using Application.DTOs.Base;
 using Application.DTOs.Department;
 using Application.DTOs.Student;
-using Application.DTOs.Teacher;
 using Application.Interfaces;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +10,7 @@ namespace API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class StudentController:ControllerBase
+public class StudentController : ControllerBase
 {
     private readonly IStudentService _studentService;
 
@@ -23,7 +23,7 @@ public class StudentController:ControllerBase
     public async Task<ActionResult<BasePaginatedResult<StudentGetDto>>> GetStudents(StudentPaginatedRequest request)
     {
         var result = await _studentService.GetPaginated(request);
-        
+
         return Ok(result);
     }
     // [HttpPost]
@@ -43,7 +43,7 @@ public class StudentController:ControllerBase
     //     
     //     
     // }
-    
+
     [HttpPatch]
     [Authorize]
     public async Task<ActionResult> Patch(StudentPatchDto dto)
@@ -55,7 +55,7 @@ public class StudentController:ControllerBase
         }
         catch (NotFoundException e)
         {
-            return NotFound(e.Message);   
+            return NotFound(e.Message);
         }
         catch (Exception e)
         {
@@ -63,7 +63,7 @@ public class StudentController:ControllerBase
             return BadRequest("Неизвестная ошибка");
         }
     }
-    
+
     [HttpDelete]
     [Authorize]
     public async Task<ActionResult> Delete(int id)
@@ -82,7 +82,5 @@ public class StudentController:ControllerBase
             Console.WriteLine(e);
             return BadRequest("Неизвестная ошибка");
         }
-        
-        
     }
 }

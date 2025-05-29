@@ -1,25 +1,27 @@
+using System.Linq.Expressions;
+using Application.DTOs.Base;
 using Application.DTOs.Department;
 using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Domain.Entities;
+using Domain.Exceptions;
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
-using Domain.Exceptions;
 
 namespace Application.Services;
 
 public class DepartmentService : IDepartmentService
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
     private static readonly Dictionary<string, Expression<Func<Department, object>>> _sortSelectors = new()
     {
         ["Title"] = d => d.Title,
         ["IsActive"] = d => d.IsActive,
         ["Id"] = d => d.Id
     };
+
+    private readonly IApplicationDbContext _context;
+    private readonly IMapper _mapper;
 
     public DepartmentService(IApplicationDbContext context, IMapper mapper)
     {
@@ -47,11 +49,8 @@ public class DepartmentService : IDepartmentService
             : query.OrderBy(sortSelector).ThenBy(d => d.Id);
 
         int? total = null;
-        if (request.Skip == 0)
-        {
-            total = await query.CountAsync();
-        }
-        
+        if (request.Skip == 0) total = await query.CountAsync();
+
         // Пагинацияs
         var items = await query
             .Skip(request.Skip)
@@ -59,36 +58,35 @@ public class DepartmentService : IDepartmentService
             .ProjectTo<DepartmentGetDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        
-        
+
         var hasMore = items.Count > request.Take;
         var resultItems = hasMore ? items.Take(request.Take) : items;
 
         return new BasePaginatedResult<DepartmentGetDto>(
-            Items: resultItems,
-            HasMore: hasMore,
-            Total: total);
+            resultItems,
+            hasMore,
+            total);
     }
 
     public async Task Create(DepartmentPostDto dto)
     {
         var department = _mapper.Map<Department>(dto);
-        
+
         _context.Departments.Add(department);
 
         await _context.SaveChangesAsync();
     }
-    
-    
+
+
     public async Task Update(DepartmentPatchDto dto)
     {
         var department = await _context.Departments.FirstOrDefaultAsync(x => x.Id == dto.Id) ??
                          throw new NotFoundException($"Department with id - {dto.Id} was not found");
-        
+
         if (!string.IsNullOrWhiteSpace(dto.Title) && department.Title != dto.Title)
             department.Title = dto.Title;
-        
-        if(dto.IsActive.HasValue && dto.IsActive != department.IsActive)
+
+        if (dto.IsActive.HasValue && dto.IsActive != department.IsActive)
             department.IsActive = dto.IsActive.Value;
 
         await _context.SaveChangesAsync();
@@ -97,13 +95,12 @@ public class DepartmentService : IDepartmentService
     public async Task Delete(int id)
     {
         var department = await _context.Departments.FirstOrDefaultAsync(x => x.Id == id);
-        
+
         if (department == null)
             throw new NotFoundException($"Department with id - {id} was not found");
-        
+
         _context.Departments.Remove(department);
-        
+
         await _context.SaveChangesAsync();
     }
-    
 }

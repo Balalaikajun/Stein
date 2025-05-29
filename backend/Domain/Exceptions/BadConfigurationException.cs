@@ -1,3 +1,3 @@
 namespace Domain.Exceptions;
 
-public class BadConfigurationException(string message):Exception(message);
+public class BadConfigurationException(string message) : Exception(message);
