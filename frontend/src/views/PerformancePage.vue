@@ -112,7 +112,7 @@ async function loadPerformance (reset = false) {
   try {
     const params = buildParams(apiConfig.performance.paramsMapping, perfSkip.value, perfTake)
     const res = await axios.post(
-        `${BACKEND_API_HOST}${apiConfig.performance.endpoint}`,
+        `${apiConfig.performance.endpoint}`,
         params
     )
 

@@ -5,10 +5,11 @@
       <tr>
         <!-- Student Columns -->
         <th
-            v-for="col in studentColumns"
+            v-for="(col, index) in studentColumns"
             :key="col.key"
             :style="{ width: col.width || 'auto' }"
             :class="[
+              { 'sticky-col': index === 0 },
               'sortable',
               { sorted: isSorted(col), disabled: col.disableSort || !editable },
               { 'text-center': col.align === 'center', 'text-right': col.align === 'right' }
@@ -41,10 +42,11 @@
       <tr v-for="student in students" :key="student.id">
         <!-- Student Data -->
         <td
-            v-for="col in studentColumns"
+            v-for="(col, index) in studentColumns"
             :key="col.key"
             :style="{ width: col.width || 'auto' }"
             :class="{
+              'sticky-col': index === 0,
               'text-center': col.align === 'center',
               'text-right': col.align === 'right'
             }"
@@ -77,16 +79,11 @@
       </tr>
       </tbody>
 
-      <tfoot ref="footerRef">
-      <tr>
-        <td :colspan="studentColumns.length + monthColumns.length" class="footer-cell">
-          Всего: {{ total?.value ?? total }}
-        </td>
-      </tr>
-      </tfoot>
+
     </table>
   </div>
 </template>
+
 
 <script setup>
 import { ref, computed, toRefs, watch, nextTick, onMounted } from 'vue'
@@ -181,6 +178,26 @@ onMounted(() => {
   border-collapse: collapse;
   table-layout: fixed;
   white-space: nowrap;
+}
+
+/* Зафиксированный первый столбец (заголовок) */
+.data-table thead th.sticky-col {
+  position: sticky;
+  left: 0;
+  background: var(--background-color);
+  z-index: 3;
+  /* При желании можно добавить бордер справа, чтобы отделить от остальных столбцов */
+  border-right: 1px solid var(--secondary-background-color);
+}
+
+/* Зафиксированные ячейки первого столбца */
+.data-table tbody td.sticky-col {
+  position: sticky;
+  left: 0;
+  background: var(--background-color);
+  z-index: 1;
+  /* Бордер справа (необязательно, но визуально разграничивает) */
+  border-right: 1px solid var(--secondary-background-color);
 }
 
 .data-table thead th {
