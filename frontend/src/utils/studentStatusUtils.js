@@ -4,12 +4,12 @@ export const STUDENT_STATUS_KEYS = {
   'Vacation': 'Академ',
   'Released': 'Выпускник',
   'TransferToOtherInstitution': 'Переведён в другое ОУ',
-  'NotActive':'Не активен'
-};
+  'NotActive': 'Не активен'
+}
 
-export function formatStudentStatus(code) {
-  return STUDENT_STATUS_KEYS[code] || 'Неизвестно';
+export function formatStudentStatus (code) {
+  return STUDENT_STATUS_KEYS[code] || 'Неизвестно'
 }
 
 export const STUDENT_STATUS_OPTIONS = Object.entries(STUDENT_STATUS_KEYS)
-  .map(([value, label]) => ({ value, label }));
+  .map(([value, label]) => ({ value, label }))

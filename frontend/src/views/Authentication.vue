@@ -15,7 +15,7 @@ const isFormValid = computed(() => {
   return login.value.trim().length >= 3 && password.value.length >= 3
 })
 
-async function handleSubmit(e) {
+async function handleSubmit (e) {
   e.preventDefault()
 
   if (!isFormValid.value) return
@@ -47,7 +47,7 @@ async function handleSubmit(e) {
 
 <template>
   <header class="header">
-    <img src="@/assets/CollageLogo.png" alt="ККАСиЦТ" class="logo" />
+    <img src="@/assets/CollageLogo.png" alt="ККАСиЦТ" class="logo"/>
   </header>
 
   <div class="auth-container">

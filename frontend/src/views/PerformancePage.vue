@@ -1,6 +1,6 @@
 <template>
   <div class="main-layout">
-    <Sidebar :items="menuItems" />
+    <Sidebar :items="menuItems"/>
 
     <div class="content-area">
       <h1>{{ pageTitle }}</h1>
@@ -30,9 +30,9 @@
           @load-more-months="() => loadPerformance(false)"
       >
         <template #student-cell-status="{ student }">
-          <StatusBadge :status="student.status" />
+          <StatusBadge :status="student.status"/>
         </template>
-        <slot name="custom-cells" />
+        <slot name="custom-cells"/>
       </PerformanceTable>
     </div>
   </div>
@@ -40,20 +40,17 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import axios from 'axios'
+import axios from '@/api/api.js'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import FiltersContainer from '@/components/Filters/FiltersContainer.vue'
 import PerformanceTable from '@/components/Table/PerformanceTable.vue'
 import StatusBadge from '@/components/Table/StatusBadge.vue'
 import menuItems from '@/router/menuData.js'
 import academicConfig from '@/configs/performance.js'
-import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
-
 
 // Configs
 const { tableConfig, filters, apiConfig, initialSort } = academicConfig
 const pageTitle = 'Успеваемость'
-
 
 // Students state
 const students = ref([])
@@ -74,26 +71,26 @@ const currentFilters = ref({})
 const currentSort = ref({ ...initialSort })
 
 // Common params builder
-function buildParams(mapping, skip, take) {
+function buildParams (mapping, skip, take) {
   const params = {
     [mapping.take]: take,
     [mapping.skip]: skip
   }
-  if (mapping.search)    params[mapping.search] = ''
-  if (mapping.sortKey)   params[mapping.sortKey] = currentSort.value.key
+  if (mapping.search) params[mapping.search] = ''
+  if (mapping.sortKey) params[mapping.sortKey] = currentSort.value.key
   if (mapping.sortOrder) params[mapping.sortOrder] = currentSort.value.descending
   Object.assign(params, currentFilters.value)
   return params
 }
 
 // Load students
-async function loadStudents(reset = false) {
+async function loadStudents (reset = false) {
   if (reset) studentSkip.value = 0
   loading.value = true
   try {
     const params = buildParams(apiConfig.student.paramsMapping, studentSkip.value, studentTake)
     const res = await axios.post(
-        `${BACKEND_API_HOST}${apiConfig.student.endpoint}`,
+        `${apiConfig.student.endpoint}`,
         params
     )
     const { items, hasMore, total } = res.data
@@ -109,7 +106,7 @@ async function loadStudents(reset = false) {
 }
 
 // Load performance items
-async function loadPerformance(reset = false) {
+async function loadPerformance (reset = false) {
   if (reset) perfSkip.value = 0
   loading.value = true
   try {
@@ -131,13 +128,13 @@ async function loadPerformance(reset = false) {
 }
 
 // Handlers
-function onFilterChange(newFilters) {
+function onFilterChange (newFilters) {
   currentFilters.value = newFilters
   loadStudents(true)
   loadPerformance(true)
 }
 
-function onSort(key) {
+function onSort (key) {
   if (currentSort.value.key === key) {
     currentSort.value.descending = !currentSort.value.descending
   } else {
@@ -151,7 +148,11 @@ function onSort(key) {
 </script>
 
 <style scoped>
-.main-layout { display: flex; height: 100vh; }
+.main-layout {
+  display: flex;
+  height: 100vh;
+}
+
 .content-area {
   flex: 1;
   padding: 2rem;
@@ -160,7 +161,17 @@ function onSort(key) {
   display: flex;
   flex-direction: column;
 }
-h1 { margin: 0 0 1rem; color: var(--text-color); }
-.filters-container { margin-bottom: 1.5rem; }
-.table-container { flex: 1; }
+
+h1 {
+  margin: 0 0 1rem;
+  color: var(--text-color);
+}
+
+.filters-container {
+  margin-bottom: 1.5rem;
+}
+
+.table-container {
+  flex: 1;
+}
 </style>

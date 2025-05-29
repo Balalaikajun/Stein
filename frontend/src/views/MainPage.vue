@@ -260,7 +260,7 @@ const filtersConfig = [
     staticOptions: [
       { label: 'Очное отделение', value: true },
       { label: 'Заочное отделение', value: false },
-      {label: 'Все', value: null },
+      { label: 'Все', value: null },
     ],
     allowDeselect: true
   }
@@ -375,7 +375,7 @@ const {
 // ========== ФУНКЦИЯ для обработки смены фильтров ========== //
 // При получении нового набора фильтров просто перезаписываем filters.value.
 // Все хуки, «подписанные» на filters, автоматически перезагрузят свои данные.
-function onFilterChange(newFilter) {
+function onFilterChange (newFilter) {
   filters.value = { ...newFilter }
 }
 </script>

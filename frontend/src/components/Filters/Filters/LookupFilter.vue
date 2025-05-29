@@ -62,11 +62,10 @@
 
 <script setup>
 import { computed, nextTick, onMounted, ref, toRaw, watch } from 'vue'
-import axios from 'axios'
+import axios from '@/api/api.js'
 import { debounce } from 'lodash-es'
 import FilterButton from '@/components/Filters/FilterButton.vue'
 import FilterModal from '@/components/Filters/FilterModal.vue'
-import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 
 const props = defineProps({
   filter: { type: Object, required: true },
@@ -150,7 +149,7 @@ async function loadOptions() {
   try {
     const body = buildRequestBody()
     const { data } = await axios.post(
-        `${BACKEND_API_HOST}${props.filter.apiEndpoint}`,
+        `${props.filter.apiEndpoint}`,
         body
     )
     const items = data.items || []

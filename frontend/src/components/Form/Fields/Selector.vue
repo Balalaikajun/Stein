@@ -69,10 +69,9 @@
 
 <script setup>
 import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
-import axios from 'axios'
+import axios from '@/api/api.js'
 import { debounce } from 'lodash-es'
 import FilterButton from '@/components/Filters/FilterButton.vue'
-import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 
 // Props & Emits
 const props = defineProps({

@@ -154,7 +154,7 @@ export const editFormConfig = {
       }
     }
   ]
-};
+}
 
 export default {
   tableConfig,

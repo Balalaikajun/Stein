@@ -1,13 +1,12 @@
-import { ref, isRef, unref, computed, watch } from 'vue'
-import axios from 'axios'
-import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
+import { computed, isRef, ref, unref, watch } from 'vue'
+import axios from '@/api/api.js'
 
 /**
  * Хук для загрузки гистограммы приказов
  *
  * @param {Object|Ref<Object>} initialRequestBody - тело запроса
  */
-export function useOrdersHistogram(initialRequestBody = {}) {
+export function useOrdersHistogram (initialRequestBody = {}) {
   const requestBodyRef = isRef(initialRequestBody) ? initialRequestBody : ref(initialRequestBody)
 
   const data = ref([])
@@ -22,7 +21,7 @@ export function useOrdersHistogram(initialRequestBody = {}) {
 
     try {
       const finalBody = { ...mergedBody.value, ...additionalBody }
-      const url = `${BACKEND_API_HOST}/api/Metrics/histogram/order`
+      const url = `/api/Metrics/histogram/order`
 
       const response = await axios.post(url, finalBody, {
         headers: { 'Content-Type': 'application/json' }

@@ -1,7 +1,7 @@
 import { ref } from 'vue'
-import axios from 'axios'
+import axios from '@/api/api.js'
 
-export default function useDataLoader(apiConfig) {
+export default function useDataLoader (apiConfig) {
   const items = ref([])
   const loading = ref(false)
   const hasMore = ref(false)
@@ -12,7 +12,7 @@ export default function useDataLoader(apiConfig) {
     try {
       loading.value = true
       const { data } = await axios.post(
-        `https://localhost:7203${apiConfig.endpoint}`,
+        `${apiConfig.endpoint}`,
         params
       )
 

@@ -7,12 +7,12 @@ export const ORDER_TYPE_KEYS = {
   'AcademicLeave': 'Академический отпуск',
   'TransferBetweenGroups': 'Перевод между группами',
   'Expulsion': 'Отчисление',
-  'Graduation' : 'Выпуск'
-};
+  'Graduation': 'Выпуск'
+}
 
-export function formatOrderType(code) {
-  return ORDER_TYPE_KEYS[code] || 'Неизвестно';
+export function formatOrderType (code) {
+  return ORDER_TYPE_KEYS[code] || 'Неизвестно'
 }
 
 export const ORDER_TYPE_OPTIONS = Object.entries(ORDER_TYPE_KEYS)
-  .map(([value, label]) => ({ value, label }));
+  .map(([value, label]) => ({ value, label }))

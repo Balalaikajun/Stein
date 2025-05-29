@@ -1,6 +1,5 @@
 import { ref, isRef, unref, computed, watch } from 'vue';
-import axios from 'axios';
-import { BACKEND_API_HOST } from '@/configs/apiConfig.js';
+import axios from '@/api/api.js';
 
 export function usePieCards(pieTypes, piesValuesMapping, initialRequestBody = {}) {
   const typesRef = isRef(pieTypes) ? pieTypes : ref(pieTypes);
@@ -22,7 +21,7 @@ export function usePieCards(pieTypes, piesValuesMapping, initialRequestBody = {}
 
       await Promise.all(
         unref(typesRef).map(async (type) => {
-          const url = `${BACKEND_API_HOST}/api/Metrics/pie?type=${encodeURIComponent(type)}`;
+          const url = `/api/Metrics/pie?type=${encodeURIComponent(type)}`;
           const response = await axios.post(url, finalBody);
 
           // Ожидаем формат:

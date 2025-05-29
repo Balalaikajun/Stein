@@ -1,12 +1,11 @@
 <script setup>
 import { ref, watch } from 'vue'
-import axios from 'axios'
+import axios from '@/api/api.js'
 import StatusBadge from '@/components/Table/StatusBadge.vue'
 import FiltersContainer from '@/components/Filters/FiltersContainer.vue'
 import Table from '@/components/Table/Table.vue'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import menuItems from '@/router/menuData.js'
-import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 import FormModal from '@/components/Form/FormModal.vue'
 
 const props = defineProps({
@@ -84,12 +83,9 @@ const loadData = async (reset = false) => {
     loading.value = true
     const params = buildRequestParams(reset)
     const { data } = await axios.post(
-        `${BACKEND_API_HOST}${apiConfig.endpoint}`,
+        `${apiConfig.endpoint}`,
         params
     )
-    console.log(params)
-    console.log(data)
-    console.log(data.total)
     tableItems.value = reset ? data.items : [...tableItems.value, ...data.items]
     if (params.skip === 0) {
       total.value = data.total
@@ -132,7 +128,6 @@ async function handleDelete (item) {
   }
 
   try {
-    console.log(deleteUrl)
     await axios.delete(deleteUrl)
     await loadData(true)
   } catch (error) {
@@ -146,16 +141,14 @@ function openCreateModal () {
 }
 
 function openEditModal (item) {
-  console.log(item)
   editingData.value = { ...item }
   isEditModalVisible.value = true
 }
 
 async function onCreateFormSubmit (data) {
-  console.log(data)
   try {
     await axios.post(
-        `${BACKEND_API_HOST}${createFormConfig.apiEndpoint}`,
+        `${createFormConfig.apiEndpoint}`,
         data)
 
     await loadData(true)
@@ -166,10 +159,9 @@ async function onCreateFormSubmit (data) {
 
 async function onEditFormSubmit (data) {
   let success = false
-  console.log(data)
   try {
     await axios.patch(
-        `${BACKEND_API_HOST}${editFormConfig.apiEndpoint}`,
+        `${editFormConfig.apiEndpoint}`,
         data)
     await loadData(true)
   } catch (error) {

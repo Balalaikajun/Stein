@@ -1,16 +1,14 @@
 <script setup>
 import { ref, computed } from 'vue'
-import axios from 'axios'
+import axios from '@/api/api.js'
 import '@fontsource/roboto/700.css'
 import menuItems from '@/router/menuData.js'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
-import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 import { Info } from 'lucide-vue-next'
 import exampleFilePath from '@/assets/ПримерВыгрузки.xlsx?url'
 
 // Пусть в папке /src/assets лежит файл example.xlsx
 const exampleFile = exampleFilePath
-
 
 const errorsMessage = ref('')
 const successMessage = ref('')
@@ -26,15 +24,17 @@ const isFormValid = computed(() => file.value !== null)
 
 // Управление модалкой
 const isModalOpen = ref(false)
-function openModal() {
+
+function openModal () {
   isModalOpen.value = true
 }
-function closeModal() {
+
+function closeModal () {
   isModalOpen.value = false
 }
 
 // Обработка выбора файла (основного инпута)
-function onFileChange(e) {
+function onFileChange (e) {
   const selected = e.target.files[0]
   if (!selected) {
     file.value = null
@@ -63,7 +63,7 @@ function onFileChange(e) {
 }
 
 // Отправка формы на бэк
-async function handleSubmit() {
+async function handleSubmit () {
   errorsMessage.value = ''
   successMessage.value = ''
 
@@ -101,13 +101,13 @@ async function handleSubmit() {
 }
 
 // Скачиваем пример с бекенда
-async function downloadSample() {
+async function downloadSample () {
   errorsMessage.value = ''
   successMessage.value = ''
   isLoading.value = true
 
   try {
-    const response = await axios.get(`${BACKEND_API_HOST}/api/Migration/sample`, {
+    const response = await axios.get(`/api/Migration/sample`, {
       responseType: 'blob'
     })
 
@@ -135,12 +135,12 @@ async function downloadSample() {
 <template>
   <div class="layout">
     <!-- Sidebar слева -->
-    <Sidebar :items="menuItems" />
+    <Sidebar :items="menuItems"/>
 
     <!-- Основной контент справа -->
     <div class="page-content">
       <div class="auth-container">
-                <!-- Форма загрузки основного файла -->
+        <!-- Форма загрузки основного файла -->
         <form @submit.prevent="handleSubmit" class="auth-form" style="margin-top: 1.5rem">
           <h2 class="form-title" style="margin-bottom: 1.5rem">
             Загрузка выгрузки
@@ -151,7 +151,7 @@ async function downloadSample() {
               Выберите файл выгрузки (XLSX)
             </label>
             <!-- Иконка вне label -->
-            <Info class="info-icon" @click="openModal" />
+            <Info class="info-icon" @click="openModal"/>
 
             <input
                 id="fileInput"
@@ -316,7 +316,7 @@ async function downloadSample() {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
