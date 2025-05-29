@@ -6,7 +6,7 @@
 .vs/
 bin/
 obj/
-API/wwwroot/
+backend/API/wwwroot/
 App_Data/
 *.log
 *.cache
