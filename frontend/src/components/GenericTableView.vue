@@ -106,7 +106,7 @@ const toggleVisibility = () => {
 
 async function handleDelete (item) {
   const idField = apiConfig.paramsMapping.id
-  let deleteUrl = `${BACKEND_API_HOST}${apiConfig.deleteEndpoint}`
+  let deleteUrl = `${apiConfig.deleteEndpoint}`
 
   // Валидация
   if (Array.isArray(idField)) {

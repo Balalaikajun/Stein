@@ -392,9 +392,9 @@ public class ExcelMigrationService : IExcelMigrationService
 
             var existings = await _context.AcademicPerformances
                 .Where(ap => keyStrings.Contains(
-                    ap.Year + "|" +
-                    ap.Month + "|" +
-                    ap.StudentId))
+                    ap.Year.ToString() + "|" +
+                    ap.Month.ToString() + "|" +
+                    ap.StudentId.ToString()))
                 .ToListAsync();
 
             foreach (var performance in performances)

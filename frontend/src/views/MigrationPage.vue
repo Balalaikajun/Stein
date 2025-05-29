@@ -78,7 +78,7 @@ async function handleSubmit () {
     formData.append('file', file.value)
 
     const response = await axios.post(
-        `${BACKEND_API_HOST}/api/Migration`,
+        `/api/Migration`,
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
     )
@@ -90,6 +90,7 @@ async function handleSubmit () {
       errorsMessage.value = response.data.message || 'Неизвестная ошибка при загрузке.'
     }
   } catch (error) {
+    console.log(error)
     if (error.response?.data?.message) {
       errorsMessage.value = error.response.data.message
     } else {
