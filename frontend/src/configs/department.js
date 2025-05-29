@@ -30,9 +30,9 @@ export default {
   ],
   apiConfig: {
     endpoint: '/api/Department/filter',
-    deleteEndpoint: '/api/Department',
+    deleteEndpoint:'/api/Department',
     paramsMapping: {
-      id: 'id',
+      id: "id",
       search: 'searchText',
       sortKey: 'sortBy',
       sortOrder: 'descending',

@@ -18,7 +18,6 @@ TestResults/
 *.Publish.xml
 
 # === Entity Framework (EF) ===
-Migrations/
 *.bak
 *.ldf
 *.mdf
