@@ -1,39 +1,89 @@
 # === Visual Studio / C# ASP.NET ===
 *.user
 *.suo
+*.userosscache
+*.sln.docstates
 .vs/
 bin/
 obj/
+API/wwwroot/
 App_Data/
 *.log
 *.cache
 *.ide
 TestResults/
+*.dbmdl
+*.pdb
+*.mdb
+*.Publish.xml
 
 # === Entity Framework (EF) ===
 Migrations/
+*.bak
+*.ldf
+*.mdf
 
-# === PostgreSQL ===
-*.dump
+# === ASP.NET Identity / Temp Keys ===
+*.key
+*.pem
+*.cer
+*.pfx
 
-# === Vue.js (JS) ===
+# === Vue.js / Vite ===
 node_modules/
+dist/
+vite.config.ts
+.vite/
 npm-debug.log*
 yarn-error.log*
-dist/
+.pnpm-debug.log*
 .vuepress/dist/
 .npm/
 coverage/
 
-# === JetBrains IDE ===
+
+# === JetBrains IDE (Rider / WebStorm / PhpStorm) ===
 .idea/
 *.iml
-
-# === Дополнительные временные файлы ===
-*.tmp
-*.temp
-.DS_Store
-Thumbs.db
+out/
 
 # === VS Code (если используется) ===
 .vscode/
+.history/
+
+# === Linux / macOS / Windows системные ===
+*.tmp
+*.temp
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
+
+# === Logs / Dumps / Other temp ===
+*.dump
+*.log
+*.stackdump
+*.pid
+*.seed
+*.orig
+
+# === Git / Merge Tools ===
+*.orig
+*.rej
+
+# === Build artifacts ===
+*.tgz
+*.gz
+*.zip
+*.tar
+*.7z
+
+# === Environment & local config ===
+.env
+.env.*.local
+.env.local
+.env.development.local
+.env.production.local
