@@ -6,10 +6,10 @@ import menuItems from '@/router/menuData.js'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import { BACKEND_API_HOST } from '@/configs/apiConfig.js'
 import { Info } from 'lucide-vue-next'
-
+import exampleFilePath from '@/assets/ПримерВыгрузки.xlsx?url'
 
 // Пусть в папке /src/assets лежит файл example.xlsx
-const exampleFile = '@/assets/Пример_выгрузки.xlsx'
+const exampleFile = exampleFilePath
 
 
 const errorsMessage = ref('')
@@ -84,7 +84,7 @@ async function handleSubmit() {
     )
 
     // Обычный формат: { success: true/false, message: '...' }
-    if (response.status === 200 && response.data.success) {
+    if (response.status === 200 || response.data.success) {
       successMessage.value = response.data.message || 'Файл успешно загружен.'
     } else {
       errorsMessage.value = response.data.message || 'Неизвестная ошибка при загрузке.'

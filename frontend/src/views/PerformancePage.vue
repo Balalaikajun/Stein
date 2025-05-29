@@ -114,11 +114,11 @@ async function loadPerformance(reset = false) {
   loading.value = true
   try {
     const params = buildParams(apiConfig.performance.paramsMapping, perfSkip.value, perfTake)
-    console.log(params)
     const res = await axios.post(
         `${BACKEND_API_HOST}${apiConfig.performance.endpoint}`,
         params
     )
+
     const { items, hasMore } = res.data
     performanceItems.value = reset ? items : performanceItems.value.concat(items)
     hasMoreMonths.value = hasMore

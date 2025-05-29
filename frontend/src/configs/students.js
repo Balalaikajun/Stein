@@ -1,6 +1,6 @@
 // student.config.js
 import { generateYearOptions } from '@/utils/dateUtils.js'
-import {formatStudentStatus, STUDENT_STATUS_OPTIONS} from '@/utils/studentStatusUtils.js'
+import { formatStudentStatus, STUDENT_STATUS_OPTIONS } from '@/utils/studentStatusUtils.js'
 
 export const tableConfig = {
   columns: [
@@ -28,7 +28,7 @@ export const tableConfig = {
       title: 'Пол',
       key: 'gender',
       sortKey: 'Gender',
-      formatter: (row) => row.gender  === 'Male' ? 'Мужской' : 'Женский',
+      formatter: (row) => row.gender === 'Male' ? 'Мужской' : 'Женский',
       width: '120px'
     },
     {
@@ -57,8 +57,12 @@ export const filters = [
   {
     id: 'isCitizen',
     title: 'Гражданство',
-    dataType: 'boolean',
-    labels: ['Нет', 'Да']
+    dataType: 'radio',
+    staticOptions: [
+      { label: 'Рф', value: true },
+      { label: 'Иное', value: false },
+      { label: 'Все', value: null },
+    ],
   },
   {
     id: 'gender',
@@ -81,7 +85,7 @@ export const filters = [
   },
   {
     id: 'DepartmentIds',
-    title: 'Кафедры',
+    title: 'Отделения',
     dataType: 'lookup',
     apiEndpoint: '/api/Department/filter',
     params: {
@@ -126,7 +130,7 @@ export const filters = [
     title: 'Группы',
     dataType: 'lookup',
     apiEndpoint: '/api/Group/filter',
-    dependsOn: ['DepartmentIds','SpecializationIds'],
+    dependsOn: ['DepartmentIds', 'SpecializationIds'],
     dependentParams: {
       DepartmentIds: 'departmentIds',
       SpecializationIds: 'specializationIds'
@@ -141,7 +145,7 @@ export const filters = [
       sortKey: 'sortBy',
       sortOrder: 'descending'
     },
-    mapOption: opt => ({ label: opt.acronym, value: opt.id})
+    mapOption: opt => ({ label: opt.acronym, value: opt.id })
   },
   {
     id: 'Years',
