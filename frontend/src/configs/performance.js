@@ -1,4 +1,5 @@
 import { generateYearOptions } from '@/utils/dateUtils.js'
+import { formatStudentStatus, STUDENT_STATUS_OPTIONS } from '@/utils/studentStatusUtils.js'
 
 export const tableConfig = {
   studentColumns: [

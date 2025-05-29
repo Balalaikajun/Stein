@@ -48,17 +48,17 @@ const props = defineProps({
 
 const emit = defineEmits(['confirm', 'cancel'])
 
-function handleKeydown (e) {
+function handleKeydown(e) {
   if (e.key === 'Escape') {
     emitCancel()
   }
 }
 
-function emitConfirm () {
+function emitConfirm() {
   emit('confirm')
 }
 
-function emitCancel () {
+function emitCancel() {
   emit('cancel')
 }
 

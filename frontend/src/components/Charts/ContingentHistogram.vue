@@ -352,7 +352,6 @@ onMounted(() => {
     height: 400px;
     padding: 1rem;
   }
-
   .chart-wrapper {
     min-width: 600px;
   }

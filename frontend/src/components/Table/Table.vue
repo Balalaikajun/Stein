@@ -155,7 +155,7 @@ function selectItem (item) {
   selectedItem.value = item
 }
 
-function handleKeydown (event) {
+function handleKeydown(event) {
   if (confirmationModalVisible.value) {
     if (event.key === 'Escape') {
       cancelDelete()
@@ -269,7 +269,6 @@ function onRowClick (item) {
   height: 100%;
   background-color: var(--primary-color);
 }
-
 .th-content {
   display: flex;
   justify-content: space-between;

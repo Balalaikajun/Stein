@@ -1,28 +1,28 @@
-import { computed, isRef, ref, unref, watch } from 'vue'
-import axios from '@/api/api.js'
+import { ref, isRef, unref, computed, watch } from 'vue';
+import axios from '@/api/api.js';
 
-export function usePieCards (pieTypes, piesValuesMapping, initialRequestBody = {}) {
-  const typesRef = isRef(pieTypes) ? pieTypes : ref(pieTypes)
-  const requestBodyRef = isRef(initialRequestBody) ? initialRequestBody : ref(initialRequestBody)
+export function usePieCards(pieTypes, piesValuesMapping, initialRequestBody = {}) {
+  const typesRef = isRef(pieTypes) ? pieTypes : ref(pieTypes);
+  const requestBodyRef = isRef(initialRequestBody) ? initialRequestBody : ref(initialRequestBody);
 
-  const pies = ref({})
-  const isLoading = ref(false)
-  const error = ref(null)
+  const pies = ref({});
+  const isLoading = ref(false);
+  const error = ref(null);
 
-  const mergedBody = computed(() => unref(requestBodyRef))
+  const mergedBody = computed(() => unref(requestBodyRef));
 
-  async function fetchAllPies (additionalBody = {}) {
-    isLoading.value = true
-    error.value = null
+  async function fetchAllPies(additionalBody = {}) {
+    isLoading.value = true;
+    error.value = null;
 
     try {
-      const results = {}
-      const finalBody = { ...unref(mergedBody), ...additionalBody }
+      const results = {};
+      const finalBody = { ...unref(mergedBody), ...additionalBody };
 
       await Promise.all(
         unref(typesRef).map(async (type) => {
-          const url = `/api/Metrics/pie?type=${encodeURIComponent(type)}`
-          const response = await axios.post(url, finalBody)
+          const url = `/api/Metrics/pie?type=${encodeURIComponent(type)}`;
+          const response = await axios.post(url, finalBody);
 
           // Ожидаем формат:
           // {
@@ -31,32 +31,32 @@ export function usePieCards (pieTypes, piesValuesMapping, initialRequestBody = {
           //     { "label": "Female", "value": 111 }
           //   ]
           // }
-          const raw = response.data
-          const keyLower = type.toLowerCase()
-          const mapping = piesValuesMapping[type] || {}
+          const raw = response.data;
+          const keyLower = type.toLowerCase();
+          const mapping = piesValuesMapping[type] || {};
 
           // Если пришёл массив raw.segments с полями label/value:
           if (Array.isArray(raw.segments)) {
             const segments = raw.segments.map(item => ({
               label: mapping[item.label] || item.label,
               value: Number(item.value)
-            }))
+            }));
 
-            const total = segments.reduce((sum, seg) => sum + seg.value, 0)
-            results[keyLower] = { segments, total }
+            const total = segments.reduce((sum, seg) => sum + seg.value, 0);
+            results[keyLower] = { segments, total };
           } else {
             // В остальных случаях просто возвращаем пустой пай
-            results[keyLower] = { segments: [], total: 0 }
+            results[keyLower] = { segments: [], total: 0 };
           }
         })
-      )
+      );
 
-      pies.value = results
+      pies.value = results;
     } catch (err) {
-      error.value = err
-      pies.value = {}
+      error.value = err;
+      pies.value = {};
     } finally {
-      isLoading.value = false
+      isLoading.value = false;
     }
   }
 
@@ -64,12 +64,12 @@ export function usePieCards (pieTypes, piesValuesMapping, initialRequestBody = {
     mergedBody,
     () => fetchAllPies(),
     { deep: true, immediate: true }
-  )
+  );
 
   return {
     pies,
     pieIsLoading: isLoading,
     pieError: error,
     fetchAllPies
-  }
+  };
 }

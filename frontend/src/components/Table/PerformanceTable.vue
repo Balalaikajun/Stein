@@ -213,31 +213,15 @@ onMounted(() => {
   z-index: 2;
 }
 
-.month-column {
-  text-align: center;
-}
+.month-column { text-align: center; }
 
 .data-table tbody tr:hover td {
   background-color: var(--hover-color);
 }
-
-.sortable {
-  cursor: pointer;
-  transition: background var(--transition-duration) var(--transition-timing);
-}
-
-.sortable:hover {
-  background-color: var(--hover-color);
-}
-
-.sorted {
-  background-color: var(--active-bg-color);
-}
-
-.disabled {
-  cursor: default;
-  opacity: 0.6;
-}
+.sortable { cursor: pointer; transition: background var(--transition-duration) var(--transition-timing); }
+.sortable:hover { background-color: var(--hover-color); }
+.sorted { background-color: var(--active-bg-color); }
+.disabled { cursor: default; opacity: 0.6; }
 
 .th-content {
   display: flex;

@@ -56,9 +56,9 @@ const generateCourseColors = (courseCount) => {
   const styles = getComputedStyle(document.documentElement)
   const baseColor = styles.getPropertyValue('--primary-color') || '#5B00E1'
 
-  return Array.from({ length: courseCount }, (_, i) => {
+  return Array.from({length: courseCount}, (_, i) => {
     const opacity = 1 - (i * 0.15)
-    return `rgba(${parseInt(baseColor.slice(1, 3), 16)}, ${parseInt(baseColor.slice(3, 5), 16)}, ${parseInt(baseColor.slice(5, 7), 16)}, ${opacity})`
+    return `rgba(${parseInt(baseColor.slice(1,3), 16)}, ${parseInt(baseColor.slice(3,5), 16)}, ${parseInt(baseColor.slice(5,7), 16)}, ${opacity})`
   })
 }
 

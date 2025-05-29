@@ -89,7 +89,7 @@ const keyToLabel = {
 const chartLabels = ref(orderedKeys.map(key => keyToLabel[key] || key))
 const chartValues = ref([])
 
-function initChart () {
+function initChart() {
   if (!chart.value || !chart.value.getContext) return
   if (chartInstance) {
     chartInstance.destroy()
@@ -143,7 +143,7 @@ function initChart () {
             autoSkip: false,
             maxRotation: 45,
             minRotation: 45,
-            callback (value) {
+            callback(value) {
               const label = this.getLabelForValue(value) || ''
               const maxCharsPerLine = 10
               const words = label.split(' ')
@@ -260,11 +260,9 @@ onMounted(() => {
   .orders-chart {
     padding: 1rem;
   }
-
   .chart-body {
     height: 250px;
   }
-
   .total-orders {
     font-size: 0.85rem;
   }

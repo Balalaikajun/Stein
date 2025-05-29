@@ -1,30 +1,30 @@
 <template>
   <Teleport to="body">
-    <div v-if="visible" class="modal-overlay" @click="cancel">
-      <div
-          class="modal-window"
-          :style="positionStyle"
-          role="dialog"
-          aria-modal="true"
-          @click.stop
-          ref="modalRef"
-      >
-        <header class="modal-header">
-          <slot name="header">
-            <h3 class="modal-title">{{ title }}</h3>
-          </slot>
-        </header>
-        <div class="modal-body">
-          <slot name="body"></slot>
+      <div v-if="visible" class="modal-overlay" @click="cancel">
+        <div
+            class="modal-window"
+            :style="positionStyle"
+            role="dialog"
+            aria-modal="true"
+            @click.stop
+            ref="modalRef"
+        >
+          <header class="modal-header">
+            <slot name="header">
+              <h3 class="modal-title">{{ title }}</h3>
+            </slot>
+          </header>
+          <div class="modal-body">
+            <slot name="body"></slot>
+          </div>
+          <footer class="modal-footer">
+            <slot name="footer">
+              <button class="btn btn--apply" @click="apply">Применить</button>
+              <button class="btn btn--cancel" @click="cancel">Отмена</button>
+            </slot>
+          </footer>
         </div>
-        <footer class="modal-footer">
-          <slot name="footer">
-            <button class="btn btn--apply" @click="apply">Применить</button>
-            <button class="btn btn--cancel" @click="cancel">Отмена</button>
-          </slot>
-        </footer>
       </div>
-    </div>
   </Teleport>
 </template>
 
@@ -46,25 +46,25 @@ const positionStyle = computed(() => {
   const sy = window.scrollY, sx = window.scrollX
   return {
     position: 'fixed',
-    top: `${props.anchorRect.bottom + sy + 4}px`,
-    left: `${props.anchorRect.left + sx}px`,
+    top:  `${props.anchorRect.bottom + sy + 4}px`,
+    left: `${props.anchorRect.left   + sx}px`,
     minWidth: `${props.anchorRect.width}px`,
     zIndex: 1001
   }
 })
 
-// Обработчики событий
-function apply () { emit('apply') }
 
-function cancel () { emit('cancel') }
+
+// Обработчики событий
+function apply() { emit('apply') }
+function cancel() { emit('cancel') }
 
 onMounted(() => {
   onClickOutside(modalRef, () => emit('cancel'))
   window.addEventListener('keydown', onEsc)
 })
 
-function onEsc (e) { if (e.key === 'Escape') emit('cancel') }
-
+function onEsc(e) { if (e.key === 'Escape') emit('cancel') }
 onBeforeUnmount(() => window.removeEventListener('keydown', onEsc))
 
 </script>
@@ -74,7 +74,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onEsc))
 .fade-leave-active {
   transition: opacity 0.2s var(--transition-timing);
 }
-
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;

@@ -103,11 +103,11 @@ const selectedLabel = computed(() => {
 })
 
 // Helpers
-function uniqueKey (opt) {
+function uniqueKey(opt) {
   return typeof opt.value === 'object' ? JSON.stringify(opt.value) : opt.value
 }
 
-function buildRequestBody () {
+function buildRequestBody() {
   const { params = {}, paramKeys = {}, dependentParams = {} } = props.filter
   const body = {
     [paramKeys.skip || 'skip']: skip.value,
@@ -123,7 +123,7 @@ function buildRequestBody () {
 }
 
 // Load options (static or via API)
-async function loadOptions () {
+async function loadOptions() {
   if (loading.value) return
   loading.value = true
 
@@ -159,14 +159,14 @@ async function loadOptions () {
   }
 }
 
-function resetLoad () {
+function resetLoad() {
   options.value = []
   skip.value = 0
   hasMore.value = true
 }
 
 // Handlers
-function toggle () {
+function toggle() {
   isOpen.value = !isOpen.value
   if (isOpen.value) {
     localValue.value = props.modelValue
@@ -178,12 +178,12 @@ function toggle () {
   }
 }
 
-function apply () {
+function apply() {
   emit('update:modelValue', localValue.value)
   close()
 }
 
-function close () {
+function close() {
   isOpen.value = false
   search.value = ''
 }
@@ -193,7 +193,7 @@ const onSearchInput = debounce(() => {
   loadOptions()
 }, debounceMs)
 
-function onScroll () {
+function onScroll() {
   const c = listContainer.value
   if (!isStatic.value && hasMore.value && !loading.value && c.scrollHeight - c.scrollTop <= c.clientHeight + 50) {
     loadOptions()

@@ -56,9 +56,9 @@ function initChart () {
 
   const colors = {
     excellent: s.getPropertyValue('--primary-color').trim(),
-    good: s.getPropertyValue('--secondary-color').trim(),
-    normal: s.getPropertyValue('--accent-color').trim(),
-    falling: s.getPropertyValue('--error-color').trim(),
+    good:      s.getPropertyValue('--secondary-color').trim(),
+    normal:    s.getPropertyValue('--accent-color').trim(),
+    falling:   s.getPropertyValue('--error-color').trim(),
     qualityLine: s.getPropertyValue('--secondary-color').trim(),
     generalLine: s.getPropertyValue('--primary-color').trim(),
   }
@@ -77,27 +77,9 @@ function initChart () {
           stack: '0',
           order: 1
         },
-        {
-          label: 'Хорошисты',
-          data: props.data.map(i => i.GoodCount),
-          backgroundColor: colors.good,
-          stack: '0',
-          order: 1
-        },
-        {
-          label: 'Удовлетворительно',
-          data: props.data.map(i => i.NormalCount),
-          backgroundColor: colors.normal,
-          stack: '0',
-          order: 1
-        },
-        {
-          label: 'Неуспевающие',
-          data: props.data.map(i => i.FallingCount),
-          backgroundColor: colors.falling,
-          stack: '0',
-          order: 1
-        },
+        { label: 'Хорошисты', data: props.data.map(i => i.GoodCount), backgroundColor: colors.good, stack: '0', order: 1 },
+        { label: 'Удовлетворительно', data: props.data.map(i => i.NormalCount), backgroundColor: colors.normal, stack: '0', order: 1 },
+        { label: 'Неуспевающие', data: props.data.map(i => i.FallingCount), backgroundColor: colors.falling, stack: '0', order: 1 },
         // линии
         {
           label: 'Качественная успеваемость',
@@ -162,16 +144,12 @@ function initChart () {
 
       scales: {
         x: { stacked: true, ticks: { color: textColor, maxRotation: 45, minRotation: 45 }, grid: { display: false } },
-        y: {
-          stacked: true, beginAtZero: true, title: { display: true, text: 'Кол-во студентов', color: textColor },
-          ticks: { color: textColor, stepSize: 1 }, grid: { color: grid }
-        },
-        y1: {
-          position: 'right', beginAtZero: true, max: 100,
+        y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Кол-во студентов', color: textColor },
+          ticks: { color: textColor, stepSize: 1 }, grid: { color: grid } },
+        y1: { position: 'right', beginAtZero: true, max: 100,
           title: { display: true, text: 'Процент успеваемости', color: textColor },
           ticks: { color: textColor, callback: v => `${v}%` },
-          grid: { drawOnChartArea: false }
-        }
+          grid: { drawOnChartArea: false } }
       }
     }
   })
@@ -192,7 +170,6 @@ onMounted(() => nextTick(initChart))
   height: 100%;
 
 }
-
 .chart-header {
   display: flex;
   justify-content: space-between;
